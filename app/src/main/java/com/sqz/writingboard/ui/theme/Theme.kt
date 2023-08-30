@@ -57,8 +57,8 @@ fun WritingBoardTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.tertiary.toArgb()
-            window.navigationBarColor = colorScheme.tertiaryContainer.toArgb()
+            window.statusBarColor = colorScheme.secondary.toArgb()
+            window.navigationBarColor = colorScheme.secondaryContainer.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
         }
     }

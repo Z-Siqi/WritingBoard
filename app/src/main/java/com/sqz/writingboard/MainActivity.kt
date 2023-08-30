@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -59,7 +60,7 @@ fun WritingBoardLayout(modifier: Modifier = Modifier) {
     val viewModel: TextViewModel = viewModel()
 
     val context = LocalContext.current
-    val sharedPreferences = context.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE)
+    val sharedPreferences = context.getSharedPreferences("WritingBoard", Context.MODE_PRIVATE)
 
     LaunchedEffect(true) {
         val savedText = sharedPreferences.getString("saved_text", "")
@@ -68,7 +69,7 @@ fun WritingBoardLayout(modifier: Modifier = Modifier) {
 
     Surface(
         modifier = modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.tertiaryContainer
+        color = MaterialTheme.colorScheme.secondaryContainer
     ) {
         Column(
             modifier = modifier
@@ -76,14 +77,14 @@ fun WritingBoardLayout(modifier: Modifier = Modifier) {
                 .shadow(5.dp, RoundedCornerShape(26.dp))
                 .border(
                     5.dp,
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = MaterialTheme.colorScheme.primary,
                     RoundedCornerShape(26.dp)
                 ),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Surface(
-                color = MaterialTheme.colorScheme.primaryContainer,
+                color = MaterialTheme.colorScheme.onSecondary,
                 modifier = modifier.fillMaxSize(),
                 shape = RoundedCornerShape(26.dp)
             ) {
@@ -98,7 +99,11 @@ fun WritingBoardLayout(modifier: Modifier = Modifier) {
                         }
                     },
                     modifier = modifier.padding(16.dp),
-                    textStyle = TextStyle.Default.copy(fontSize = 23.sp)
+                    textStyle = TextStyle.Default.copy(
+                        fontSize = 23.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
                 )
             }
         }
