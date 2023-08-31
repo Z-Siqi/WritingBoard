@@ -88,11 +88,9 @@ fun WritingBoardLayout(modifier: Modifier = Modifier) {
             .imePadding()
             .pointerInput(Unit) {
                 detectTapGestures { _ ->
-                    if (doneButton) {
-                        keyboardDone?.hide()
-                        focusManager.clearFocus()
-                        doneButton = false
-                    }
+                    keyboardDone?.hide()
+                    focusManager.clearFocus()
+                    doneButton = false
                 }
             },
         color = MaterialTheme.colorScheme.secondaryContainer
@@ -119,7 +117,7 @@ fun WritingBoardLayout(modifier: Modifier = Modifier) {
                     value = viewModel.textState,
                     onValueChange = { newValue ->
                         viewModel.textState = newValue
-                        Handler(Looper.getMainLooper()).postDelayed(1000) {
+                        Handler(Looper.getMainLooper()).postDelayed(1200) {
                             sharedPreferences.edit()
                                 .putString(
                                     "saved_text",
