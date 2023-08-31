@@ -13,3 +13,10 @@ Sometimes you may suddenly have a great idea, but it is easy to forget. At this 
 ## Screenshot
 
 <img src="https://github.com/Z-Siqi/WritingBoard/assets/77391690/f6717af0-93ae-4b28-8f74-2aeec28e7f50" width="300" height="600">
+
+
+****
+
+This app is still in the early stages of development, may be unstable at the moment.
+
+Do Not save important on this app for a long time.
