@@ -22,10 +22,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -70,17 +66,9 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun WritingBoardLayout(modifier: Modifier = Modifier) {
 
-    val viewModel: TextViewModel = viewModel()
-    val context = LocalContext.current
-    val sharedPreferences = context.getSharedPreferences("WritingBoard", Context.MODE_PRIVATE)
-    LaunchedEffect(true) {
-        val savedText = sharedPreferences.getString("saved_text", "")
-        viewModel.textState = TextFieldValue(savedText ?: "")
-    }
-
+    val doneButtonState: DoneButton = viewModel()
     val keyboardDone = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
-    var doneButton by remember { mutableStateOf(false) }
 
     Surface(
         modifier = modifier
@@ -90,17 +78,17 @@ fun WritingBoardLayout(modifier: Modifier = Modifier) {
                 detectTapGestures { _ ->
                     keyboardDone?.hide()
                     focusManager.clearFocus()
-                    doneButton = false
+                    doneButtonState.doneButton = false
                 }
             },
-        color = MaterialTheme.colorScheme.secondaryContainer
+        color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Column(
             modifier = modifier
                 .padding(20.dp)
                 .shadow(5.dp, RoundedCornerShape(26.dp))
                 .border(
-                    5.dp,
+                    4.dp,
                     color = MaterialTheme.colorScheme.primary,
                     RoundedCornerShape(26.dp)
                 ),
@@ -108,36 +96,15 @@ fun WritingBoardLayout(modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Surface(
-                color = MaterialTheme.colorScheme.onSecondary,
+                color = MaterialTheme.colorScheme.onPrimary,
                 modifier = modifier
                     .fillMaxSize(),
                 shape = RoundedCornerShape(26.dp)
             ) {
-                BasicTextField(
-                    value = viewModel.textState,
-                    onValueChange = { newValue ->
-                        viewModel.textState = newValue
-                        Handler(Looper.getMainLooper()).postDelayed(1200) {
-                            sharedPreferences.edit()
-                                .putString(
-                                    "saved_text",
-                                    viewModel.textState.text
-                                        .trimEnd { it.isWhitespace() })
-                                .apply()
-                        }
-                        doneButton = true
-                    },
-                    singleLine = false,
-                    modifier = modifier.padding(16.dp),
-                    textStyle = TextStyle.Default.copy(
-                        fontSize = 23.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.secondary
-                    ),
-                )
+                WritingBoardText()
             }
         }
-        if (doneButton) {
+        if (doneButtonState.doneButton) {
             Column(
                 modifier = modifier
                     .fillMaxSize()
@@ -148,7 +115,7 @@ fun WritingBoardLayout(modifier: Modifier = Modifier) {
                 FloatingActionButton(onClick = {
                     keyboardDone?.hide()
                     focusManager.clearFocus()
-                    doneButton = false
+                    doneButtonState.doneButton = false
                 }) {
                     Image(
                         painter = painterResource(R.drawable.baseline_done_24),
@@ -158,6 +125,42 @@ fun WritingBoardLayout(modifier: Modifier = Modifier) {
             }
         }
     }
+}
+
+@Composable
+fun WritingBoardText(modifier: Modifier = Modifier) {
+
+    val doneButtonState: DoneButton = viewModel()
+    val viewModel: TextBoard = viewModel()
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("WritingBoard", Context.MODE_PRIVATE)
+    LaunchedEffect(true) {
+        val savedText = sharedPreferences.getString("saved_text", "")
+        viewModel.textState = TextFieldValue(savedText ?: "")
+    }
+
+    BasicTextField(
+        value = viewModel.textState,
+        onValueChange = { newValue ->
+            viewModel.textState = newValue
+            Handler(Looper.getMainLooper()).postDelayed(1200) {
+                sharedPreferences.edit()
+                    .putString(
+                        "saved_text",
+                        viewModel.textState.text
+                            .trimEnd { it.isWhitespace() })
+                    .apply()
+            }
+            doneButtonState.doneButton = true
+        },
+        singleLine = false,
+        modifier = modifier.padding(16.dp),
+        textStyle = TextStyle.Default.copy(
+            fontSize = 23.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.secondary
+        )
+    )
 }
 
 @Preview(showBackground = true)

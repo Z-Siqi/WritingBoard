@@ -6,6 +6,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 
-class TextViewModel : ViewModel() {
+class TextBoard : ViewModel() {
     var textState by mutableStateOf(TextFieldValue())
+}
+
+class DoneButton : ViewModel() {
+    var doneButton by mutableStateOf(false)
 }
