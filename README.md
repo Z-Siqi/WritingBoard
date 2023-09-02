@@ -1,7 +1,7 @@
 # WritingBoard
 A simple and useful app for write your idea
 
-![ic_launcher_round](https://github.com/Z-Siqi/WritingBoard/assets/77391690/c427be70-b693-4596-975d-4c6e0f481692)
+![ic_launcher_round](https://github.com/Z-Siqi/WritingBoard/assets/77391690/56f0a408-d46b-4f6e-b3a0-18372d1f80c4)
 
 Sometimes you may suddenly have a great idea, but it is easy to forget. At this time, you may need a simple and practical application to help you remember this idea.
 
