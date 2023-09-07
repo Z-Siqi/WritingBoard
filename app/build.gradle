@@ -12,7 +12,7 @@ android {
         minSdk 31
         targetSdk 34
         versionCode 7
-        versionName "0.0.5"
+        versionName "0.0.7"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -66,8 +66,8 @@ dependencies {
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
     //ViewModel
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0-alpha01"
-    //Room
-    implementation "androidx.room:room-runtime:2.5.2"
-    annotationProcessor "androidx.room:room-compiler:2.5.2"
-    implementation("androidx.room:room-ktx:2.5.2")
+    //navigation
+    implementation "androidx.navigation:navigation-compose:2.7.1"
+    //datastore
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
 }
