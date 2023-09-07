@@ -5,20 +5,25 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -32,7 +37,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
@@ -52,7 +56,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.datastore.preferences.core.emptyPreferences
 import com.sqz.writingboard.ButtonState
-import com.sqz.writingboard.R
+import com.sqz.writingboard.KeyboardVisibilityObserver
 import com.sqz.writingboard.WritingBoard
 import com.sqz.writingboard.WritingBoardSettingState
 import kotlinx.coroutines.flow.catch
@@ -68,10 +72,12 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "Wr
 @Composable
 fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifier) {
 
-    val doneButtonState: ButtonState = viewModel()
+    val buttonState: ButtonState = viewModel()
     val keyboardDone = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
     var openLayout by remember { mutableStateOf(false) }
+    var isKeyboardVisible by remember { mutableStateOf(false) }
 
     Surface(
         modifier = modifier
@@ -81,7 +87,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 detectTapGestures { _ ->
                     keyboardDone?.hide()
                     focusManager.clearFocus()
-                    doneButtonState.doneButton = false
+                    buttonState.doneButton = false
                 }
             },
         color = MaterialTheme.colorScheme.surfaceVariant
@@ -106,16 +112,56 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             ) {
                 if (openLayout) {
                     WritingBoardText()
-                }else {
+                    Log.i("WritingBoardTag", "Pre-Opening WritingBoard Text")
+                } else {
                     WritingBoardText()
                 }
-                Handler(Looper.getMainLooper()).postDelayed(500) {
+                Handler(Looper.getMainLooper()).postDelayed(550) {
                     openLayout = true
-                    Log.i("tag", "Opening WritingBoard Text")
+                    Log.i("WritingBoardTag", "Opening WritingBoard Text")
+                }
+                if (buttonState.cleanButton) {
+                    navController.navigate("WritingBoardNone")
+                    Handler(Looper.getMainLooper()).postDelayed(380) {
+                        navController.popBackStack()
+                        Log.i("WritingBoardTag", "Re-Opening WritingBoard Text")
+                        buttonState.cleanButton = false
+                    }
                 }
             }
         }
-        if (doneButtonState.doneButton) {
+        if (buttonState.doneButton) {
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(36.dp),
+                verticalArrangement = Arrangement.Bottom,
+                horizontalAlignment = Alignment.End
+            ) {
+                if (settingState.readSwitchState("clean_all_text", context)) {
+                    FloatingActionButton(onClick = {
+                        buttonState.cleanButton = true
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.Clear,
+                            contentDescription = "Clean all texts"
+                        )
+                    }
+                }
+                Spacer(modifier = modifier.height(10.dp))
+                FloatingActionButton(onClick = {
+                    keyboardDone?.hide()
+                    focusManager.clearFocus()
+                    buttonState.doneButton = false
+                }) {
+                    Icon(
+                        imageVector = Icons.Filled.Done,
+                        contentDescription = "Done"
+                    )
+                }
+            }
+        }
+        if (settingState.readSwitchState("clean_all_text", context) && !buttonState.doneButton) {
             Column(
                 modifier = modifier
                     .fillMaxSize()
@@ -124,18 +170,16 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 horizontalAlignment = Alignment.End
             ) {
                 FloatingActionButton(onClick = {
-                    keyboardDone?.hide()
-                    focusManager.clearFocus()
-                    doneButtonState.doneButton = false
+                    buttonState.cleanButton = true
                 }) {
-                    Image(
-                        painter = painterResource(R.drawable.baseline_done_24),
-                        contentDescription = null
+                    Icon(
+                        imageVector = Icons.Filled.Clear,
+                        contentDescription = "Clean all texts"
                     )
                 }
             }
         }
-        if (!doneButtonState.doneButton) {
+        if (!buttonState.doneButton) {
             Column(
                 modifier = modifier
                     .fillMaxSize()
@@ -146,8 +190,18 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 FloatingActionButton(onClick = {
                     navController.navigate("Setting")
                 }) {
-                    Text("Setting")
+                    Icon(
+                        imageVector = Icons.Filled.Settings,
+                        contentDescription = "Setting"
+                    )
                 }
+            }
+        }
+
+        KeyboardVisibilityObserver { isVisible ->
+            isKeyboardVisible = isVisible
+            if (isVisible) {
+                buttonState.doneButton = true
             }
         }
     }
@@ -156,7 +210,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
 @Composable
 fun WritingBoardText(modifier: Modifier = Modifier) {
 
-    val doneButtonState: ButtonState = viewModel()
+    val buttonState: ButtonState = viewModel()
     val viewModel: WritingBoard = viewModel()
     val dataStore = LocalContext.current.dataStore
     val coroutineScope = rememberCoroutineScope()
@@ -178,6 +232,16 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
         viewModel.textState = TextFieldValue(savedText)
     }
 
+    if (buttonState.cleanButton) {
+        viewModel.textState.text.let { newText ->
+            coroutineScope.launch {
+                dataStore.edit { preferences ->
+                    preferences[stringPreferencesKey("saved_text")] = newText.drop(Int.MAX_VALUE)
+                }
+                Log.i("WritingBoardTag", "Save writing board texts")
+            }
+        }
+    }
     BasicTextField(
         value = viewModel.textState.text,
         onValueChange = { newText ->
@@ -189,6 +253,7 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
                             context
                         ) && newText.isNotEmpty() && newText.last() == '\n'
                     ) {
+                        Log.i("WritingBoardTag", "Removing line breaks and adding a new line.")
                         newText.trimEnd { it == '\n' }.plus('\n')
                     } else {
                         newText
@@ -197,13 +262,15 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
                         dataStore.edit { preferences ->
                             preferences[stringPreferencesKey("saved_text")] = textToSave
                         }
+                        Log.i("WritingBoardTag", "Save writing board texts")
                     }
                 }
             }
-            doneButtonState.doneButton = true
+            buttonState.doneButton = true
         },
         singleLine = false,
-        modifier = modifier.padding(16.dp),
+        modifier = modifier
+            .padding(16.dp),
         textStyle = TextStyle.Default.copy(
             fontSize = 23.sp,
             fontWeight = FontWeight.SemiBold,
@@ -211,7 +278,6 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
         )
     )
 }
-
 
 @Preview(showBackground = true)
 @Composable

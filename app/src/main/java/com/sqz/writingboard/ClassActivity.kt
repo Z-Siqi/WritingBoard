@@ -1,6 +1,7 @@
 package com.sqz.writingboard
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,11 +14,13 @@ class WritingBoard : ViewModel() {
 
 class ButtonState : ViewModel() {
     var doneButton by mutableStateOf(false)
+    var cleanButton by mutableStateOf(false)
 }
 
 class WritingBoardSettingState {
     fun readSwitchState(name: String, context: Context): Boolean {
         val sharedPreferences = context.getSharedPreferences("WritingBoardSetting", Context.MODE_PRIVATE)
+        Log.i("WritingBoardTag", "readSwitchState")
         return sharedPreferences.getBoolean(name, false)
     }
 
@@ -26,5 +29,7 @@ class WritingBoardSettingState {
         val editor = sharedPreferences.edit()
         editor.putBoolean(name, state)
         editor.apply()
+        Log.i("WritingBoardTag", "writeSwitchState")
     }
 }
+
