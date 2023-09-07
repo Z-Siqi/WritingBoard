@@ -1,8 +1,10 @@
 package com.sqz.writingboard.ui
 
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -19,6 +21,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -44,12 +49,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.datastore.preferences.core.emptyPreferences
 import com.sqz.writingboard.ButtonState
 import com.sqz.writingboard.R
 import com.sqz.writingboard.WritingBoard
 import com.sqz.writingboard.WritingBoardSettingState
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import java.io.IOException
 
 val settingState = WritingBoardSettingState()
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "WritingBoard")
@@ -61,6 +71,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
     val doneButtonState: ButtonState = viewModel()
     val keyboardDone = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
+    var openLayout by remember { mutableStateOf(false) }
 
     Surface(
         modifier = modifier
@@ -93,7 +104,15 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                     .fillMaxSize(),
                 shape = RoundedCornerShape(26.dp)
             ) {
-                WritingBoardText()
+                if (openLayout) {
+                    WritingBoardText()
+                }else {
+                    WritingBoardText()
+                }
+                Handler(Looper.getMainLooper()).postDelayed(500) {
+                    openLayout = true
+                    Log.i("tag", "Opening WritingBoard Text")
+                }
             }
         }
         if (doneButtonState.doneButton) {
@@ -144,7 +163,18 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
     val context = LocalContext.current
 
     LaunchedEffect(true) {
-        val savedText = dataStore.data.first()[stringPreferencesKey("saved_text")] ?: ""
+        val savedText: String = context.dataStore.data
+            .catch {
+                if (it is IOException) {
+                    Log.e(TAG, "Error reading preferences.", it)
+                    emit(emptyPreferences())
+                } else {
+                    throw it
+                }
+            }
+            .map { preferences ->
+                preferences[stringPreferencesKey("saved_text")] ?: ""
+            }.first()
         viewModel.textState = TextFieldValue(savedText)
     }
 
