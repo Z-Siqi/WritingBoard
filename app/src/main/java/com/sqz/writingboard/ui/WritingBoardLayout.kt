@@ -1,6 +1,5 @@
 package com.sqz.writingboard.ui
 
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -15,8 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Done
@@ -27,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,34 +35,19 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.os.postDelayed
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.focus.focusRequester
-import androidx.datastore.preferences.core.emptyPreferences
 import com.sqz.writingboard.ButtonState
 import com.sqz.writingboard.KeyboardVisibilityObserver
-import com.sqz.writingboard.WritingBoard
 import com.sqz.writingboard.WritingBoardSettingState
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import java.io.IOException
 
 val settingState = WritingBoardSettingState()
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "WritingBoard")
@@ -245,103 +226,6 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 buttonState.doneButton = true
             }
         }
-    }
-}
-
-@Composable
-fun WritingBoardText(modifier: Modifier = Modifier) {
-
-    val buttonState: ButtonState = viewModel()
-    val viewModel: WritingBoard = viewModel()
-    val dataStore = LocalContext.current.dataStore
-    val coroutineScope = rememberCoroutineScope()
-    val context = LocalContext.current
-    val focusRequester = buttonState.requestFocus
-
-
-    LaunchedEffect(true) {
-        val savedText: String = context.dataStore.data
-            .catch {
-                if (it is IOException) {
-                    Log.e(TAG, "Error reading preferences.", it)
-                    emit(emptyPreferences())
-                } else {
-                    throw it
-                }
-            }
-            .map { preferences ->
-                preferences[stringPreferencesKey("saved_text")] ?: ""
-            }.first()
-        viewModel.textState = TextFieldValue(savedText)
-    }
-
-    //clean all texts action
-    if (buttonState.cleanButton) {
-        viewModel.textState.text.let { newText ->
-            coroutineScope.launch {
-                dataStore.edit { preferences ->
-                    preferences[stringPreferencesKey("saved_text")] = newText.drop(Int.MAX_VALUE)
-                }
-                Log.i("WritingBoardTag", "Save writing board texts")
-            }
-        }
-    }
-    //save action by button
-    if (buttonState.saveAction) {
-        viewModel.textState.text.let { newText ->
-            val textToSave = if (!settingState.readSwitchState(
-                    "allow_multiple_lines",
-                    context
-                ) && newText.isNotEmpty() && newText.last() == '\n'
-            ) {
-                Log.i("WritingBoardTag", "Removing line breaks and adding a new line.")
-                newText.trimEnd { it == '\n' }.plus('\n')
-            } else {
-                newText
-            }
-            coroutineScope.launch {
-                dataStore.edit { preferences ->
-                    preferences[stringPreferencesKey("saved_text")] = textToSave
-                }
-                Log.i("WritingBoardTag", "Save writing board texts by done button")
-            }
-        }
-        buttonState.saveAction = false
-    }
-
-    if (settingState.readSwitchState("edit_button", context) && !buttonState.editButton) {
-        BasicText(
-            text = viewModel.textState.text,
-            modifier = modifier
-                .padding(16.dp)
-                .focusRequester(focusRequester),
-            style = TextStyle.Default.copy(
-                fontSize = 23.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.secondary
-            )
-        )
-        Log.i("WritingBoardTag", "Read-only text")
-    } else {
-        BasicTextField(
-            value = viewModel.textState.text,
-            onValueChange = { newText ->
-                viewModel.textState = TextFieldValue(newText)
-                Handler(Looper.getMainLooper()).postDelayed(2500) {
-                    buttonState.saveAction = true
-                }
-                buttonState.doneButton = true
-            },
-            singleLine = false,
-            modifier = modifier
-                .padding(16.dp)
-                .focusRequester(focusRequester),
-            textStyle = TextStyle.Default.copy(
-                fontSize = 23.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.secondary
-            )
-        )
     }
 }
 
