@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">书写板</string>
+    <string name="settings">设置</string>
+    <string name="allow_multiple_lines">允许末尾有多个换行符\n(多于一个换行符)</string>
+    <string name="clean_all_texts_button">显示删除所有文本按钮</string>
+    <string name="edit_writingboard_button">显示编辑书写板按钮\n(仅允许点击按钮编辑)</string>
+    <string name="language">语言 (Android 13+)\n打开系统设置进行更改</string>
+</resources>

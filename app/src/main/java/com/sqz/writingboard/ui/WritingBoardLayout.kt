@@ -15,10 +15,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -54,6 +56,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.focus.focusRequester
 import androidx.datastore.preferences.core.emptyPreferences
 import com.sqz.writingboard.ButtonState
 import com.sqz.writingboard.KeyboardVisibilityObserver
@@ -88,6 +91,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                     keyboardDone?.hide()
                     focusManager.clearFocus()
                     buttonState.doneButton = false
+                    buttonState.editButton = false
                 }
             },
         color = MaterialTheme.colorScheme.surfaceVariant
@@ -138,6 +142,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.End
             ) {
+                //clean all text button
                 if (settingState.readSwitchState("clean_all_text", context)) {
                     FloatingActionButton(onClick = {
                         buttonState.cleanButton = true
@@ -148,11 +153,15 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                         )
                     }
                 }
+                //done button
                 Spacer(modifier = modifier.height(10.dp))
                 FloatingActionButton(onClick = {
                     keyboardDone?.hide()
                     focusManager.clearFocus()
+                    buttonState.saveAction = true
                     buttonState.doneButton = false
+                    buttonState.editButton = false
+                    Log.i("WritingBoardTag", "Done button is clicked")
                 }) {
                     Icon(
                         imageVector = Icons.Filled.Done,
@@ -161,7 +170,12 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 }
             }
         }
-        if (settingState.readSwitchState("clean_all_text", context) && !buttonState.doneButton) {
+        //clean all text button
+        if (settingState.readSwitchState(
+                "clean_all_text",
+                context
+            ) && !buttonState.doneButton && buttonState.editButton
+        ) {
             Column(
                 modifier = modifier
                     .fillMaxSize()
@@ -179,6 +193,32 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 }
             }
         }
+        //edit button
+        if (!buttonState.doneButton && settingState.readSwitchState(
+                "edit_button",
+                context
+            ) && !buttonState.editButton
+        ) {
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(36.dp),
+                verticalArrangement = Arrangement.Bottom,
+                horizontalAlignment = Alignment.End
+            ) {
+                FloatingActionButton(onClick = {
+                    buttonState.requestFocus.requestFocus()
+                    buttonState.editButton = true
+                    Log.i("WritingBoardTag", "Edit button is clicked")
+                }) {
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = "Edit"
+                    )
+                }
+            }
+        }
+        //setting button
         if (!buttonState.doneButton) {
             Column(
                 modifier = modifier
@@ -188,6 +228,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 horizontalAlignment = Alignment.Start
             ) {
                 FloatingActionButton(onClick = {
+                    buttonState.saveAction = true
                     navController.navigate("Setting")
                 }) {
                     Icon(
@@ -215,6 +256,8 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
     val dataStore = LocalContext.current.dataStore
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val focusRequester = buttonState.requestFocus
+
 
     LaunchedEffect(true) {
         val savedText: String = context.dataStore.data
@@ -232,6 +275,7 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
         viewModel.textState = TextFieldValue(savedText)
     }
 
+    //clean all texts action
     if (buttonState.cleanButton) {
         viewModel.textState.text.let { newText ->
             coroutineScope.launch {
@@ -242,41 +286,63 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
             }
         }
     }
-    BasicTextField(
-        value = viewModel.textState.text,
-        onValueChange = { newText ->
-            viewModel.textState = TextFieldValue(newText)
-            Handler(Looper.getMainLooper()).postDelayed(1200) {
-                viewModel.textState.text.let {
-                    val textToSave = if (!settingState.readSwitchState(
-                            "allow_multiple_lines",
-                            context
-                        ) && newText.isNotEmpty() && newText.last() == '\n'
-                    ) {
-                        Log.i("WritingBoardTag", "Removing line breaks and adding a new line.")
-                        newText.trimEnd { it == '\n' }.plus('\n')
-                    } else {
-                        newText
-                    }
-                    coroutineScope.launch {
-                        dataStore.edit { preferences ->
-                            preferences[stringPreferencesKey("saved_text")] = textToSave
-                        }
-                        Log.i("WritingBoardTag", "Save writing board texts")
-                    }
-                }
+    //save action by button
+    if (buttonState.saveAction) {
+        viewModel.textState.text.let { newText ->
+            val textToSave = if (!settingState.readSwitchState(
+                    "allow_multiple_lines",
+                    context
+                ) && newText.isNotEmpty() && newText.last() == '\n'
+            ) {
+                Log.i("WritingBoardTag", "Removing line breaks and adding a new line.")
+                newText.trimEnd { it == '\n' }.plus('\n')
+            } else {
+                newText
             }
-            buttonState.doneButton = true
-        },
-        singleLine = false,
-        modifier = modifier
-            .padding(16.dp),
-        textStyle = TextStyle.Default.copy(
-            fontSize = 23.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.secondary
+            coroutineScope.launch {
+                dataStore.edit { preferences ->
+                    preferences[stringPreferencesKey("saved_text")] = textToSave
+                }
+                Log.i("WritingBoardTag", "Save writing board texts by done button")
+            }
+        }
+        buttonState.saveAction = false
+    }
+
+    if (settingState.readSwitchState("edit_button", context) && !buttonState.editButton) {
+        BasicText(
+            text = viewModel.textState.text,
+            modifier = modifier
+                .padding(16.dp)
+                .focusRequester(focusRequester),
+            style = TextStyle.Default.copy(
+                fontSize = 23.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.secondary
+            )
         )
-    )
+        Log.i("WritingBoardTag", "Read-only text")
+    } else {
+        BasicTextField(
+            value = viewModel.textState.text,
+            onValueChange = { newText ->
+                viewModel.textState = TextFieldValue(newText)
+                Handler(Looper.getMainLooper()).postDelayed(2500) {
+                    buttonState.saveAction = true
+                }
+                buttonState.doneButton = true
+            },
+            singleLine = false,
+            modifier = modifier
+                .padding(16.dp)
+                .focusRequester(focusRequester),
+            textStyle = TextStyle.Default.copy(
+                fontSize = 23.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.secondary
+            )
+        )
+    }
 }
 
 @Preview(showBackground = true)

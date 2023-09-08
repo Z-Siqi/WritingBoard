@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">寫字板</string>
+    <string name="settings">設置</string>
+    <string name="allow_multiple_lines">允許末尾有多個換行符\n(多於一個換行符)</string>
+    <string name="clean_all_texts_button">顯示刪除所有文本按鈕</string>
+    <string name="edit_writingboard_button">顯示編輯書寫板按鈕\n(僅允許點擊按鈕編輯)</string>
+    <string name="language">語言 (Android 13+)\n打開系統設置進行更改</string>
+</resources>
