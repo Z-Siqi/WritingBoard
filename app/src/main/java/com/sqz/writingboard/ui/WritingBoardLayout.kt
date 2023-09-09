@@ -155,7 +155,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         if (settingState.readSwitchState(
                 "clean_all_text",
                 context
-            ) && !buttonState.doneButton && buttonState.editButton
+            ) && !buttonState.doneButton && !buttonState.editButton
         ) {
             Column(
                 modifier = modifier
