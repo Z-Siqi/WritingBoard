@@ -21,8 +21,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,6 +29,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -58,7 +59,6 @@ import com.sqz.writingboard.R
 import com.sqz.writingboard.WritingBoardSettingState
 
 val setting = WritingBoardSettingState()
-
 @Composable
 fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
     val list = listOf("1") + ((2..100).map { it.toString() })
@@ -126,46 +126,96 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
                 }
 
                 "4" -> {
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        ),
-                        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                            .height(80.dp)
-                            .clickable {
-                                val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                                intent.data = Uri.fromParts("package", context.packageName, null)
-                                startActivityForResult(context as Activity, intent, 0, null)
-                            }
-                    ) {
-                        Box(
-                            modifier = modifier.fillMaxSize()
-                        ) {
-                            Text(
-                                text = stringResource(R.string.language),
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                modifier = modifier
-                                    .padding(16.dp)
-                                    .wrapContentHeight(Alignment.CenterVertically),
-                                color = MaterialTheme.colorScheme.secondary
-                            )
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_language),
-                                contentDescription = "Language",
-                                modifier = modifier
-                                    .fillMaxSize()
-                                    .wrapContentWidth(Alignment.End)
-                                    .padding(end = 30.dp),
-                            )
-                        }
-                    }
+                    SegmentedButtonCardLayout(
+                        text = stringResource(R.string.choose_font_size),
+                        context
+                    )
+                }
+
+                "5" -> {
+                    ClickCardLayout(
+                        intent = {
+                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                            intent.data = Uri.fromParts("package", context.packageName, null)
+                            startActivityForResult(context as Activity, intent, 0, null)
+                        },
+                        text = stringResource(R.string.language),
+                        painter = R.drawable.ic_language,
+                        contentDescription = "Language"
+                    )
                 }
             }
         })
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FontSizeButton(context: Context){
+    var fontSize by remember {
+        mutableStateOf(
+            setting.readSegmentedButtonState(
+                "font_size",
+                context
+            )
+        )
+    }
+    val options = listOf(R.string.small, R.string.medium, R.string.large)
+    SingleChoiceSegmentedButtonRow {
+        options.forEachIndexed { index, label ->
+            SegmentedButton(
+                shape = SegmentedButtonDefaults.itemShape(
+                    index = index,
+                    count = options.size
+                ),
+                onClick = {
+                    fontSize = index
+                    setting.writeSegmentedButtonState("font_size", context, index)
+                },
+                selected = index == fontSize,
+            ) {
+                Text(stringResource(label))
+            }
+        }
+    }
+}
+
+@Composable
+fun SegmentedButtonCardLayout(
+    text: String,
+    context: Context,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+        ),
+        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .height(100.dp)
+    ) {
+        Column(modifier = modifier.fillMaxSize()) {
+            Text(
+                text = text,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = modifier
+                    .padding(16.dp)
+                    .wrapContentHeight(Alignment.CenterVertically),
+                color = MaterialTheme.colorScheme.secondary
+            )
+            Box(
+                modifier = modifier
+                    .fillMaxSize()
+                    .wrapContentHeight(Alignment.Bottom)
+                    .wrapContentWidth(Alignment.CenterHorizontally)
+                    .padding(bottom = 10.dp, start = 10.dp, end = 10.dp)
+            ) {
+                FontSizeButton(context)
+            }
+        }
     }
 }
 
@@ -199,7 +249,7 @@ fun WritingBoardSetting(
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
-                            imageVector = Icons.Filled.ArrowBack,
+                            painter = painterResource(R.drawable.ic_arrow_back),
                             contentDescription = "Back"
                         )
                     }
@@ -256,6 +306,49 @@ fun CardLayout(
                     .padding(16.dp),
                 checked = checked,
                 onCheckedChange = onCheckedChange
+            )
+        }
+    }
+}
+
+@Composable
+fun ClickCardLayout(
+    intent: () -> Unit,
+    text: String,
+    painter: Int,
+    contentDescription: String,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+        ),
+        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .height(80.dp)
+            .clickable(onClick = intent)
+    ) {
+        Box(
+            modifier = modifier.fillMaxSize()
+        ) {
+            Text(
+                text = text,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = modifier
+                    .padding(16.dp)
+                    .wrapContentHeight(Alignment.CenterVertically),
+                color = MaterialTheme.colorScheme.secondary
+            )
+            Icon(
+                painter = painterResource(painter),
+                contentDescription = contentDescription,
+                modifier = modifier
+                    .fillMaxSize()
+                    .wrapContentWidth(Alignment.End)
+                    .padding(end = 27.dp),
             )
         }
     }

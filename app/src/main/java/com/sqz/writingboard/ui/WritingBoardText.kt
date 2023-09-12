@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.os.postDelayed
@@ -33,7 +34,10 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 
 @Composable
-fun WritingBoardText(modifier: Modifier = Modifier) {
+fun WritingBoardText(
+    fontSize: TextUnit,
+    modifier: Modifier = Modifier
+) {
 
     val buttonState: ButtonState = viewModel()
     val viewModel: WritingBoard = viewModel()
@@ -99,7 +103,7 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
                 .padding(16.dp)
                 .focusRequester(focusRequester),
             style = TextStyle.Default.copy(
-                fontSize = 23.sp,
+                fontSize = fontSize,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.secondary
             )
@@ -120,7 +124,7 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
                 .padding(16.dp)
                 .focusRequester(focusRequester),
             textStyle = TextStyle.Default.copy(
-                fontSize = 23.sp,
+                fontSize = fontSize,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.secondary
             )

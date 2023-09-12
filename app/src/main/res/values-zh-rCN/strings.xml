@@ -5,5 +5,9 @@
     <string name="allow_multiple_lines">允许末尾有多个换行符\n(多于一个换行符)</string>
     <string name="clean_all_texts_button">显示删除所有文本按钮</string>
     <string name="edit_writingboard_button">显示编辑书写板按钮\n(仅允许点击按钮编辑)</string>
-    <string name="language">语言 (Android 13+)\n打开系统设置进行更改</string>
+    <string name="language">语言 (Android 13+)\n点击以打开应用设置进行更改</string>
+    <string name="small">小号</string>
+    <string name="medium">中号</string>
+    <string name="large">大号</string>
+    <string name="choose_font_size">选择字体大小</string>
 </resources>

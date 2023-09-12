@@ -28,7 +28,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.pointerInput
@@ -45,6 +44,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.sp
 import com.sqz.writingboard.ButtonState
 import com.sqz.writingboard.KeyboardVisibilityObserver
 import com.sqz.writingboard.WritingBoardSettingState
@@ -52,7 +52,15 @@ import com.sqz.writingboard.WritingBoardSettingState
 val settingState = WritingBoardSettingState()
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "WritingBoard")
 
-@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun WritingBoardTextInit(context: Context){
+    when (settingState.readSegmentedButtonState("font_size", context)) {
+        0 -> WritingBoardText(18.sp)
+        1 -> WritingBoardText(23.sp)
+        2 -> WritingBoardText(33.sp)
+    }
+}
+
 @Composable
 fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifier) {
 
@@ -96,10 +104,10 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 shape = RoundedCornerShape(26.dp)
             ) {
                 if (openLayout) {
-                    WritingBoardText()
+                    WritingBoardTextInit(context)
                     Log.i("WritingBoardTag", "Pre-Opening WritingBoard Text")
                 } else {
-                    WritingBoardText()
+                    WritingBoardTextInit(context)
                 }
                 Handler(Looper.getMainLooper()).postDelayed(550) {
                     openLayout = true
@@ -222,9 +230,10 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
 
         KeyboardVisibilityObserver { isVisible ->
             isKeyboardVisible = isVisible
-            if (isVisible) {
+            buttonState.doneButton = isVisible
+            /*if (isVisible) {
                 buttonState.doneButton = true
-            }
+            }*/
         }
     }
 }

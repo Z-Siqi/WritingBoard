@@ -35,5 +35,18 @@ class WritingBoardSettingState {
         editor.apply()
         Log.i("WritingBoardTag", "writeSwitchState")
     }
-}
 
+    fun readSegmentedButtonState(name: String, context: Context): Int {
+        val sharedPreferences = context.getSharedPreferences("WritingBoardSetting", Context.MODE_PRIVATE)
+        Log.i("WritingBoardTag", "readSegmentedButtonState")
+        return sharedPreferences.getInt(name, 1)
+    }
+
+    fun writeSegmentedButtonState(name: String, context: Context, state: Int){
+        val sharedPreferences = context.getSharedPreferences("WritingBoardSetting", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putInt(name, state)
+        editor.apply()
+        Log.i("WritingBoardTag", "writeSwitchState")
+    }
+}

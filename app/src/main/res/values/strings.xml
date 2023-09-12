@@ -4,5 +4,9 @@
     <string name="allow_multiple_lines">Allow multiple lines at end.\n(more than one lines)</string>
     <string name="clean_all_texts_button">Show clean all texts button.</string>
     <string name="edit_writingboard_button">Show edit WritingBoard button.\n(Only allow click to edit)</string>
-    <string name="language">Language (Android 13+)\nOpen system Settings to change.</string>
+    <string name="language">Language (Android 13+)\nClick to open AppSettings to change.</string>
+    <string name="small">Small</string>
+    <string name="medium">Medium</string>
+    <string name="large">Large</string>
+    <string name="choose_font_size">Choose font size</string>
 </resources>
