@@ -12,8 +12,7 @@ Sometimes you may suddenly have a great idea, but it is easy to forget. At this 
 
 ## Screenshot
 
-<img src="https://github.com/Z-Siqi/WritingBoard/assets/77391690/f6717af0-93ae-4b28-8f74-2aeec28e7f50" width="300" height="600">
-
+<img src="https://github.com/Z-Siqi/WritingBoard/assets/77391690/b4c13803-9f95-4336-9fe2-f75053d263e0" width="300" height="600">
 
 ****
 
