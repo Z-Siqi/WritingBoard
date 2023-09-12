@@ -9,6 +9,7 @@ Sometimes you may suddenly have a great idea, but it is easy to forget. At this 
 
 * There is only one writing pad built into this app.
 * Based on Material Design, you have to make sure your system is Android 12+
+* Many personalization settings.
 
 ## Screenshot
 
@@ -16,6 +17,4 @@ Sometimes you may suddenly have a great idea, but it is easy to forget. At this 
 
 ****
 
-This app is still in the early stages of development, may be unstable at the moment.
-
-Do Not save important on this app for a long time.
+[Download beta version](https://github.com/Z-Siqi/WritingBoard/raw/master/app/release/app-release.apk)
