@@ -45,15 +45,15 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.sp
-import com.sqz.writingboard.ButtonState
 import com.sqz.writingboard.KeyboardVisibilityObserver
+import com.sqz.writingboard.ValueState
 import com.sqz.writingboard.WritingBoardSettingState
 
 val settingState = WritingBoardSettingState()
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "WritingBoard")
 
 @Composable
-fun WritingBoardTextInit(context: Context){
+fun WritingBoardTextInit(context: Context) {
     when (settingState.readSegmentedButtonState("font_size", context)) {
         0 -> WritingBoardText(18.sp)
         1 -> WritingBoardText(23.sp)
@@ -64,7 +64,7 @@ fun WritingBoardTextInit(context: Context){
 @Composable
 fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifier) {
 
-    val buttonState: ButtonState = viewModel()
+    val buttonState: ValueState = viewModel()
     val keyboardDone = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
@@ -83,7 +83,12 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                     buttonState.editButton = false
                 }
             },
-        color = MaterialTheme.colorScheme.surfaceVariant
+        color = when (settingState.readSegmentedButtonState("theme", context)) {
+            0 -> MaterialTheme.colorScheme.surfaceContainerLowest
+            1 -> MaterialTheme.colorScheme.surfaceVariant
+            2 -> MaterialTheme.colorScheme.secondaryContainer
+            else -> MaterialTheme.colorScheme.surfaceVariant
+        }
     ) {
         Column(
             modifier = modifier
@@ -91,14 +96,24 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 .shadow(5.dp, RoundedCornerShape(26.dp))
                 .border(
                     4.dp,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = when (settingState.readSegmentedButtonState("theme", context)) {
+                        0 -> MaterialTheme.colorScheme.tertiaryContainer
+                        1 -> MaterialTheme.colorScheme.primary
+                        2 -> MaterialTheme.colorScheme.secondary
+                        else -> MaterialTheme.colorScheme.primary
+                    },
                     RoundedCornerShape(26.dp)
                 ),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Surface(
-                color = MaterialTheme.colorScheme.onPrimary,
+                color = when (settingState.readSegmentedButtonState("theme", context)) {
+                    0 -> MaterialTheme.colorScheme.surfaceBright
+                    1 -> MaterialTheme.colorScheme.surfaceContainerLow
+                    2 -> MaterialTheme.colorScheme.tertiaryContainer
+                    else -> MaterialTheme.colorScheme.surfaceContainerLow
+                },
                 modifier = modifier
                     .fillMaxSize(),
                 shape = RoundedCornerShape(26.dp)
@@ -230,10 +245,14 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
 
         KeyboardVisibilityObserver { isVisible ->
             isKeyboardVisible = isVisible
-            buttonState.doneButton = isVisible
-            /*if (isVisible) {
+            if (isVisible) {
                 buttonState.doneButton = true
-            }*/
+            } else {
+                buttonState.doneButton = false
+                if (settingState.readSwitchState("clean_pointer_focus", context)) {
+                    focusManager.clearFocus()
+                }
+            }
         }
     }
 }

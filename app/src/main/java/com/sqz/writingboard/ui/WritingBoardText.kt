@@ -15,17 +15,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.os.postDelayed
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.sqz.writingboard.ButtonState
+import com.sqz.writingboard.ValueState
 import com.sqz.writingboard.WritingBoard
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
@@ -39,7 +40,7 @@ fun WritingBoardText(
     modifier: Modifier = Modifier
 ) {
 
-    val buttonState: ButtonState = viewModel()
+    val buttonState: ValueState = viewModel()
     val viewModel: WritingBoard = viewModel()
     val dataStore = LocalContext.current.dataStore
     val coroutineScope = rememberCoroutineScope()
@@ -126,7 +127,23 @@ fun WritingBoardText(
             textStyle = TextStyle.Default.copy(
                 fontSize = fontSize,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.secondary
+                fontFamily = when (settingState.readSegmentedButtonState("font_style", context)) {
+                    0 -> FontFamily.Monospace
+                    1 -> FontFamily.Default
+                    2 -> FontFamily.Serif
+                    3 -> FontFamily.Cursive
+                    else -> FontFamily.Default
+                },
+                fontStyle = if (settingState.readSwitchState("italics", context)) {
+                    FontStyle.Italic
+                } else {
+                    FontStyle.Normal
+                },
+                color = when (settingState.readSegmentedButtonState("theme", context)) {
+                    1 -> MaterialTheme.colorScheme.secondary
+                    2 -> MaterialTheme.colorScheme.tertiary
+                    else -> MaterialTheme.colorScheme.secondary
+                }
             )
         )
     }

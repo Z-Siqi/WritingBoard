@@ -13,12 +13,13 @@ class WritingBoard : ViewModel() {
     var textState by mutableStateOf(TextFieldValue())
 }
 
-class ButtonState : ViewModel() {
+class ValueState : ViewModel() {
     var doneButton by mutableStateOf(false)
     var cleanButton by mutableStateOf(false)
     var saveAction by mutableStateOf(false)
     var requestFocus = FocusRequester()
     var editButton by mutableStateOf(false)
+    var updateScreen by mutableStateOf(false)
 }
 
 class WritingBoardSettingState {

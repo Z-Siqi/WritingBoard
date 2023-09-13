@@ -4,25 +4,22 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
-import androidx.compose.foundation.BorderStroke
+import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,7 +29,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
@@ -53,20 +49,34 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.core.os.postDelayed
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.sqz.writingboard.R
+import com.sqz.writingboard.ValueState
 import com.sqz.writingboard.WritingBoardSettingState
 
 val setting = WritingBoardSettingState()
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
+    val valueState: ValueState = viewModel()
     val list = listOf("1") + ((2..100).map { it.toString() })
 
     var allowMultipleLines by remember {
         mutableStateOf(
             setting.readSwitchState(
                 "allow_multiple_lines",
+                context
+            )
+        )
+    }
+    var cleanPointerFocus by remember {
+        mutableStateOf(
+            setting.readSwitchState(
+                "clean_pointer_focus",
                 context
             )
         )
@@ -87,34 +97,45 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
             )
         )
     }
+    var theme by remember {
+        mutableStateOf(
+            setting.readSegmentedButtonState(
+                "theme",
+                context
+            )
+        )
+    }
+    var fontSize by remember {
+        mutableStateOf(
+            setting.readSegmentedButtonState(
+                "font_size",
+                context
+            )
+        )
+    }
+    var italics by remember {
+        mutableStateOf(
+            setting.readSwitchState(
+                "italics",
+                context
+            )
+        )
+    }
+    var fontStyle by remember {
+        mutableStateOf(
+            setting.readSegmentedButtonState(
+                "font_style",
+                context
+            )
+        )
+    }
+
     LazyColumn(
         modifier = modifier.fillMaxSize()
     ) {
         items(items = list, itemContent = { item ->
             when (item) {
                 "1" -> {
-                    CardLayout(
-                        text = stringResource(R.string.allow_multiple_lines),
-                        checked = allowMultipleLines,
-                        onCheckedChange = {
-                            allowMultipleLines = it
-                            setting.writeSwitchState("allow_multiple_lines", context, it)
-                        }
-                    )
-                }
-
-                "2" -> {
-                    CardLayout(
-                        text = stringResource(R.string.clean_all_texts_button),
-                        checked = cleanAllText,
-                        onCheckedChange = {
-                            cleanAllText = it
-                            setting.writeSwitchState("clean_all_text", context, it)
-                        }
-                    )
-                }
-
-                "3" -> {
                     CardLayout(
                         text = stringResource(R.string.edit_writingboard_button),
                         checked = editButton,
@@ -125,14 +146,190 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
                     )
                 }
 
+                "2" -> {
+                    val options =
+                        listOf(R.string.light_color, R.string.theme_default, R.string.distinct)
+                    Box {
+                        SegmentedButtonCardLayout(
+                            text = stringResource(R.string.choose_theme)
+                        )
+                        Box(
+                            modifier = modifier
+                                .fillMaxSize()
+                                .padding(top = 65.dp, start = 32.dp, end = 32.dp)
+                                .wrapContentWidth(Alignment.CenterHorizontally)
+                        ) {
+                            SingleChoiceSegmentedButtonRow {
+                                options.forEachIndexed { index, label ->
+                                    SegmentedButton(
+                                        shape = SegmentedButtonDefaults.itemShape(
+                                            index = index,
+                                            count = options.size
+                                        ),
+                                        onClick = {
+                                            theme = index
+                                            setting.writeSegmentedButtonState(
+                                                "theme",
+                                                context,
+                                                index
+                                            )
+                                            valueState.updateScreen = true
+                                        },
+                                        selected = index == theme,
+                                    ) {
+                                        Text(stringResource(label))
+                                        Spacer(
+                                            modifier = modifier.padding(
+                                                start = 30.dp, end = 30.dp
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                "3" -> {
+                    CardLayout(
+                        text = stringResource(R.string.clean_all_texts_button),
+                        checked = cleanAllText,
+                        onCheckedChange = {
+                            cleanAllText = it
+                            setting.writeSwitchState("clean_all_text", context, it)
+                        }
+                    )
+                }
+
                 "4" -> {
-                    SegmentedButtonCardLayout(
-                        text = stringResource(R.string.choose_font_size),
-                        context
+                    CardLayout(
+                        text = stringResource(R.string.clean_pointer_focus),
+                        checked = cleanPointerFocus,
+                        onCheckedChange = {
+                            cleanPointerFocus = it
+                            setting.writeSwitchState("clean_pointer_focus", context, it)
+                        }
                     )
                 }
 
                 "5" -> {
+                    CardLayout(
+                        text = stringResource(R.string.allow_multiple_lines),
+                        checked = allowMultipleLines,
+                        onCheckedChange = {
+                            allowMultipleLines = it
+                            setting.writeSwitchState("allow_multiple_lines", context, it)
+                        }
+                    )
+                }
+
+                "6" -> {
+                    val options = listOf(R.string.small, R.string.medium, R.string.large)
+                    Box {
+                        SegmentedButtonCardLayout(
+                            text = stringResource(R.string.choose_font_size)
+                        )
+                        Box(
+                            modifier = modifier
+                                .fillMaxSize()
+                                .padding(top = 65.dp, start = 32.dp, end = 32.dp)
+                                .wrapContentWidth(Alignment.CenterHorizontally)
+                        ) {
+                            SingleChoiceSegmentedButtonRow {
+                                options.forEachIndexed { index, label ->
+                                    SegmentedButton(
+                                        shape = SegmentedButtonDefaults.itemShape(
+                                            index = index,
+                                            count = options.size
+                                        ),
+                                        onClick = {
+                                            fontSize = index
+                                            setting.writeSegmentedButtonState(
+                                                "font_size",
+                                                context,
+                                                index
+                                            )
+                                        },
+                                        selected = index == fontSize,
+                                    ) {
+                                        Text(stringResource(label))
+                                        Spacer(
+                                            modifier = modifier.padding(
+                                                start = 30.dp, end = 30.dp
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                "7" -> {
+                    CardLayout(
+                        text = stringResource(R.string.font_italics),
+                        checked = italics,
+                        onCheckedChange = {
+                            italics = it
+                            setting.writeSwitchState("italics", context, it)
+                        }
+                    )
+                }
+
+                "8" -> {
+                    val options = listOf(
+                        R.string.monospace,
+                        R.string.font_default,
+                        R.string.serif,
+                        R.string.cursive,
+                    )
+                    Box {
+                        SegmentedButtonCardLayout(
+                            text = stringResource(R.string.choose_font_size)
+                        )
+                        Box(
+                            modifier = modifier
+                                .fillMaxSize()
+                                .padding(top = 62.dp, start = 25.dp, end = 25.dp)
+                                .wrapContentWidth(Alignment.CenterHorizontally)
+                        ) {
+                            SingleChoiceSegmentedButtonRow(
+                                modifier = modifier.height(43.dp)
+                            ) {
+                                options.forEachIndexed { index, label ->
+                                    SegmentedButton(
+                                        shape = SegmentedButtonDefaults.itemShape(
+                                            index = index,
+                                            count = options.size
+                                        ),
+                                        onClick = {
+                                            fontStyle = index
+                                            setting.writeSegmentedButtonState(
+                                                "font_style",
+                                                context,
+                                                index
+                                            )
+                                        },
+                                        selected = index == fontStyle,
+                                    ) {
+                                        Text(
+                                            stringResource(label),
+                                            fontSize = 14.sp,
+                                            lineHeight = 10.sp
+                                        )
+                                        Spacer(
+                                            modifier = modifier.padding(
+                                                start = 30.dp, end = 30.dp
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                "9" -> {
                     ClickCardLayout(
                         intent = {
                             val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
@@ -151,81 +348,12 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FontSizeButton(context: Context){
-    var fontSize by remember {
-        mutableStateOf(
-            setting.readSegmentedButtonState(
-                "font_size",
-                context
-            )
-        )
-    }
-    val options = listOf(R.string.small, R.string.medium, R.string.large)
-    SingleChoiceSegmentedButtonRow {
-        options.forEachIndexed { index, label ->
-            SegmentedButton(
-                shape = SegmentedButtonDefaults.itemShape(
-                    index = index,
-                    count = options.size
-                ),
-                onClick = {
-                    fontSize = index
-                    setting.writeSegmentedButtonState("font_size", context, index)
-                },
-                selected = index == fontSize,
-            ) {
-                Text(stringResource(label))
-            }
-        }
-    }
-}
-
-@Composable
-fun SegmentedButtonCardLayout(
-    text: String,
-    context: Context,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-        ),
-        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .height(100.dp)
-    ) {
-        Column(modifier = modifier.fillMaxSize()) {
-            Text(
-                text = text,
-                fontSize = 17.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = modifier
-                    .padding(16.dp)
-                    .wrapContentHeight(Alignment.CenterVertically),
-                color = MaterialTheme.colorScheme.secondary
-            )
-            Box(
-                modifier = modifier
-                    .fillMaxSize()
-                    .wrapContentHeight(Alignment.Bottom)
-                    .wrapContentWidth(Alignment.CenterHorizontally)
-                    .padding(bottom = 10.dp, start = 10.dp, end = 10.dp)
-            ) {
-                FontSizeButton(context)
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
 fun WritingBoardSetting(
     navController: NavController,
     modifier: Modifier = Modifier,
     context: Context
 ) {
+    val valueState: ValueState = viewModel()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
     Scaffold(
@@ -234,9 +362,33 @@ fun WritingBoardSetting(
         topBar = {
             LargeTopAppBar(
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    scrolledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = when (settingState.readSegmentedButtonState(
+                        "theme",
+                        context
+                    )) {
+                        0 -> MaterialTheme.colorScheme.surfaceBright
+                        1 -> MaterialTheme.colorScheme.surfaceVariant
+                        2 -> MaterialTheme.colorScheme.tertiaryContainer
+                        else -> MaterialTheme.colorScheme.surfaceVariant
+                    },
+                    scrolledContainerColor = when (settingState.readSegmentedButtonState(
+                        "theme",
+                        context
+                    )) {
+                        0 -> MaterialTheme.colorScheme.surfaceDim
+                        1 -> MaterialTheme.colorScheme.secondaryContainer
+                        2 -> MaterialTheme.colorScheme.tertiaryContainer
+                        else -> MaterialTheme.colorScheme.secondaryContainer
+                    },
+                    titleContentColor = when (settingState.readSegmentedButtonState(
+                        "theme",
+                        context
+                    )) {
+                        0 -> MaterialTheme.colorScheme.secondary
+                        1 -> MaterialTheme.colorScheme.primary
+                        2 -> MaterialTheme.colorScheme.tertiary
+                        else -> MaterialTheme.colorScheme.primary
+                    },
                 ),
                 title = {
                     Text(
@@ -263,93 +415,24 @@ fun WritingBoardSetting(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(color = MaterialTheme.colorScheme.surfaceVariant)
+                .background(
+                    color = when (settingState.readSegmentedButtonState("theme", context)) {
+                        0 -> MaterialTheme.colorScheme.surfaceBright
+                        1 -> MaterialTheme.colorScheme.surfaceVariant
+                        2 -> MaterialTheme.colorScheme.tertiaryContainer
+                        else -> MaterialTheme.colorScheme.surfaceVariant
+                    }
+                )
         ) {
             SettingFunction(context = context)
         }
     }
-}
-
-@Composable
-fun CardLayout(
-    text: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-        ),
-        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .height(80.dp)
-    ) {
-        Box(
-            modifier = modifier.fillMaxSize()
-        ) {
-            Text(
-                text = text,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = modifier
-                    .padding(10.dp)
-                    .size(width = 280.dp, height = 60.dp)
-            )
-            Switch(
-                modifier = modifier
-                    .fillMaxSize()
-                    .wrapContentWidth(Alignment.End)
-                    .padding(16.dp),
-                checked = checked,
-                onCheckedChange = onCheckedChange
-            )
-        }
-    }
-}
-
-@Composable
-fun ClickCardLayout(
-    intent: () -> Unit,
-    text: String,
-    painter: Int,
-    contentDescription: String,
-    modifier: Modifier = Modifier,
-) {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-        ),
-        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .height(80.dp)
-            .clickable(onClick = intent)
-    ) {
-        Box(
-            modifier = modifier.fillMaxSize()
-        ) {
-            Text(
-                text = text,
-                fontSize = 17.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = modifier
-                    .padding(16.dp)
-                    .wrapContentHeight(Alignment.CenterVertically),
-                color = MaterialTheme.colorScheme.secondary
-            )
-            Icon(
-                painter = painterResource(painter),
-                contentDescription = contentDescription,
-                modifier = modifier
-                    .fillMaxSize()
-                    .wrapContentWidth(Alignment.End)
-                    .padding(end = 27.dp),
-            )
+    if (valueState.updateScreen) {
+        navController.navigate("WritingBoardNone")
+        Handler(Looper.getMainLooper()).postDelayed(50) {
+            navController.popBackStack()
+            Log.i("WritingBoardTag", "Re-Opening WritingBoard Text")
+            valueState.updateScreen = false
         }
     }
 }

@@ -3,11 +3,22 @@
     <string name="app_name">寫字板</string>
     <string name="settings">設置</string>
     <string name="allow_multiple_lines">允許末尾有多個換行符\n(多於一個換行符)</string>
+    <string name="clean_pointer_focus">鍵盤收起時清除鍵盤指針焦點</string>
     <string name="clean_all_texts_button">顯示刪除所有文本按鈕</string>
     <string name="edit_writingboard_button">顯示編輯書寫板按鈕\n(僅允許點擊按鈕編輯)</string>
     <string name="language">語言 (Android 13+)\n單擊以打開App系統設置進行更改</string>
-    <string name="small">小號</string>
-    <string name="medium">中號</string>
-    <string name="large">大號</string>
-    <string name="choose_font_size">選擇字體大小</string>
+    <string name="small">小號字體</string>
+    <string name="medium">中號字體</string>
+    <string name="large">大號字體</string>
+    <string name="choose_font_size">選擇WritingBoard字體大小</string>
+    <string name="light_color">淺色主題</string>
+    <string name="theme_default">默認主題</string>
+    <string name="distinct">鮮明主題</string>
+    <string name="choose_theme">選擇WritingBoard應用程序主題</string>
+    <string name="monospace">Monospace</string>
+    <string name="serif">Serif</string>
+    <string name="cursive">Cursive</string>
+    <string name="font_default">默認</string>
+    <string name="font_style">選擇WritingBoard字體樣式 (EN-only)</string>
+    <string name="font_italics">啟用斜體WritingBoard字體樣式</string>
 </resources>
