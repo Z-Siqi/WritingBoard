@@ -97,7 +97,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 .border(
                     4.dp,
                     color = when (settingState.readSegmentedButtonState("theme", context)) {
-                        0 -> MaterialTheme.colorScheme.tertiaryContainer
+                        0 -> MaterialTheme.colorScheme.primaryContainer
                         1 -> MaterialTheme.colorScheme.primary
                         2 -> MaterialTheme.colorScheme.secondary
                         else -> MaterialTheme.colorScheme.primary
