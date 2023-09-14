@@ -106,6 +106,13 @@ fun WritingBoardText(
             style = TextStyle.Default.copy(
                 fontSize = fontSize,
                 fontWeight = FontWeight.SemiBold,
+                fontFamily = when (settingState.readSegmentedButtonState("font_style", context)) {
+                    0 -> FontFamily.Monospace
+                    1 -> FontFamily.Default
+                    2 -> FontFamily.Serif
+                    3 -> FontFamily.Cursive
+                    else -> FontFamily.Default
+                },
                 color = MaterialTheme.colorScheme.secondary
             )
         )

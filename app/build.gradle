@@ -11,8 +11,8 @@ android {
         applicationId "com.sqz.writingboard"
         minSdk 31
         targetSdk 34
-        versionCode 13
-        versionName "0.1.0"
+        versionCode 15
+        versionName "0.1.5"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -70,4 +70,6 @@ dependencies {
     implementation "androidx.navigation:navigation-compose:2.7.2"
     //datastore
     implementation "androidx.datastore:datastore-preferences:1.0.0"
+    //splashscreen
+    implementation "androidx.core:core-splashscreen:1.0.1"
 }
