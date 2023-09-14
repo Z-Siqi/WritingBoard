@@ -113,6 +113,11 @@ fun WritingBoardText(
                     3 -> FontFamily.Cursive
                     else -> FontFamily.Default
                 },
+                fontStyle = if (settingState.readSwitchState("italics", context)) {
+                    FontStyle.Italic
+                } else {
+                    FontStyle.Normal
+                },
                 color = MaterialTheme.colorScheme.secondary
             )
         )
