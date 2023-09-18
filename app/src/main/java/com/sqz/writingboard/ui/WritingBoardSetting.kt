@@ -34,8 +34,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,70 +63,14 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
     val valueState: ValueState = viewModel()
     val list = listOf("1") + ((2..100).map { it.toString() })
 
-    var allowMultipleLines by remember {
-        mutableStateOf(
-            setting.readSwitchState(
-                "allow_multiple_lines",
-                context
-            )
-        )
-    }
-    var cleanPointerFocus by remember {
-        mutableStateOf(
-            setting.readSwitchState(
-                "clean_pointer_focus",
-                context
-            )
-        )
-    }
-    var cleanAllText by remember {
-        mutableStateOf(
-            setting.readSwitchState(
-                "clean_all_text",
-                context
-            )
-        )
-    }
-    var editButton by remember {
-        mutableStateOf(
-            setting.readSwitchState(
-                "edit_button",
-                context
-            )
-        )
-    }
-    var theme by remember {
-        mutableStateOf(
-            setting.readSegmentedButtonState(
-                "theme",
-                context
-            )
-        )
-    }
-    var fontSize by remember {
-        mutableStateOf(
-            setting.readSegmentedButtonState(
-                "font_size",
-                context
-            )
-        )
-    }
-    var italics by remember {
-        mutableStateOf(
-            setting.readSwitchState(
-                "italics",
-                context
-            )
-        )
-    }
-    var fontStyle by remember {
-        mutableStateOf(
-            setting.readSegmentedButtonState(
-                "font_style",
-                context
-            )
-        )
-    }
+    var allowMultipleLines by setting.rememberSwitchState("allow_multiple_lines", context)
+    var cleanPointerFocus by setting.rememberSwitchState("clean_pointer_focus", context)
+    var cleanAllText by setting.rememberSwitchState("clean_all_text", context)
+    var editButton by setting.rememberSwitchState("edit_button", context)
+    var theme by setting.rememberSegmentedButtonState("theme", context)
+    var fontSize by setting.rememberSegmentedButtonState("font_size", context)
+    var italics by setting.rememberSwitchState("italics", context)
+    var fontStyle by setting.rememberSegmentedButtonState("font_style", context)
 
     LazyColumn(
         modifier = modifier.fillMaxSize()
