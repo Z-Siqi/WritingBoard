@@ -9,15 +9,11 @@ import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,16 +22,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -57,11 +49,10 @@ import com.sqz.writingboard.WritingBoardSettingState
 
 val setting = WritingBoardSettingState()
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
     val valueState: ValueState = viewModel()
-    val list = listOf("1") + ((2..100).map { it.toString() })
+    val list = listOf("0") + ((1..100).map { it.toString() })
 
     var allowMultipleLines by setting.rememberSwitchState("allow_multiple_lines", context)
     var cleanPointerFocus by setting.rememberSwitchState("clean_pointer_focus", context)
@@ -77,7 +68,44 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
     ) {
         items(items = list, itemContent = { item ->
             when (item) {
+                "0" -> {
+                    Text(
+                        text = "WritingBoard App",
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.tertiary,
+                        modifier = modifier.padding(top = 32.dp, start = 18.dp)
+                    )
+                }
                 "1" -> {
+                    SegmentedButtonCardLayout(
+                        context = context,
+                        title = stringResource(R.string.choose_theme),
+                        options = listOf(R.string.light_color, R.string.theme_default, R.string.distinct),
+                        selectedOption = theme,
+                        onOptionSelected = { index ->
+                            theme = index
+                            setting.writeSegmentedButtonState(
+                                "theme",
+                                context,
+                                index
+                            )
+                            valueState.updateScreen = true
+                        }
+                    )
+                }
+
+                "2" -> {
+                    Text(
+                        text = "The WritingBoard",
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.tertiary,
+                        modifier = modifier.padding(top = 16.dp, start = 18.dp)
+                    )
+                }
+
+                "3" -> {
                     CardLayout(
                         text = stringResource(R.string.edit_writingboard_button),
                         checked = editButton,
@@ -88,51 +116,7 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
                     )
                 }
 
-                "2" -> {
-                    val options =
-                        listOf(R.string.light_color, R.string.theme_default, R.string.distinct)
-                    Box {
-                        SegmentedButtonCardLayout(
-                            text = stringResource(R.string.choose_theme)
-                        )
-                        Box(
-                            modifier = modifier
-                                .fillMaxSize()
-                                .padding(top = 65.dp, start = 32.dp, end = 32.dp)
-                                .wrapContentWidth(Alignment.CenterHorizontally)
-                        ) {
-                            SingleChoiceSegmentedButtonRow {
-                                options.forEachIndexed { index, label ->
-                                    SegmentedButton(
-                                        shape = SegmentedButtonDefaults.itemShape(
-                                            index = index,
-                                            count = options.size
-                                        ),
-                                        onClick = {
-                                            theme = index
-                                            setting.writeSegmentedButtonState(
-                                                "theme",
-                                                context,
-                                                index
-                                            )
-                                            valueState.updateScreen = true
-                                        },
-                                        selected = index == theme,
-                                    ) {
-                                        Text(stringResource(label))
-                                        Spacer(
-                                            modifier = modifier.padding(
-                                                start = 30.dp, end = 30.dp
-                                            )
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                "3" -> {
+                "4" -> {
                     CardLayout(
                         text = stringResource(R.string.clean_all_texts_button),
                         checked = cleanAllText,
@@ -143,71 +127,24 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
                     )
                 }
 
-                "4" -> {
-                    CardLayout(
-                        text = stringResource(R.string.clean_pointer_focus),
-                        checked = cleanPointerFocus,
-                        onCheckedChange = {
-                            cleanPointerFocus = it
-                            setting.writeSwitchState("clean_pointer_focus", context, it)
-                        }
-                    )
-                }
-
                 "5" -> {
-                    CardLayout(
-                        text = stringResource(R.string.allow_multiple_lines),
-                        checked = allowMultipleLines,
-                        onCheckedChange = {
-                            allowMultipleLines = it
-                            setting.writeSwitchState("allow_multiple_lines", context, it)
+                    SegmentedButtonCardLayout(
+                        context = context,
+                        title = stringResource(R.string.choose_font_size),
+                        options = listOf(R.string.small, R.string.medium, R.string.large),
+                        selectedOption = fontSize,
+                        onOptionSelected = { index ->
+                            fontSize = index
+                            setting.writeSegmentedButtonState(
+                                "font_size",
+                                context,
+                                index
+                            )
                         }
                     )
                 }
 
                 "6" -> {
-                    val options = listOf(R.string.small, R.string.medium, R.string.large)
-                    Box {
-                        SegmentedButtonCardLayout(
-                            text = stringResource(R.string.choose_font_size)
-                        )
-                        Box(
-                            modifier = modifier
-                                .fillMaxSize()
-                                .padding(top = 65.dp, start = 32.dp, end = 32.dp)
-                                .wrapContentWidth(Alignment.CenterHorizontally)
-                        ) {
-                            SingleChoiceSegmentedButtonRow {
-                                options.forEachIndexed { index, label ->
-                                    SegmentedButton(
-                                        shape = SegmentedButtonDefaults.itemShape(
-                                            index = index,
-                                            count = options.size
-                                        ),
-                                        onClick = {
-                                            fontSize = index
-                                            setting.writeSegmentedButtonState(
-                                                "font_size",
-                                                context,
-                                                index
-                                            )
-                                        },
-                                        selected = index == fontSize,
-                                    ) {
-                                        Text(stringResource(label))
-                                        Spacer(
-                                            modifier = modifier.padding(
-                                                start = 30.dp, end = 30.dp
-                                            )
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                "7" -> {
                     CardLayout(
                         text = stringResource(R.string.font_italics),
                         checked = italics,
@@ -218,60 +155,71 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
                     )
                 }
 
-                "8" -> {
-                    val options = listOf(
-                        R.string.monospace,
-                        R.string.font_default,
-                        R.string.serif,
-                        R.string.cursive,
-                    )
-                    Box {
-                        SegmentedButtonCardLayout(
-                            text = stringResource(R.string.choose_font_size)
-                        )
-                        Box(
-                            modifier = modifier
-                                .fillMaxSize()
-                                .padding(top = 62.dp, start = 25.dp, end = 25.dp)
-                                .wrapContentWidth(Alignment.CenterHorizontally)
-                        ) {
-                            SingleChoiceSegmentedButtonRow(
-                                modifier = modifier.height(43.dp)
-                            ) {
-                                options.forEachIndexed { index, label ->
-                                    SegmentedButton(
-                                        shape = SegmentedButtonDefaults.itemShape(
-                                            index = index,
-                                            count = options.size
-                                        ),
-                                        onClick = {
-                                            fontStyle = index
-                                            setting.writeSegmentedButtonState(
-                                                "font_style",
-                                                context,
-                                                index
-                                            )
-                                        },
-                                        selected = index == fontStyle,
-                                    ) {
-                                        Text(
-                                            stringResource(label),
-                                            fontSize = 14.sp,
-                                            lineHeight = 10.sp
-                                        )
-                                        Spacer(
-                                            modifier = modifier.padding(
-                                                start = 30.dp, end = 30.dp
-                                            )
-                                        )
-                                    }
-                                }
-                            }
+                "7" -> {
+                    SegmentedButtonCardLayout(
+                        context = context,
+                        title = stringResource(R.string.choose_font_size),
+                        options = listOf(
+                            R.string.monospace,
+                            R.string.font_default,
+                            R.string.serif,
+                            R.string.cursive,
+                        ),
+                        selectedOption = fontStyle,
+                        onOptionSelected = { index ->
+                            fontStyle = index
+                            setting.writeSegmentedButtonState(
+                                "font_style",
+                                context,
+                                index
+                            )
                         }
-                    }
+                    )
+                }
+
+                "8" -> {
+                    Text(
+                        text = "Keyboard & Texts Action",
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.tertiary,
+                        modifier = modifier.padding(top = 16.dp, start = 18.dp)
+                    )
                 }
 
                 "9" -> {
+                    CardLayout(
+                        text = stringResource(R.string.clean_pointer_focus),
+                        checked = cleanPointerFocus,
+                        onCheckedChange = {
+                            cleanPointerFocus = it
+                            setting.writeSwitchState("clean_pointer_focus", context, it)
+                        }
+                    )
+                }
+
+                "10" -> {
+                    CardLayout(
+                        text = stringResource(R.string.allow_multiple_lines),
+                        checked = allowMultipleLines,
+                        onCheckedChange = {
+                            allowMultipleLines = it
+                            setting.writeSwitchState("allow_multiple_lines", context, it)
+                        }
+                    )
+                }
+
+                "11" -> {
+                    Text(
+                        text = "Others",
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.tertiary,
+                        modifier = modifier.padding(top = 16.dp, start = 18.dp)
+                    )
+                }
+
+                "12" -> {
                     ClickCardLayout(
                         intent = {
                             val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
@@ -337,7 +285,7 @@ fun WritingBoardSetting(
                         text = stringResource(R.string.settings),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
                     )
                 },
                 navigationIcon = {
