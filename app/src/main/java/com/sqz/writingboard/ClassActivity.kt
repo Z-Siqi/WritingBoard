@@ -24,6 +24,7 @@ class ValueState : ViewModel() {
     var requestFocus = FocusRequester()
     var editButton by mutableStateOf(false)
     var updateScreen by mutableStateOf(false)
+    var openLayout by mutableStateOf(false)
 }
 
 class WritingBoardSettingState {

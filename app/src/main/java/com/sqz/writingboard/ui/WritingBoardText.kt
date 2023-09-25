@@ -5,8 +5,10 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,6 +42,7 @@ fun WritingBoardText(
     modifier: Modifier = Modifier
 ) {
 
+    val rememberScrollState = rememberScrollState()
     val buttonState: ValueState = viewModel()
     val viewModel: WritingBoard = viewModel()
     val dataStore = LocalContext.current.dataStore
@@ -97,12 +100,23 @@ fun WritingBoardText(
         buttonState.saveAction = false
     }
 
-    if (settingState.readSwitchState("edit_button", context) && !buttonState.editButton) {
+    if (settingState.readSwitchState(
+            "edit_button",
+            context
+        ) && !buttonState.editButton || !buttonState.openLayout
+    ) {
         BasicText(
             text = viewModel.textState.text,
-            modifier = modifier
-                .padding(16.dp)
-                .focusRequester(focusRequester),
+            modifier = if (!buttonState.openLayout) {
+                modifier
+                    .padding(16.dp)
+                    .focusRequester(focusRequester)
+            } else {
+                modifier
+                    .padding(16.dp)
+                    .focusRequester(focusRequester)
+                    .verticalScroll(rememberScrollState)
+            },
             style = TextStyle.Default.copy(
                 fontSize = fontSize,
                 fontWeight = FontWeight.SemiBold,
@@ -135,7 +149,8 @@ fun WritingBoardText(
             singleLine = false,
             modifier = modifier
                 .padding(16.dp)
-                .focusRequester(focusRequester),
+                .focusRequester(focusRequester)
+                .verticalScroll(rememberScrollState),
             textStyle = TextStyle.Default.copy(
                 fontSize = fontSize,
                 fontWeight = FontWeight.SemiBold,

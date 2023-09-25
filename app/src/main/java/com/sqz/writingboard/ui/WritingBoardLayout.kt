@@ -68,7 +68,6 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
     val keyboardDone = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
-    var openLayout by remember { mutableStateOf(false) }
     var isKeyboardVisible by remember { mutableStateOf(false) }
 
     Surface(
@@ -118,15 +117,10 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                     .fillMaxSize(),
                 shape = RoundedCornerShape(26.dp)
             ) {
-                if (openLayout) {
-                    WritingBoardTextInit(context)
-                    Log.i("WritingBoardTag", "Pre-Opening WritingBoard Text")
-                } else {
-                    WritingBoardTextInit(context)
-                }
+                WritingBoardTextInit(context)
                 Handler(Looper.getMainLooper()).postDelayed(550) {
-                    openLayout = true
-                    Log.i("WritingBoardTag", "Opening WritingBoard Text")
+                    buttonState.openLayout = true
+                    Log.i("WritingBoardTag", "Initializing WritingBoard Text")
                 }
                 if (buttonState.cleanButton) {
                     navController.navigate("WritingBoardNone")

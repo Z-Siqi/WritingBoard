@@ -79,20 +79,18 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
                 }
                 "1" -> {
                     SegmentedButtonCardLayout(
-                        context = context,
                         title = stringResource(R.string.choose_theme),
                         options = listOf(R.string.light_color, R.string.theme_default, R.string.distinct),
-                        selectedOption = theme,
-                        onOptionSelected = { index ->
-                            theme = index
-                            setting.writeSegmentedButtonState(
-                                "theme",
-                                context,
-                                index
-                            )
-                            valueState.updateScreen = true
-                        }
-                    )
+                        selectedOption = theme
+                    ) { index ->
+                        theme = index
+                        setting.writeSegmentedButtonState(
+                            "theme",
+                            context,
+                            index
+                        )
+                        valueState.updateScreen = true
+                    }
                 }
 
                 "2" -> {
@@ -129,19 +127,17 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
 
                 "5" -> {
                     SegmentedButtonCardLayout(
-                        context = context,
                         title = stringResource(R.string.choose_font_size),
                         options = listOf(R.string.small, R.string.medium, R.string.large),
-                        selectedOption = fontSize,
-                        onOptionSelected = { index ->
-                            fontSize = index
-                            setting.writeSegmentedButtonState(
-                                "font_size",
-                                context,
-                                index
-                            )
-                        }
-                    )
+                        selectedOption = fontSize
+                    ) { index ->
+                        fontSize = index
+                        setting.writeSegmentedButtonState(
+                            "font_size",
+                            context,
+                            index
+                        )
+                    }
                 }
 
                 "6" -> {
@@ -157,7 +153,6 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
 
                 "7" -> {
                     SegmentedButtonCardLayout(
-                        context = context,
                         title = stringResource(R.string.choose_font_size),
                         options = listOf(
                             R.string.monospace,
@@ -165,16 +160,15 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
                             R.string.serif,
                             R.string.cursive,
                         ),
-                        selectedOption = fontStyle,
-                        onOptionSelected = { index ->
-                            fontStyle = index
-                            setting.writeSegmentedButtonState(
-                                "font_style",
-                                context,
-                                index
-                            )
-                        }
-                    )
+                        selectedOption = fontStyle
+                    ) { index ->
+                        fontStyle = index
+                        setting.writeSegmentedButtonState(
+                            "font_style",
+                            context,
+                            index
+                        )
+                    }
                 }
 
                 "8" -> {

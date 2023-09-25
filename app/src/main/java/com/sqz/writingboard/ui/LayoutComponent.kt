@@ -1,6 +1,5 @@
 package com.sqz.writingboard.ui
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -48,7 +47,6 @@ fun WritingBoardNone(modifier: Modifier = Modifier) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SegmentedButtonCardLayout(
-    context: Context,
     modifier: Modifier = Modifier,
     title: String,
     options: List<Int>,
