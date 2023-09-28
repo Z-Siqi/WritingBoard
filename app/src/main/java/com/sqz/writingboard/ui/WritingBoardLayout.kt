@@ -70,6 +70,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
     val context = LocalContext.current
     var isKeyboardVisible by remember { mutableStateOf(false) }
 
+    //Layout
     Surface(
         modifier = modifier
             .fillMaxSize()
@@ -132,6 +133,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 }
             }
         }
+        //Buttons
         if (buttonState.doneButton) {
             Column(
                 modifier = modifier

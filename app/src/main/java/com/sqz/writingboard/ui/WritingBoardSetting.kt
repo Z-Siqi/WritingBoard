@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -52,7 +51,6 @@ val setting = WritingBoardSettingState()
 @Composable
 fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
     val valueState: ValueState = viewModel()
-    val list = listOf("0") + ((1..100).map { it.toString() })
 
     var allowMultipleLines by setting.rememberSwitchState("allow_multiple_lines", context)
     var cleanPointerFocus by setting.rememberSwitchState("clean_pointer_focus", context)
@@ -66,167 +64,152 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
     LazyColumn(
         modifier = modifier.fillMaxSize()
     ) {
-        items(items = list, itemContent = { item ->
-            when (item) {
-                "0" -> {
-                    Text(
-                        text = "WritingBoard App",
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.tertiary,
-                        modifier = modifier.padding(top = 32.dp, start = 18.dp)
-                    )
-                }
-                "1" -> {
-                    SegmentedButtonCardLayout(
-                        title = stringResource(R.string.choose_theme),
-                        options = listOf(R.string.light_color, R.string.theme_default, R.string.distinct),
-                        selectedOption = theme
-                    ) { index ->
-                        theme = index
-                        setting.writeSegmentedButtonState(
-                            "theme",
-                            context,
-                            index
-                        )
-                        valueState.updateScreen = true
-                    }
-                }
-
-                "2" -> {
-                    Text(
-                        text = "The WritingBoard",
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.tertiary,
-                        modifier = modifier.padding(top = 16.dp, start = 18.dp)
-                    )
-                }
-
-                "3" -> {
-                    CardLayout(
-                        text = stringResource(R.string.edit_writingboard_button),
-                        checked = editButton,
-                        onCheckedChange = {
-                            editButton = it
-                            setting.writeSwitchState("edit_button", context, it)
-                        }
-                    )
-                }
-
-                "4" -> {
-                    CardLayout(
-                        text = stringResource(R.string.clean_all_texts_button),
-                        checked = cleanAllText,
-                        onCheckedChange = {
-                            cleanAllText = it
-                            setting.writeSwitchState("clean_all_text", context, it)
-                        }
-                    )
-                }
-
-                "5" -> {
-                    SegmentedButtonCardLayout(
-                        title = stringResource(R.string.choose_font_size),
-                        options = listOf(R.string.small, R.string.medium, R.string.large),
-                        selectedOption = fontSize
-                    ) { index ->
-                        fontSize = index
-                        setting.writeSegmentedButtonState(
-                            "font_size",
-                            context,
-                            index
-                        )
-                    }
-                }
-
-                "6" -> {
-                    CardLayout(
-                        text = stringResource(R.string.font_italics),
-                        checked = italics,
-                        onCheckedChange = {
-                            italics = it
-                            setting.writeSwitchState("italics", context, it)
-                        }
-                    )
-                }
-
-                "7" -> {
-                    SegmentedButtonCardLayout(
-                        title = stringResource(R.string.choose_font_size),
-                        options = listOf(
-                            R.string.monospace,
-                            R.string.font_default,
-                            R.string.serif,
-                            R.string.cursive,
-                        ),
-                        selectedOption = fontStyle
-                    ) { index ->
-                        fontStyle = index
-                        setting.writeSegmentedButtonState(
-                            "font_style",
-                            context,
-                            index
-                        )
-                    }
-                }
-
-                "8" -> {
-                    Text(
-                        text = "Keyboard & Texts Action",
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.tertiary,
-                        modifier = modifier.padding(top = 16.dp, start = 18.dp)
-                    )
-                }
-
-                "9" -> {
-                    CardLayout(
-                        text = stringResource(R.string.clean_pointer_focus),
-                        checked = cleanPointerFocus,
-                        onCheckedChange = {
-                            cleanPointerFocus = it
-                            setting.writeSwitchState("clean_pointer_focus", context, it)
-                        }
-                    )
-                }
-
-                "10" -> {
-                    CardLayout(
-                        text = stringResource(R.string.allow_multiple_lines),
-                        checked = allowMultipleLines,
-                        onCheckedChange = {
-                            allowMultipleLines = it
-                            setting.writeSwitchState("allow_multiple_lines", context, it)
-                        }
-                    )
-                }
-
-                "11" -> {
-                    Text(
-                        text = "Others",
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.tertiary,
-                        modifier = modifier.padding(top = 16.dp, start = 18.dp)
-                    )
-                }
-
-                "12" -> {
-                    ClickCardLayout(
-                        intent = {
-                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                            intent.data = Uri.fromParts("package", context.packageName, null)
-                            startActivityForResult(context as Activity, intent, 0, null)
-                        },
-                        text = stringResource(R.string.language),
-                        painter = R.drawable.ic_language,
-                        contentDescription = "Language"
-                    )
-                }
+        item {
+            Text(
+                text = stringResource(R.string.writingboard_app),
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.tertiary,
+                modifier = modifier.padding(top = 32.dp, start = 18.dp)
+            )
+        }
+        item {
+            SegmentedButtonCardLayout(
+                title = stringResource(R.string.choose_theme),
+                options = listOf(R.string.light_color, R.string.theme_default, R.string.distinct),
+                selectedOption = theme
+            ) { index ->
+                theme = index
+                setting.writeSegmentedButtonState(
+                    "theme",
+                    context,
+                    index
+                )
+                valueState.updateScreen = true
             }
-        })
+        }
+        item {
+            Text(
+                text = stringResource(R.string.writingboard),
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.tertiary,
+                modifier = modifier.padding(top = 16.dp, start = 18.dp)
+            )
+        }
+        item {
+            CardLayout(
+                text = stringResource(R.string.edit_writingboard_button),
+                checked = editButton,
+                onCheckedChange = {
+                    editButton = it
+                    setting.writeSwitchState("edit_button", context, it)
+                }
+            )
+        }
+        item {
+            CardLayout(
+                text = stringResource(R.string.clean_all_texts_button),
+                checked = cleanAllText,
+                onCheckedChange = {
+                    cleanAllText = it
+                    setting.writeSwitchState("clean_all_text", context, it)
+                }
+            )
+        }
+        item {
+            SegmentedButtonCardLayout(
+                title = stringResource(R.string.choose_font_size),
+                options = listOf(R.string.small, R.string.medium, R.string.large),
+                selectedOption = fontSize
+            ) { index ->
+                fontSize = index
+                setting.writeSegmentedButtonState(
+                    "font_size",
+                    context,
+                    index
+                )
+            }
+        }
+        item {
+            CardLayout(
+                text = stringResource(R.string.font_italics),
+                checked = italics,
+                onCheckedChange = {
+                    italics = it
+                    setting.writeSwitchState("italics", context, it)
+                }
+            )
+        }
+        item {
+            SegmentedButtonCardLayout(
+                title = stringResource(R.string.choose_font_size),
+                options = listOf(
+                    R.string.monospace,
+                    R.string.font_default,
+                    R.string.serif,
+                    R.string.cursive,
+                ),
+                selectedOption = fontStyle
+            ) { index ->
+                fontStyle = index
+                setting.writeSegmentedButtonState(
+                    "font_style",
+                    context,
+                    index
+                )
+            }
+        }
+        item {
+            Text(
+                text = stringResource(R.string.keyboard_texts_action),
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.tertiary,
+                modifier = modifier.padding(top = 16.dp, start = 18.dp)
+            )
+        }
+        item {
+            CardLayout(
+                text = stringResource(R.string.clean_pointer_focus),
+                checked = cleanPointerFocus,
+                onCheckedChange = {
+                    cleanPointerFocus = it
+                    setting.writeSwitchState("clean_pointer_focus", context, it)
+                }
+            )
+        }
+        item {
+            CardLayout(
+                text = stringResource(R.string.allow_multiple_lines),
+                checked = allowMultipleLines,
+                onCheckedChange = {
+                    allowMultipleLines = it
+                    setting.writeSwitchState("allow_multiple_lines", context, it)
+                }
+            )
+        }
+        item {
+            Text(
+                text = stringResource(R.string.others),
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.tertiary,
+                modifier = modifier.padding(top = 16.dp, start = 18.dp)
+            )
+        }
+        item {
+            ClickCardLayout(
+                intent = {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                    intent.data = Uri.fromParts("package", context.packageName, null)
+                    startActivityForResult(context as Activity, intent, 0, null)
+                },
+                text = stringResource(R.string.language),
+                painter = R.drawable.ic_language,
+                contentDescription = "Language"
+            )
+        }
     }
 }
 
