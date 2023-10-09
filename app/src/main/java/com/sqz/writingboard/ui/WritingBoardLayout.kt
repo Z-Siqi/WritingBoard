@@ -209,6 +209,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 FloatingActionButton(onClick = {
                     buttonState.requestFocus.requestFocus()
                     buttonState.editButton = true
+                    buttonState.editScroll = true
                     Log.i("WritingBoardTag", "Edit button is clicked")
                 }) {
                     Icon(
@@ -243,6 +244,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             isKeyboardVisible = isVisible
             if (isVisible) {
                 buttonState.doneButton = true
+                buttonState.editScroll = false
             } else {
                 buttonState.doneButton = false
                 if (settingState.readSwitchState("clean_pointer_focus", context)) {

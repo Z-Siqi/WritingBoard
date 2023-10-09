@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -25,6 +26,7 @@ class ValueState : ViewModel() {
     var editButton by mutableStateOf(false)
     var updateScreen by mutableStateOf(false)
     var openLayout by mutableStateOf(false)
+    var editScroll by mutableStateOf(false)
 }
 
 class WritingBoardSettingState {
@@ -57,7 +59,7 @@ class WritingBoardSettingState {
     @Composable
     fun rememberSegmentedButtonState(key: String, context: Context): MutableState<Int> {
         return remember {
-            mutableStateOf(
+            mutableIntStateOf(
                 setting.readSegmentedButtonState(
                     key,
                     context
