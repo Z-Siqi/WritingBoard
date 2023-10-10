@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -81,7 +80,7 @@ fun SegmentedButtonCardLayout(
                     .wrapContentHeight(Alignment.Bottom)
             ) {
                 SingleChoiceSegmentedButtonRow(
-                    modifier = modifier.height(43.dp)
+                    modifier = modifier.height(43.dp).fillMaxWidth()
                 ) {
                     options.forEachIndexed { index, label ->
                         SegmentedButton(
@@ -97,11 +96,6 @@ fun SegmentedButtonCardLayout(
                             Text(
                                 text = stringResource(label),
                                 lineHeight = 10.sp
-                            )
-                            Spacer(
-                                modifier = modifier.padding(
-                                    start = 30.dp, end = 30.dp
-                                )
                             )
                         }
                     }

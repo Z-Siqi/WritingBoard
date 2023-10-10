@@ -25,4 +25,9 @@
     <string name="writingboard">The WritingBoard</string>
     <string name="keyboard_texts_action">键盘和文本行为</string>
     <string name="others">其它</string>
+    <string name="about">关于\ngithub.com/Z-Siqi/WrtingBoard/</string>
+    <string name="button_style">WritingBoard 按钮风格</string>
+    <string name="button_hide">隐藏</string>
+    <string name="button_default">默认</string>
+    <string name="button_manual">单击红色区域打开设置屏幕</string>
 </resources>

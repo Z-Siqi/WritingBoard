@@ -60,6 +60,7 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
     var fontSize by setting.rememberSegmentedButtonState("font_size", context)
     var italics by setting.rememberSwitchState("italics", context)
     var fontStyle by setting.rememberSegmentedButtonState("font_style", context)
+    var buttonStyle by setting.rememberSegmentedButtonState("button_style", context)
 
     LazyColumn(
         modifier = modifier.fillMaxSize()
@@ -86,6 +87,20 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
                     index
                 )
                 valueState.updateScreen = true
+            }
+        }
+        item {
+            SegmentedButtonCardLayout(
+                title = stringResource(R.string.button_style),
+                options = listOf(R.string.button_hide, R.string.button_default),
+                selectedOption = buttonStyle
+            ) { index ->
+                buttonStyle = index
+                setting.writeSegmentedButtonState(
+                    "button_style",
+                    context,
+                    index
+                )
             }
         }
         item {
@@ -210,6 +225,17 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
                 contentDescription = "Language"
             )
         }
+        item {
+            ClickCardLayout(
+                intent = {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Z-Siqi/WritingBoard/"))
+                    startActivityForResult(context as Activity, intent, 0, null)
+                },
+                text = stringResource(R.string.about),
+                painter = R.drawable.github_mark,
+                contentDescription = "About"
+            )
+        }
     }
 }
 
@@ -223,39 +249,35 @@ fun WritingBoardSetting(
     val valueState: ValueState = viewModel()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
+    val themeColorSetting = settingState.readSegmentedButtonState("theme", context)
+    val scrolledContainerColor = when (themeColorSetting) {
+        0 -> MaterialTheme.colorScheme.surfaceDim
+        1 -> MaterialTheme.colorScheme.secondaryContainer
+        2 -> MaterialTheme.colorScheme.tertiaryContainer
+        else -> MaterialTheme.colorScheme.secondaryContainer
+    }
+    val titleContentColor = when (themeColorSetting) {
+        0 -> MaterialTheme.colorScheme.secondary
+        1 -> MaterialTheme.colorScheme.primary
+        2 -> MaterialTheme.colorScheme.tertiary
+        else -> MaterialTheme.colorScheme.primary
+    }
+    val backgroundColor = when (themeColorSetting) {
+        0 -> MaterialTheme.colorScheme.surfaceBright
+        1 -> MaterialTheme.colorScheme.surfaceVariant
+        2 -> MaterialTheme.colorScheme.tertiaryContainer
+        else -> MaterialTheme.colorScheme.surfaceVariant
+    }
+
     Scaffold(
         modifier = modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             LargeTopAppBar(
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
-                    containerColor = when (settingState.readSegmentedButtonState(
-                        "theme",
-                        context
-                    )) {
-                        0 -> MaterialTheme.colorScheme.surfaceBright
-                        1 -> MaterialTheme.colorScheme.surfaceVariant
-                        2 -> MaterialTheme.colorScheme.tertiaryContainer
-                        else -> MaterialTheme.colorScheme.surfaceVariant
-                    },
-                    scrolledContainerColor = when (settingState.readSegmentedButtonState(
-                        "theme",
-                        context
-                    )) {
-                        0 -> MaterialTheme.colorScheme.surfaceDim
-                        1 -> MaterialTheme.colorScheme.secondaryContainer
-                        2 -> MaterialTheme.colorScheme.tertiaryContainer
-                        else -> MaterialTheme.colorScheme.secondaryContainer
-                    },
-                    titleContentColor = when (settingState.readSegmentedButtonState(
-                        "theme",
-                        context
-                    )) {
-                        0 -> MaterialTheme.colorScheme.secondary
-                        1 -> MaterialTheme.colorScheme.primary
-                        2 -> MaterialTheme.colorScheme.tertiary
-                        else -> MaterialTheme.colorScheme.primary
-                    },
+                    containerColor = backgroundColor,
+                    scrolledContainerColor = scrolledContainerColor,
+                    titleContentColor = titleContentColor,
                 ),
                 title = {
                     Text(
@@ -282,14 +304,7 @@ fun WritingBoardSetting(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(
-                    color = when (settingState.readSegmentedButtonState("theme", context)) {
-                        0 -> MaterialTheme.colorScheme.surfaceBright
-                        1 -> MaterialTheme.colorScheme.surfaceVariant
-                        2 -> MaterialTheme.colorScheme.tertiaryContainer
-                        else -> MaterialTheme.colorScheme.surfaceVariant
-                    }
-                )
+                .background(color = backgroundColor)
         ) {
             SettingFunction(context = context)
         }

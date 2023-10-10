@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">WritingBoard</string>
     <string name="settings">Settings</string>
-    <string name="allow_multiple_lines">Allow multiple lines at end.\n(more than one lines)</string>
+    <string name="allow_multiple_lines">Allow save multiple lines at end.\n(more than one lines)</string>
     <string name="clean_pointer_focus">Clean pointer focus when\nkeyboard is retracted.</string>
     <string name="clean_all_texts_button">Clean all texts button.</string>
     <string name="edit_writingboard_button">Edit WritingBoard button.\n(Only allow click to edit)</string>
@@ -24,4 +24,9 @@
     <string name="writingboard">The WritingBoard</string>
     <string name="keyboard_texts_action"><![CDATA[Keyboard & Texts Action]]></string>
     <string name="others">Others</string>
+    <string name="about">About \ngithub.com/Z-Siqi/WrtingBoard/</string>
+    <string name="button_style">WritingBoard button style</string>
+    <string name="button_hide">Hide</string>
+    <string name="button_default">Default</string>
+    <string name="button_manual">Click the red area to open setting screen.</string>
 </resources>

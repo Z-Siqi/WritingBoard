@@ -25,4 +25,9 @@
     <string name="writingboard">寫字板</string>
     <string name="keyboard_texts_action">鍵盤和文字行為</string>
     <string name="others">其它</string>
+    <string name="about">關於\ngithub.com/Z-Siqi/WrtingBoard/</string>
+    <string name="button_style">WritingBoard按鈕樣式</string>
+    <string name="button_hide">隱藏</string>
+    <string name="button_default">默認</string>
+    <string name="button_manual">點選紅色區域開啟設定畫面。</string>
 </resources>
