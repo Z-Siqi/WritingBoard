@@ -57,6 +57,24 @@ fun WritingBoardText(
     var scrollToPosition by remember { mutableFloatStateOf(0.0f) }
     val scrollState = rememberScrollState(100)
 
+    val fontFamily = when (settingState.readSegmentedButtonState("font_style", context)) {
+        0 -> FontFamily.Monospace
+        1 -> FontFamily.Default
+        2 -> FontFamily.Serif
+        3 -> FontFamily.Cursive
+        else -> FontFamily.Default
+    }
+    val fontStyle = if (settingState.readSwitchState("italics", context)) {
+        FontStyle.Italic
+    } else {
+        FontStyle.Normal
+    }
+    val color = when (settingState.readSegmentedButtonState("theme", context)) {
+        1 -> MaterialTheme.colorScheme.secondary
+        2 -> MaterialTheme.colorScheme.tertiary
+        else -> MaterialTheme.colorScheme.secondary
+    }
+
     LaunchedEffect(true) {
         val savedText: String = context.dataStore.data
             .catch {
@@ -121,19 +139,9 @@ fun WritingBoardText(
             style = TextStyle.Default.copy(
                 fontSize = fontSize,
                 fontWeight = FontWeight.SemiBold,
-                fontFamily = when (settingState.readSegmentedButtonState("font_style", context)) {
-                    0 -> FontFamily.Monospace
-                    1 -> FontFamily.Default
-                    2 -> FontFamily.Serif
-                    3 -> FontFamily.Cursive
-                    else -> FontFamily.Default
-                },
-                fontStyle = if (settingState.readSwitchState("italics", context)) {
-                    FontStyle.Italic
-                } else {
-                    FontStyle.Normal
-                },
-                color = MaterialTheme.colorScheme.secondary
+                fontFamily = fontFamily,
+                fontStyle = fontStyle,
+                color = color
             )
         )
         Log.i("WritingBoardTag", "Read-only text")
@@ -164,23 +172,9 @@ fun WritingBoardText(
             textStyle = TextStyle.Default.copy(
                 fontSize = fontSize,
                 fontWeight = FontWeight.SemiBold,
-                fontFamily = when (settingState.readSegmentedButtonState("font_style", context)) {
-                    0 -> FontFamily.Monospace
-                    1 -> FontFamily.Default
-                    2 -> FontFamily.Serif
-                    3 -> FontFamily.Cursive
-                    else -> FontFamily.Default
-                },
-                fontStyle = if (settingState.readSwitchState("italics", context)) {
-                    FontStyle.Italic
-                } else {
-                    FontStyle.Normal
-                },
-                color = when (settingState.readSegmentedButtonState("theme", context)) {
-                    1 -> MaterialTheme.colorScheme.secondary
-                    2 -> MaterialTheme.colorScheme.tertiary
-                    else -> MaterialTheme.colorScheme.secondary
-                }
+                fontFamily = fontFamily,
+                fontStyle = fontStyle,
+                color = color
             )
         )
     }

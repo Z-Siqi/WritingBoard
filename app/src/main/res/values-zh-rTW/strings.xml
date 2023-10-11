@@ -30,4 +30,5 @@
     <string name="button_hide">隱藏</string>
     <string name="button_default">默認</string>
     <string name="button_manual">點選紅色區域開啟設定畫面。</string>
+    <string name="edit_button_manual">點擊紫色區域可編輯WritingBoard文本</string>
 </resources>

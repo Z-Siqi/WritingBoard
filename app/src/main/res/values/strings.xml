@@ -29,4 +29,5 @@
     <string name="button_hide">Hide</string>
     <string name="button_default">Default</string>
     <string name="button_manual">Click the red area to open setting screen.</string>
+    <string name="edit_button_manual">Click the purple area to edit WritingBoard texts.</string>
 </resources>

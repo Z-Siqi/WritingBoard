@@ -30,4 +30,5 @@
     <string name="button_hide">隐藏</string>
     <string name="button_default">默认</string>
     <string name="button_manual">点击红色区域打开设置屏幕</string>
+    <string name="edit_button_manual">单击紫色区域以编辑书写板文本</string>
 </resources>

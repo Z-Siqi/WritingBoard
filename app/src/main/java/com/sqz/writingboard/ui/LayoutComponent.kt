@@ -1,9 +1,11 @@
 package com.sqz.writingboard.ui
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +15,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -27,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -41,6 +48,47 @@ fun WritingBoardNone(modifier: Modifier = Modifier) {
                 MaterialTheme.colorScheme.surfaceVariant
             )
     ) { Log.i("WritingBoardTag", "NoneScreen has open") }
+}
+
+@Composable
+fun WritingBoardManual(
+    @SuppressLint("ModifierParameter") modifierPadding: Modifier,
+    onClick: () -> Unit,
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifierPadding,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.End
+    ) {
+        Card(
+            modifier = modifier
+                .size(200.dp, 100.dp)
+                .shadow(5.dp, RoundedCornerShape(10.dp))
+        ) {
+            Column(
+                modifier = modifier.fillMaxSize()
+            ) {
+                Text(
+                    modifier = modifier.padding(start = 8.dp, end = 8.dp, top = 8.dp),
+                    text = text,
+                    fontWeight = FontWeight.SemiBold,
+                    lineHeight = 20.sp,
+                    fontSize = 15.sp,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+                Button(
+                    modifier = modifier
+                        .padding(8.dp)
+                        .align(Alignment.End),
+                    onClick = onClick
+                ) {
+                    Icon(imageVector = Icons.Filled.Done, contentDescription = "Okay")
+                }
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,7 +128,9 @@ fun SegmentedButtonCardLayout(
                     .wrapContentHeight(Alignment.Bottom)
             ) {
                 SingleChoiceSegmentedButtonRow(
-                    modifier = modifier.height(43.dp).fillMaxWidth()
+                    modifier = modifier
+                        .height(43.dp)
+                        .fillMaxWidth()
                 ) {
                     options.forEachIndexed { index, label ->
                         SegmentedButton(
