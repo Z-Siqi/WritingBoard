@@ -22,6 +22,8 @@ class ValueState : ViewModel() {
     var doneButton by mutableStateOf(false)
     var cleanButton by mutableStateOf(false)
     var saveAction by mutableStateOf(false)
+    var buttonSaveAction by mutableStateOf(false)
+    var ee by mutableStateOf(false)
     var requestFocus = FocusRequester()
     var editButton by mutableStateOf(false)
     var updateScreen by mutableStateOf(false)

@@ -12,3 +12,6 @@ val Pink40 = Color(0xFF7D5260)
 
 val RedForManual = Color(0xBEE21717)
 val PurpleForManual = Color(0xFF816EB8)
+val Blue = Color(0xFF56BFE7)
+val Pink = Color(0xFFE29CAA)
+val White = Color(0xFFE7E7E7)

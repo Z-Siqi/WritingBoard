@@ -4,10 +4,12 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,7 +17,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Button
@@ -36,9 +40,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sqz.writingboard.R
+import com.sqz.writingboard.ui.theme.Blue
+import com.sqz.writingboard.ui.theme.Pink
+import com.sqz.writingboard.ui.theme.Pink40
+import com.sqz.writingboard.ui.theme.Purple40
+import com.sqz.writingboard.ui.theme.White
 
 @Composable
 fun WritingBoardNone(modifier: Modifier = Modifier) {
@@ -213,10 +225,11 @@ fun ClickCardLayout(
             .fillMaxWidth()
             .padding(16.dp)
             .height(80.dp)
-            .clickable(onClick = intent)
     ) {
         Box(
-            modifier = modifier.fillMaxSize()
+            modifier = modifier
+                .fillMaxSize()
+                .clickable(onClick = intent)
         ) {
             Text(
                 text = text,
@@ -235,6 +248,109 @@ fun ClickCardLayout(
                     .wrapContentWidth(Alignment.End)
                     .padding(end = 27.dp),
             )
+        }
+    }
+}
+
+@Composable
+fun WritingBoardEE(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.errorContainer
+    ) {
+        Column(
+            modifier = modifier
+                .padding(20.dp)
+                .shadow(5.dp, RoundedCornerShape(26.dp))
+                .border(
+                    4.dp,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    RoundedCornerShape(26.dp)
+                ),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box {
+                Column(modifier = modifier.fillMaxSize()) {
+                    val blueColor = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .background(color = Blue)
+                    val pinkColor = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .background(color = Pink)
+                    val whiteColor = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .background(color = White)
+                    Spacer(blueColor)
+                    Spacer(pinkColor)
+                    Spacer(whiteColor)
+                    Spacer(pinkColor)
+                    Spacer(blueColor)
+                }
+                Column(
+                    modifier = modifier
+                        .fillMaxSize()
+                        .padding(top = 10.dp, bottom = 10.dp, start = 10.dp, end = 10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Top
+                ) {
+                    val itemPink = Modifier
+                        .weight(1f)
+                        .padding(top = 15.dp)
+                    val itemBlue = Modifier
+                        .weight(1f)
+                        .padding(top = 30.dp)
+                        .verticalScroll(rememberScrollState())
+                    Text(
+                        text = stringResource(R.string.easter_eggs),
+                        fontSize = 18.sp,
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = itemPink,
+                        color = Pink40
+                    )
+                    Text(
+                        text = stringResource(R.string.may_all_people_equal),
+                        fontSize = 19.sp,
+                        fontFamily = FontFamily.Cursive,
+                        fontStyle = FontStyle.Italic,
+                        fontWeight = FontWeight.ExtraBold,
+                        modifier = itemBlue,
+                        color = Purple40
+                    )
+                    Text(
+                        text = stringResource(R.string.to_the_special_you),
+                        fontSize = 16.sp,
+                        fontFamily = FontFamily.Serif,
+                        fontStyle = FontStyle.Italic,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState()),
+                        color = Pink40
+                    )
+                    Text(
+                        text = stringResource(R.string.may_everyone),
+                        fontSize = 20.sp,
+                        fontFamily = FontFamily.Cursive,
+                        fontStyle = FontStyle.Italic,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = itemBlue,
+                        color = Purple40
+                    )
+                    Text(
+                        text = stringResource(R.string.see_easter_egg_again),
+                        fontSize = 16.sp,
+                        fontFamily = FontFamily.Serif,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = itemPink,
+                        color = Pink40
+                    )
+                }
+            }
         }
     }
 }

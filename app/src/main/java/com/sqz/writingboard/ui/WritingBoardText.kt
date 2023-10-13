@@ -48,12 +48,12 @@ fun WritingBoardText(
     modifier: Modifier = Modifier
 ) {
 
-    val buttonState: ValueState = viewModel()
+    val valueState: ValueState = viewModel()
     val viewModel: WritingBoard = viewModel()
     val dataStore = LocalContext.current.dataStore
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    val focusRequester = buttonState.requestFocus
+    val focusRequester = valueState.requestFocus
     var scrollToPosition by remember { mutableFloatStateOf(0.0f) }
     val scrollState = rememberScrollState(100)
 
@@ -92,7 +92,7 @@ fun WritingBoardText(
     }
 
     //clean all texts action
-    if (buttonState.cleanButton) {
+    if (valueState.cleanButton) {
         viewModel.textState.text.let { newText ->
             coroutineScope.launch {
                 dataStore.edit { preferences ->
@@ -102,8 +102,23 @@ fun WritingBoardText(
             }
         }
     }
-    //save action by button
-    if (buttonState.saveAction) {
+    //save action by done button
+    if (valueState.buttonSaveAction) {
+        valueState.saveAction = true
+        viewModel.textState.text.let { newText ->
+            if (
+                (newText.endsWith("\uD83C\uDFF3️\u200D⚧️")) &&
+                (!settingState.readSwitchState("easter_eggs", context)) ||
+                (newText.endsWith("_-OPEN_IT"))
+            ) {
+                settingState.writeSwitchState("easter_eggs", context, true)
+                valueState.ee = true
+            }
+        }
+        valueState.buttonSaveAction = false
+    }
+    //save action
+    if (valueState.saveAction) {
         viewModel.textState.text.let { newText ->
             val textToSave = if (!settingState.readSwitchState(
                     "allow_multiple_lines",
@@ -119,16 +134,16 @@ fun WritingBoardText(
                 dataStore.edit { preferences ->
                     preferences[stringPreferencesKey("saved_text")] = textToSave
                 }
-                Log.i("WritingBoardTag", "Save writing board texts by done button")
+                Log.i("WritingBoardTag", "Save writing board texts")
             }
         }
-        buttonState.saveAction = false
+        valueState.saveAction = false
     }
 
     if (settingState.readSwitchState(
             "edit_button",
             context
-        ) && !buttonState.editButton || !buttonState.openLayout
+        ) && !valueState.editButton || !valueState.openLayout
     ) {
         BasicText(
             text = viewModel.textState.text,
@@ -151,12 +166,12 @@ fun WritingBoardText(
             onValueChange = { newText ->
                 viewModel.textState = TextFieldValue(newText)
                 Handler(Looper.getMainLooper()).postDelayed(2500) {
-                    buttonState.saveAction = true
+                    valueState.saveAction = true
                 }
-                buttonState.doneButton = true
+                valueState.doneButton = true
             },
             singleLine = false,
-            modifier = if (buttonState.editScroll) {
+            modifier = if (valueState.editScroll) {
                 modifier
                     .padding(16.dp)
                     .focusRequester(focusRequester)

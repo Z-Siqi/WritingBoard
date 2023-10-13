@@ -31,4 +31,9 @@
     <string name="button_default">默認</string>
     <string name="button_manual">點選紅色區域開啟設定畫面。</string>
     <string name="edit_button_manual">點擊紫色區域可編輯WritingBoard文本</string>
+    <string name="easter_eggs">致所有發現這裡的人:\n恭喜你，你找到了彩蛋!\n\n祝你有美好的一天!!</string>
+    <string name="may_all_people_equal">願所有人以平等的眼光看待任何群體</string>
+    <string name="to_the_special_you"><![CDATA[致特別的你 🏳️‍⚧️:\n不要屈服於焦慮和憂鬱，這世界終會有我們的一席之地。\n請不要絕望，總是會有人站在你這邊。\n\n - text by MtF.wiki & Z-Siqi]]></string>
+    <string name="may_everyone">願每個人都自由地生活在陽光下</string>
+    <string name="see_easter_egg_again">如果你想再次看到彩蛋或當你感到悲傷或難過時想再次看到它, \n請在文字末尾輸入 _-OPEN_IT 然後按下 完成 按鈕.</string>
 </resources>

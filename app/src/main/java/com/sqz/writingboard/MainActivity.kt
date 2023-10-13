@@ -14,6 +14,7 @@ import androidx.core.view.WindowCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.sqz.writingboard.ui.WritingBoardEE
 import com.sqz.writingboard.ui.WritingBoardLayout
 import com.sqz.writingboard.ui.WritingBoardNone
 import com.sqz.writingboard.ui.WritingBoardSetting
@@ -48,6 +49,9 @@ class MainActivity : ComponentActivity() {
                         composable("WritingBoardNone") {
                             WritingBoardNone()
                             Log.i("WritingBoardTag", "NavHost: Screen is WritingBoardSetting.")
+                        }
+                        composable("EE") {
+                            WritingBoardEE()
                         }
                     }
                 }
