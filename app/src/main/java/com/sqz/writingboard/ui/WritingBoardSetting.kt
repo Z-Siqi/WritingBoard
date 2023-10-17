@@ -45,6 +45,7 @@ import androidx.navigation.compose.rememberNavController
 import com.sqz.writingboard.R
 import com.sqz.writingboard.ValueState
 import com.sqz.writingboard.WritingBoardSettingState
+import com.sqz.writingboard.settingState
 
 val setting = WritingBoardSettingState()
 

@@ -1,5 +1,6 @@
 package com.sqz.writingboard
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -11,6 +12,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -20,6 +24,8 @@ import com.sqz.writingboard.ui.WritingBoardNone
 import com.sqz.writingboard.ui.WritingBoardSetting
 import com.sqz.writingboard.ui.theme.WritingBoardTheme
 
+val settingState = WritingBoardSettingState()
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "WritingBoard")
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +54,7 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("WritingBoardNone") {
                             WritingBoardNone()
-                            Log.i("WritingBoardTag", "NavHost: Screen is WritingBoardSetting.")
+                            Log.i("WritingBoardTag", "NavHost: Screen is WritingBoardNone.")
                         }
                         composable("EE") {
                             WritingBoardEE()

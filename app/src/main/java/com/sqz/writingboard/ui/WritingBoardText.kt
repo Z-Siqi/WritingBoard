@@ -18,7 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalContext
@@ -27,8 +27,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.os.postDelayed
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
@@ -36,6 +36,8 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sqz.writingboard.ValueState
 import com.sqz.writingboard.WritingBoard
+import com.sqz.writingboard.dataStore
+import com.sqz.writingboard.settingState
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -43,20 +45,22 @@ import kotlinx.coroutines.launch
 import java.io.IOException
 
 @Composable
-fun WritingBoardText(
-    fontSize: TextUnit,
-    modifier: Modifier = Modifier
-) {
+fun WritingBoardText(modifier: Modifier = Modifier) {
 
     val valueState: ValueState = viewModel()
     val viewModel: WritingBoard = viewModel()
     val dataStore = LocalContext.current.dataStore
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    val focusRequester = valueState.requestFocus
     var scrollToPosition by remember { mutableFloatStateOf(0.0f) }
-    val scrollState = rememberScrollState(100)
+    val scrollState = rememberScrollState()
 
+    val fontSize = when (settingState.readSegmentedButtonState("font_size", context)) {
+        0 -> 18.sp
+        1 -> 23.sp
+        2 -> 33.sp
+        else -> 18.sp
+    }
     val fontFamily = when (settingState.readSegmentedButtonState("font_style", context)) {
         0 -> FontFamily.Monospace
         1 -> FontFamily.Default
@@ -89,6 +93,7 @@ fun WritingBoardText(
                 preferences[stringPreferencesKey("saved_text")] ?: ""
             }.first()
         viewModel.textState = TextFieldValue(savedText)
+        Log.i("WritingBoardTag", "LaunchedEffect: val savedText")
     }
 
     //clean all texts action
@@ -140,16 +145,15 @@ fun WritingBoardText(
         valueState.saveAction = false
     }
 
-    if (settingState.readSwitchState(
-            "edit_button",
-            context
-        ) && !valueState.editButton || !valueState.openLayout
+    if (
+        (settingState.readSwitchState("edit_button", context)) &&
+        (!valueState.editButton) ||
+        (!valueState.openLayout)
     ) {
         BasicText(
             text = viewModel.textState.text,
             modifier = modifier
                 .padding(16.dp)
-                .focusRequester(focusRequester)
                 .verticalScroll(scrollState),
             style = TextStyle.Default.copy(
                 fontSize = fontSize,
@@ -171,19 +175,20 @@ fun WritingBoardText(
                 valueState.doneButton = true
             },
             singleLine = false,
-            modifier = if (valueState.editScroll) {
+            modifier = if (valueState.editScroll < 3) {
                 modifier
                     .padding(16.dp)
-                    .focusRequester(focusRequester)
                     .verticalScroll(scrollState)
+                    .onFocusChanged {
+                        valueState.editScroll++
+                    }
             } else {
                 modifier
                     .padding(16.dp)
-                    .focusRequester(focusRequester)
                     .onGloballyPositioned { coordinates ->
                         scrollToPosition = scrollState.value + coordinates.positionInRoot().y
                     }
-                   },
+            },
             textStyle = TextStyle.Default.copy(
                 fontSize = fontSize,
                 fontWeight = FontWeight.SemiBold,

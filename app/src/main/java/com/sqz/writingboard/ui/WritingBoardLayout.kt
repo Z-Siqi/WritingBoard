@@ -1,6 +1,5 @@
 package com.sqz.writingboard.ui
 
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -39,33 +38,17 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.os.postDelayed
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.sp
 import com.sqz.writingboard.KeyboardVisibilityObserver
 import com.sqz.writingboard.R
 import com.sqz.writingboard.ValueState
-import com.sqz.writingboard.WritingBoardSettingState
+import com.sqz.writingboard.settingState
 import com.sqz.writingboard.ui.theme.PurpleForManual
 import com.sqz.writingboard.ui.theme.RedForManual
-
-val settingState = WritingBoardSettingState()
-val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "WritingBoard")
-
-@Composable
-fun WritingBoardTextInit(context: Context) {
-    when (settingState.readSegmentedButtonState("font_size", context)) {
-        0 -> WritingBoardText(18.sp)
-        1 -> WritingBoardText(23.sp)
-        2 -> WritingBoardText(33.sp)
-    }
-}
 
 @Composable
 fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifier) {
@@ -100,6 +83,24 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         else -> MaterialTheme.colorScheme.surfaceContainerLow
     }
 
+    var editAction by remember { mutableStateOf(false) }
+    if (editAction){
+        valueState.editButton = true
+        valueState.editScroll = 0
+        Log.i("WritingBoardTag", "Edit button is clicked")
+        editAction = false
+    }
+    var doneAction by remember { mutableStateOf(false) }
+    if (doneAction){
+        keyboardDone?.hide()
+        focusManager.clearFocus()
+        valueState.buttonSaveAction = true
+        valueState.doneButton = false
+        valueState.editButton = false
+        Log.i("WritingBoardTag", "Done button is clicked")
+        doneAction = false
+    }
+
     //Layout
     Surface(
         modifier = modifier
@@ -107,10 +108,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             .imePadding()
             .pointerInput(Unit) {
                 detectTapGestures { _ ->
-                    keyboardDone?.hide()
-                    focusManager.clearFocus()
-                    valueState.doneButton = false
-                    valueState.editButton = false
+                    doneAction = true
                 }
             },
         color = backgroundColor
@@ -130,6 +128,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                                     .pointerInput(Unit) {
                                         detectTapGestures { _ ->
                                             valueState.saveAction = true
+                                            valueState.editScroll = 1
                                             navController.navigate("Setting")
                                         }
                                     } then area
@@ -152,10 +151,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                                 modifier
                                     .pointerInput(Unit) {
                                         detectTapGestures { _ ->
-                                            valueState.requestFocus.requestFocus()
-                                            valueState.editButton = true
-                                            valueState.editScroll = true
-                                            Log.i("WritingBoardTag", "Edit button is clicked")
+                                            editAction = true
                                         }
                                     } then area
                             } else if (
@@ -190,10 +186,12 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                     .fillMaxSize(),
                 shape = RoundedCornerShape(26.dp)
             ) {
-                WritingBoardTextInit(context)
-                Handler(Looper.getMainLooper()).postDelayed(550) {
-                    valueState.openLayout = true
-                    Log.i("WritingBoardTag", "Initializing WritingBoard Text")
+                WritingBoardText()
+                if (!valueState.openLayout){
+                    Handler(Looper.getMainLooper()).postDelayed(550) {
+                        valueState.openLayout = true
+                        Log.i("WritingBoardTag", "Initializing WritingBoard Text")
+                    }
                 }
                 if (valueState.cleanButton) {
                     navController.navigate("WritingBoardNone")
@@ -227,14 +225,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 }
                 //done button
                 Spacer(modifier = modifier.height(10.dp))
-                FloatingActionButton(onClick = {
-                    keyboardDone?.hide()
-                    focusManager.clearFocus()
-                    valueState.buttonSaveAction = true
-                    valueState.doneButton = false
-                    valueState.editButton = false
-                    Log.i("WritingBoardTag", "Done button is clicked")
-                }) {
+                FloatingActionButton(onClick = { doneAction = true }) {
                     Icon(
                         imageVector = Icons.Filled.Done,
                         contentDescription = "Done"
@@ -278,12 +269,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.End
             ) {
-                FloatingActionButton(onClick = {
-                    valueState.requestFocus.requestFocus()
-                    valueState.editButton = true
-                    valueState.editScroll = true
-                    Log.i("WritingBoardTag", "Edit button is clicked")
-                }) {
+                FloatingActionButton(onClick = { editAction = true }) {
                     Icon(
                         imageVector = Icons.Filled.Edit,
                         contentDescription = "Edit"
@@ -302,7 +288,9 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             ) {
                 FloatingActionButton(onClick = {
                     valueState.saveAction = true
+                    focusManager.clearFocus()
                     navController.navigate("Setting")
+                    valueState.editScroll = 0
                 }) {
                     Icon(
                         imageVector = Icons.Filled.Settings,
@@ -357,6 +345,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             )
         }
         if (valueState.ee){
+            valueState.editScroll = 0
             navController.navigate("EE")
             Handler(Looper.getMainLooper()).postDelayed(80000) {
                 navController.popBackStack()
@@ -368,10 +357,10 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             isKeyboardVisible = isVisible
             if (isVisible) {
                 valueState.doneButton = true
-                valueState.editScroll = false
                 hideModeController = true
             } else {
-                valueState.doneButton = false
+                doneAction = true
+                hideModeController = false
                 if (settingState.readSwitchState("clean_pointer_focus", context)) {
                     focusManager.clearFocus()
                 }
