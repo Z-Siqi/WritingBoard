@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -52,6 +53,7 @@ val setting = WritingBoardSettingState()
 @Composable
 fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
     val valueState: ValueState = viewModel()
+    val state = rememberLazyListState()
 
     var allowMultipleLines by setting.rememberSwitchState("allow_multiple_lines", context)
     var cleanPointerFocus by setting.rememberSwitchState("clean_pointer_focus", context)
@@ -64,7 +66,10 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
     var buttonStyle by setting.rememberSegmentedButtonState("button_style", context)
 
     LazyColumn(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
+            .drawVerticalScrollbar(state),
+        state = state
     ) {
         item {
             Text(
@@ -229,7 +234,10 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
         item {
             ClickCardLayout(
                 intent = {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Z-Siqi/WritingBoard/"))
+                    val intent = Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("https://github.com/Z-Siqi/WritingBoard/")
+                    )
                     startActivityForResult(context as Activity, intent, 0, null)
                 },
                 text = stringResource(R.string.about),

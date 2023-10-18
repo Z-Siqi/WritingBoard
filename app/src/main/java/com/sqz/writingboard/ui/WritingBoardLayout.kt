@@ -97,7 +97,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         valueState.buttonSaveAction = true
         valueState.doneButton = false
         valueState.editButton = false
-        Log.i("WritingBoardTag", "Done button is clicked")
+        Log.i("WritingBoardTag", "Done action is triggered")
         doneAction = false
     }
 
