@@ -256,7 +256,7 @@ fun WritingBoardSetting(
     context: Context
 ) {
     val valueState: ValueState = viewModel()
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
     val themeColorSetting = settingState.readSegmentedButtonState("theme", context)
     val scrolledContainerColor = when (themeColorSetting) {

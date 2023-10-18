@@ -251,7 +251,7 @@ private fun Modifier.drawScrollbar(
 }
 
 private val barColor: Color
-    @Composable get() = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+    @Composable get() = MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.5f)
 
 private val thickness = 4.dp
 private val fadeOutAnimationSpec =
