@@ -84,21 +84,32 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
     }
 
     var editAction by remember { mutableStateOf(false) }
-    if (editAction){
+    if (editAction) {
         valueState.editButton = true
-        valueState.editScroll = 0
+        valueState.editScroll = 1
         Log.i("WritingBoardTag", "Edit button is clicked")
         editAction = false
     }
     var doneAction by remember { mutableStateOf(false) }
-    if (doneAction){
+    if (doneAction) {
         keyboardDone?.hide()
         focusManager.clearFocus()
-        valueState.buttonSaveAction = true
+        valueState.saveAction = true
         valueState.doneButton = false
         valueState.editButton = false
         Log.i("WritingBoardTag", "Done action is triggered")
         doneAction = false
+    }
+    var onClickSetting by remember { mutableStateOf(false) }
+    if (onClickSetting) {
+        doneAction = true
+        navController.navigate("Setting")
+        if (valueState.initScroll > 2) { //to fix an error with open setting
+            valueState.editScroll = 0
+        } else {
+            valueState.editScroll = 1
+        }
+        onClickSetting = false
     }
 
     //Layout
@@ -123,13 +134,15 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                             .fillMaxWidth()
                             .height(80.dp)
                         Spacer(
-                            modifier = if (settingState.readSwitchState("off_button_manual", context)) {
+                            modifier = if (settingState.readSwitchState(
+                                    "off_button_manual",
+                                    context
+                                )
+                            ) {
                                 modifier
                                     .pointerInput(Unit) {
                                         detectTapGestures { _ ->
-                                            valueState.saveAction = true
-                                            valueState.editScroll = 1
-                                            navController.navigate("Setting")
+                                            onClickSetting = true
                                         }
                                     } then area
                             } else {
@@ -187,13 +200,13 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 shape = RoundedCornerShape(26.dp)
             ) {
                 WritingBoardText()
-                if (!valueState.openLayout){
+                if (!valueState.openLayout) { //to fix error with first open edit
                     Handler(Looper.getMainLooper()).postDelayed(550) {
                         valueState.openLayout = true
                         Log.i("WritingBoardTag", "Initializing WritingBoard Text")
                     }
                 }
-                if (valueState.cleanButton) {
+                if (valueState.cleanButton) { //to reload texts
                     navController.navigate("WritingBoardNone")
                     Handler(Looper.getMainLooper()).postDelayed(380) {
                         navController.popBackStack()
@@ -225,7 +238,10 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 }
                 //done button
                 Spacer(modifier = modifier.height(10.dp))
-                FloatingActionButton(onClick = { doneAction = true }) {
+                FloatingActionButton(onClick = {
+                    valueState.buttonSaveAction = true
+                    doneAction = true
+                }) {
                     Icon(
                         imageVector = Icons.Filled.Done,
                         contentDescription = "Done"
@@ -286,12 +302,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.Start
             ) {
-                FloatingActionButton(onClick = {
-                    valueState.saveAction = true
-                    focusManager.clearFocus()
-                    navController.navigate("Setting")
-                    valueState.editScroll = 0
-                }) {
+                FloatingActionButton(onClick = { onClickSetting = true }) {
                     Icon(
                         imageVector = Icons.Filled.Settings,
                         contentDescription = "Setting"
@@ -344,7 +355,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 text = stringResource(R.string.edit_button_manual)
             )
         }
-        if (valueState.ee){
+        if (valueState.ee) {
             valueState.editScroll = 0
             navController.navigate("EE")
             Handler(Looper.getMainLooper()).postDelayed(80000) {

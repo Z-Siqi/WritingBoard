@@ -4,6 +4,9 @@ import android.content.ContentValues
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.onConsumedWindowInsetsChanged
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
@@ -19,9 +22,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -43,6 +50,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.io.IOException
+import kotlin.math.roundToInt
 
 @Composable
 fun WritingBoardText(modifier: Modifier = Modifier) {
@@ -53,7 +61,7 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     var scrollToPosition by remember { mutableFloatStateOf(0.0f) }
-    val scrollState = rememberScrollState()
+    val scrollState = rememberScrollState(scrollToPosition.roundToInt())
 
     val fontSize = when (settingState.readSegmentedButtonState("font_size", context)) {
         0 -> 18.sp
@@ -79,7 +87,7 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
         else -> MaterialTheme.colorScheme.secondary
     }
 
-    LaunchedEffect(true) {
+    LaunchedEffect(true) { //to load saved texts
         val savedText: String = context.dataStore.data
             .catch {
                 if (it is IOException) {
@@ -142,9 +150,10 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
                 Log.i("WritingBoardTag", "Save writing board texts")
             }
         }
+        valueState.initScroll++
         valueState.saveAction = false
     }
-
+    //val scrollBehavior
     if (
         (settingState.readSwitchState("edit_button", context)) &&
         (!valueState.editButton) ||
@@ -154,6 +163,7 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
             text = viewModel.textState.text,
             modifier = modifier
                 .padding(16.dp)
+                .drawVerticalScrollbar(scrollState)
                 .verticalScroll(scrollState),
             style = TextStyle.Default.copy(
                 fontSize = fontSize,
@@ -178,7 +188,13 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
             modifier = if (valueState.editScroll < 3) {
                 modifier
                     .padding(16.dp)
+                    .drawVerticalScrollbar(scrollState)
                     .verticalScroll(scrollState)
+                    .onConsumedWindowInsetsChanged {
+                        coroutineScope.launch {
+                            scrollState.animateScrollBy(0.0f)
+                        }
+                    }
                     .onFocusChanged {
                         valueState.editScroll++
                     }
@@ -186,7 +202,7 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
                 modifier
                     .padding(16.dp)
                     .onGloballyPositioned { coordinates ->
-                        scrollToPosition = scrollState.value + coordinates.positionInRoot().y
+                        scrollToPosition = scrollState.value + coordinates.positionInWindow().y
                     }
             },
             textStyle = TextStyle.Default.copy(

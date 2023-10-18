@@ -26,6 +26,7 @@ class ValueState : ViewModel() {
     var updateScreen by mutableStateOf(false)
     var openLayout by mutableStateOf(false)
     var editScroll by mutableIntStateOf(1)
+    var initScroll by mutableIntStateOf(0)
 }
 
 class WritingBoardSettingState {
