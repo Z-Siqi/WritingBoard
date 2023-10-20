@@ -5,7 +5,6 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.compose.foundation.gestures.animateScrollBy
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.onConsumedWindowInsetsChanged
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -22,13 +21,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.focus.onFocusEvent
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -45,6 +40,7 @@ import com.sqz.writingboard.ValueState
 import com.sqz.writingboard.WritingBoard
 import com.sqz.writingboard.dataStore
 import com.sqz.writingboard.settingState
+import com.sqz.writingboard.ui.component.drawVerticalScrollbar
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -131,7 +127,7 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
         valueState.buttonSaveAction = false
     }
     //save action
-    if (valueState.saveAction) {
+    if (valueState.saveAction && valueState.initLayout) {
         viewModel.textState.text.let { newText ->
             val textToSave = if (!settingState.readSwitchState(
                     "allow_multiple_lines",
@@ -140,6 +136,9 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
             ) {
                 Log.i("WritingBoardTag", "Removing line breaks and adding a new line.")
                 newText.trimEnd { it == '\n' }.plus('\n')
+            } else if (newText.isEmpty()) {
+                Log.w("WritingBoardTag", "Saved Nothing!")
+                newText
             } else {
                 newText
             }
@@ -157,7 +156,7 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
     if (
         (settingState.readSwitchState("edit_button", context)) &&
         (!valueState.editButton) ||
-        (!valueState.openLayout)
+        (!valueState.initLayout)
     ) {
         BasicText(
             text = viewModel.textState.text,

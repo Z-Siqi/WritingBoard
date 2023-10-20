@@ -47,6 +47,10 @@ import com.sqz.writingboard.R
 import com.sqz.writingboard.ValueState
 import com.sqz.writingboard.WritingBoardSettingState
 import com.sqz.writingboard.settingState
+import com.sqz.writingboard.ui.component.CardLayout
+import com.sqz.writingboard.ui.component.ClickCardLayout
+import com.sqz.writingboard.ui.component.SegmentedButtonCardLayout
+import com.sqz.writingboard.ui.component.drawVerticalScrollbar
 
 val setting = WritingBoardSettingState()
 

@@ -17,6 +17,7 @@ class WritingBoard : ViewModel() {
 }
 
 class ValueState : ViewModel() {
+    var initLayout by mutableStateOf(false)
     var doneButton by mutableStateOf(false)
     var cleanButton by mutableStateOf(false)
     var saveAction by mutableStateOf(false)
@@ -24,7 +25,6 @@ class ValueState : ViewModel() {
     var ee by mutableStateOf(false)
     var editButton by mutableStateOf(false)
     var updateScreen by mutableStateOf(false)
-    var openLayout by mutableStateOf(false)
     var editScroll by mutableIntStateOf(1)
     var initScroll by mutableIntStateOf(0)
 }

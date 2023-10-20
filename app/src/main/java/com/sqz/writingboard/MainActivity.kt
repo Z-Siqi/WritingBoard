@@ -18,9 +18,9 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.sqz.writingboard.ui.WritingBoardEE
+import com.sqz.writingboard.ui.component.WritingBoardEE
 import com.sqz.writingboard.ui.WritingBoardLayout
-import com.sqz.writingboard.ui.WritingBoardNone
+import com.sqz.writingboard.ui.component.WritingBoardNone
 import com.sqz.writingboard.ui.WritingBoardSetting
 import com.sqz.writingboard.ui.theme.WritingBoardTheme
 

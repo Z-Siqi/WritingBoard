@@ -47,6 +47,7 @@ import com.sqz.writingboard.KeyboardVisibilityObserver
 import com.sqz.writingboard.R
 import com.sqz.writingboard.ValueState
 import com.sqz.writingboard.settingState
+import com.sqz.writingboard.ui.component.WritingBoardManual
 import com.sqz.writingboard.ui.theme.PurpleForManual
 import com.sqz.writingboard.ui.theme.RedForManual
 
@@ -91,7 +92,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         editAction = false
     }
     var doneAction by remember { mutableStateOf(false) }
-    if (doneAction) {
+    if (doneAction && valueState.initLayout) {
         keyboardDone?.hide()
         focusManager.clearFocus()
         valueState.saveAction = true
@@ -200,9 +201,9 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 shape = RoundedCornerShape(26.dp)
             ) {
                 WritingBoardText()
-                if (!valueState.openLayout) { //to fix error with first open edit
+                if (!valueState.initLayout) { //to fix error with first open edit
                     Handler(Looper.getMainLooper()).postDelayed(550) {
-                        valueState.openLayout = true
+                        valueState.initLayout = true
                         Log.i("WritingBoardTag", "Initializing WritingBoard Text")
                     }
                 }
