@@ -4,9 +4,12 @@ import android.content.ContentValues
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import androidx.compose.foundation.gestures.animateScrollBy
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.onConsumedWindowInsetsChanged
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
@@ -14,22 +17,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.os.postDelayed
 import androidx.datastore.preferences.core.edit
@@ -46,8 +44,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.io.IOException
-import kotlin.math.roundToInt
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WritingBoardText(modifier: Modifier = Modifier) {
 
@@ -56,8 +54,7 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
     val dataStore = LocalContext.current.dataStore
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    var scrollToPosition by remember { mutableFloatStateOf(0.0f) }
-    val scrollState = rememberScrollState(scrollToPosition.roundToInt())
+    val scrollState = rememberScrollState()
 
     val fontSize = when (settingState.readSegmentedButtonState("font_size", context)) {
         0 -> 18.sp
@@ -152,7 +149,7 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
         valueState.initScroll++
         valueState.saveAction = false
     }
-    //val scrollBehavior
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
     if (
         (settingState.readSwitchState("edit_button", context)) &&
         (!valueState.editButton) ||
@@ -161,7 +158,7 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
         BasicText(
             text = viewModel.textState.text,
             modifier = modifier
-                .padding(16.dp)
+                .fillMaxSize()
                 .drawVerticalScrollbar(scrollState)
                 .verticalScroll(scrollState),
             style = TextStyle.Default.copy(
@@ -181,27 +178,31 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
                 Handler(Looper.getMainLooper()).postDelayed(2500) {
                     valueState.saveAction = true
                 }
-                valueState.doneButton = true
             },
-            singleLine = false,
-            modifier = if (valueState.editScroll < 3) {
+            modifier = if (valueState.scrollControl < 3) {
                 modifier
-                    .padding(16.dp)
+                    .fillMaxSize()
                     .drawVerticalScrollbar(scrollState)
                     .verticalScroll(scrollState)
                     .onConsumedWindowInsetsChanged {
                         coroutineScope.launch {
-                            scrollState.animateScrollBy(0.0f)
+                            scrollState.scrollBy(0.0f)
                         }
                     }
                     .onFocusChanged {
-                        valueState.editScroll++
+                        valueState.scrollControl++
                     }
             } else {
                 modifier
-                    .padding(16.dp)
-                    .onGloballyPositioned { coordinates ->
-                        scrollToPosition = scrollState.value + coordinates.positionInWindow().y
+                    .fillMaxSize()
+                    .bringIntoViewRequester(bringIntoViewRequester)
+                    .onFocusEvent { focusState ->
+                        coroutineScope.launch {
+                            bringIntoViewRequester.bringIntoView()
+                        }
+                        if (focusState.isFocused) {
+                            valueState.doneButton = true
+                        }
                     }
             },
             textStyle = TextStyle.Default.copy(

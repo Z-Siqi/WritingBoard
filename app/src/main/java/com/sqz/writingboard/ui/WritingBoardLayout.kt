@@ -87,7 +87,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
     var editAction by remember { mutableStateOf(false) }
     if (editAction) {
         valueState.editButton = true
-        valueState.editScroll = 1
+        valueState.scrollControl = 1
         Log.i("WritingBoardTag", "Edit button is clicked")
         editAction = false
     }
@@ -98,6 +98,8 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         valueState.saveAction = true
         valueState.doneButton = false
         valueState.editButton = false
+        valueState.scrollControl = 1
+        valueState.initLayout = false
         Log.i("WritingBoardTag", "Done action is triggered")
         doneAction = false
     }
@@ -106,9 +108,9 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         doneAction = true
         navController.navigate("Setting")
         if (valueState.initScroll > 2) { //to fix an error with open setting
-            valueState.editScroll = 0
+            valueState.scrollControl = 0
         } else {
-            valueState.editScroll = 1
+            valueState.scrollControl = 1
         }
         onClickSetting = false
     }
@@ -116,8 +118,8 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
     //Layout
     Surface(
         modifier = modifier
-            .fillMaxSize()
             .imePadding()
+            .fillMaxSize()
             .pointerInput(Unit) {
                 detectTapGestures { _ ->
                     doneAction = true
@@ -200,8 +202,13 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                     .fillMaxSize(),
                 shape = RoundedCornerShape(26.dp)
             ) {
-                WritingBoardText()
-                if (!valueState.initLayout) { //to fix error with first open edit
+                Column(
+                    modifier = modifier
+                        .padding(15.dp)
+                ) {
+                    WritingBoardText()
+                }
+                if (!valueState.initLayout) { //to fix errors with edit
                     Handler(Looper.getMainLooper()).postDelayed(550) {
                         valueState.initLayout = true
                         Log.i("WritingBoardTag", "Initializing WritingBoard Text")
@@ -357,7 +364,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             )
         }
         if (valueState.ee) {
-            valueState.editScroll = 0
+            valueState.scrollControl = 0
             navController.navigate("EE")
             Handler(Looper.getMainLooper()).postDelayed(80000) {
                 navController.popBackStack()
@@ -371,10 +378,10 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 valueState.doneButton = true
                 hideModeController = true
             } else {
-                doneAction = true
                 hideModeController = false
                 if (settingState.readSwitchState("clean_pointer_focus", context)) {
                     focusManager.clearFocus()
+                    doneAction = true
                 }
             }
         }
