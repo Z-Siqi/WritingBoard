@@ -72,7 +72,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         else -> MaterialTheme.colorScheme.surfaceVariant
     }
     val shapeColor = when (readTheme) {
-        0 -> MaterialTheme.colorScheme.primaryContainer
+        0 -> MaterialTheme.colorScheme.secondaryContainer
         1 -> MaterialTheme.colorScheme.primary
         2 -> MaterialTheme.colorScheme.secondary
         else -> MaterialTheme.colorScheme.primary
@@ -190,13 +190,13 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         ) {
             Surface(
                 color = boardColor,
-                modifier = modifier
-                    .fillMaxSize(),
+                modifier = modifier.fillMaxSize(),
                 shape = RoundedCornerShape(26.dp)
             ) {
                 Column(
                     modifier = modifier
-                        .padding(15.dp)
+                        .fillMaxSize()
+                        .padding(8.dp)
                 ) {
                     WritingBoardText()
                 }
@@ -360,7 +360,6 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         KeyboardVisibilityObserver { isVisible ->
             isKeyboardVisible = isVisible
             if (isVisible) {
-                valueState.doneButton = true
                 hideModeController = true
             } else {
                 hideModeController = false

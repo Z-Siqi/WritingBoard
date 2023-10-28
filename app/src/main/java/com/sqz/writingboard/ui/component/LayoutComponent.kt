@@ -18,7 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -86,12 +86,11 @@ fun SegmentedButtonCardLayout(
     title: String,
     options: List<Int>,
     selectedOption: Int,
+    colors: CardColors,
     onOptionSelected: (Int) -> Unit
 ) {
     Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-        ),
+        colors = colors,
         border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
         modifier = modifier
             .fillMaxWidth()
@@ -148,12 +147,11 @@ fun CardLayout(
     text: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
+    colors: CardColors,
     modifier: Modifier = Modifier
 ) {
     Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-        ),
+        colors = colors,
         border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
         modifier = Modifier
             .fillMaxWidth()
@@ -190,12 +188,11 @@ fun ClickCardLayout(
     text: String,
     painter: Int,
     contentDescription: String,
+    colors: CardColors,
     modifier: Modifier = Modifier,
 ) {
     Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-        ),
+        colors = colors,
         border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
         modifier = Modifier
             .fillMaxWidth()

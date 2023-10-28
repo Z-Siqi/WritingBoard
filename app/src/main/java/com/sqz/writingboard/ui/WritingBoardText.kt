@@ -6,6 +6,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text2.BasicTextField2
@@ -26,6 +27,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.os.postDelayed
 import androidx.datastore.preferences.core.edit
@@ -169,7 +171,8 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
             modifier = modifier
                 .fillMaxSize()
                 .drawVerticalScrollbar(scrollState)
-                .verticalScroll(scrollState),
+                .verticalScroll(scrollState)
+                .padding(8.dp),
             style = TextStyle.Default.copy(
                 fontSize = fontSize,
                 fontWeight = FontWeight.SemiBold,
@@ -186,15 +189,16 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
                 viewModel.textState = TextFieldValue(newText)
                 autoSave = true
             },
+            scrollState = scrollState,
             modifier = modifier
                 .fillMaxSize()
                 .drawVerticalScrollbar(scrollState)
+                .padding(8.dp)
                 .onFocusEvent { focusState ->
                     if (focusState.isFocused) {
                         valueState.doneButton = true
                     }
                 },
-            scrollState = scrollState,
             textStyle = TextStyle.Default.copy(
                 fontSize = fontSize,
                 fontWeight = FontWeight.SemiBold,

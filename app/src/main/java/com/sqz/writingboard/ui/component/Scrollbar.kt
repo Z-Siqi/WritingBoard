@@ -56,11 +56,13 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastSumBy
+import com.sqz.writingboard.settingState
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -251,7 +253,18 @@ private fun Modifier.drawScrollbar(
 }
 
 private val barColor: Color
-    @Composable get() = MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.5f)
+    @Composable get() = colors().copy(alpha = 0.5f)
+
+@Composable
+fun colors(): Color {
+    val context = LocalContext.current
+    return when (settingState.readSegmentedButtonState("theme", context)){
+        0 -> MaterialTheme.colorScheme.secondary
+        1 -> MaterialTheme.colorScheme.surfaceTint
+        2 -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+}
 
 private val thickness = 4.dp
 private val fadeOutAnimationSpec =

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -59,6 +60,13 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
     val valueState: ValueState = viewModel()
     val state = rememberLazyListState()
 
+    val cardColors = when (settingState.readSegmentedButtonState("theme", context)) {
+        0 -> CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest)
+        1 -> CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        2 -> CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+        else -> CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+    }
+
     var allowMultipleLines by setting.rememberSwitchState("allow_multiple_lines", context)
     var cleanPointerFocus by setting.rememberSwitchState("clean_pointer_focus", context)
     var cleanAllText by setting.rememberSwitchState("clean_all_text", context)
@@ -89,7 +97,8 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
             SegmentedButtonCardLayout(
                 title = stringResource(R.string.choose_theme),
                 options = listOf(R.string.light_color, R.string.theme_default, R.string.distinct),
-                selectedOption = theme
+                selectedOption = theme,
+                colors = cardColors
             ) { index ->
                 theme = index
                 setting.writeSegmentedButtonState(
@@ -104,7 +113,8 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
             SegmentedButtonCardLayout(
                 title = stringResource(R.string.button_style),
                 options = listOf(R.string.button_hide, R.string.button_default),
-                selectedOption = buttonStyle
+                selectedOption = buttonStyle,
+                colors = cardColors
             ) { index ->
                 buttonStyle = index
                 setting.writeSegmentedButtonState(
@@ -130,7 +140,8 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
                 onCheckedChange = {
                     editButton = it
                     setting.writeSwitchState("edit_button", context, it)
-                }
+                },
+                colors = cardColors
             )
         }
         item {
@@ -140,14 +151,16 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
                 onCheckedChange = {
                     cleanAllText = it
                     setting.writeSwitchState("clean_all_text", context, it)
-                }
+                },
+                colors = cardColors
             )
         }
         item {
             SegmentedButtonCardLayout(
                 title = stringResource(R.string.choose_font_size),
                 options = listOf(R.string.small, R.string.medium, R.string.large),
-                selectedOption = fontSize
+                selectedOption = fontSize,
+                colors = cardColors
             ) { index ->
                 fontSize = index
                 setting.writeSegmentedButtonState(
@@ -164,7 +177,8 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
                 onCheckedChange = {
                     italics = it
                     setting.writeSwitchState("italics", context, it)
-                }
+                },
+                colors = cardColors
             )
         }
         item {
@@ -176,7 +190,8 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
                     R.string.serif,
                     R.string.cursive,
                 ),
-                selectedOption = fontStyle
+                selectedOption = fontStyle,
+                colors = cardColors
             ) { index ->
                 fontStyle = index
                 setting.writeSegmentedButtonState(
@@ -202,7 +217,8 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
                 onCheckedChange = {
                     cleanPointerFocus = it
                     setting.writeSwitchState("clean_pointer_focus", context, it)
-                }
+                },
+                colors = cardColors
             )
         }
         item {
@@ -212,7 +228,8 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
                 onCheckedChange = {
                     allowMultipleLines = it
                     setting.writeSwitchState("allow_multiple_lines", context, it)
-                }
+                },
+                colors = cardColors
             )
         }
         item {
@@ -233,7 +250,8 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
                 },
                 text = stringResource(R.string.language),
                 painter = R.drawable.ic_language,
-                contentDescription = "Language"
+                contentDescription = "Language",
+                colors = cardColors
             )
         }
         item {
@@ -247,7 +265,8 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
                 },
                 text = stringResource(R.string.about),
                 painter = R.drawable.github_mark,
-                contentDescription = "About"
+                contentDescription = "About",
+                colors = cardColors
             )
         }
     }
@@ -261,7 +280,8 @@ fun WritingBoardSetting(
     context: Context
 ) {
     val valueState: ValueState = viewModel()
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    val scrollBehavior =
+        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
     val themeColorSetting = settingState.readSegmentedButtonState("theme", context)
     val scrolledContainerColor = when (themeColorSetting) {
