@@ -69,6 +69,7 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
     var fontStyle by setting.rememberSegmentedButtonState("font_style", context)
     var buttonStyle by setting.rememberSegmentedButtonState("button_style", context)
 
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()

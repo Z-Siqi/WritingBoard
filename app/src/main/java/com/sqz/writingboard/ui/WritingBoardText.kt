@@ -5,22 +5,20 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.onConsumedWindowInsetsChanged
-import androidx.compose.foundation.relocation.BringIntoViewRequester
-import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text2.BasicTextField2
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -55,6 +53,7 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val scrollState = rememberScrollState()
+    var autoSave by remember { mutableStateOf(false) }
 
     val fontSize = when (settingState.readSegmentedButtonState("font_size", context)) {
         0 -> 18.sp
@@ -94,6 +93,12 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
                 preferences[stringPreferencesKey("saved_text")] ?: ""
             }.first()
         viewModel.textState = TextFieldValue(savedText)
+
+        if (!valueState.initLayout) { //to block save if text not load
+            valueState.initLayout = true
+            Log.i("WritingBoardTag", "Initializing WritingBoard Text")
+        }
+
         Log.i("WritingBoardTag", "LaunchedEffect: val savedText")
     }
 
@@ -146,10 +151,14 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
                 Log.i("WritingBoardTag", "Save writing board texts")
             }
         }
-        valueState.initScroll++
         valueState.saveAction = false
     }
-    val bringIntoViewRequester = remember { BringIntoViewRequester() }
+    if (autoSave) {
+        Handler(Looper.getMainLooper()).postDelayed(2500) {
+            valueState.saveAction = true
+            autoSave = false
+        }
+    }
     if (
         (settingState.readSwitchState("edit_button", context)) &&
         (!valueState.editButton) ||
@@ -171,40 +180,21 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
         )
         Log.i("WritingBoardTag", "Read-only text")
     } else {
-        BasicTextField(
+        BasicTextField2(
             value = viewModel.textState.text,
             onValueChange = { newText ->
                 viewModel.textState = TextFieldValue(newText)
-                Handler(Looper.getMainLooper()).postDelayed(2500) {
-                    valueState.saveAction = true
-                }
+                autoSave = true
             },
-            modifier = if (valueState.scrollControl < 3) {
-                modifier
-                    .fillMaxSize()
-                    .drawVerticalScrollbar(scrollState)
-                    .verticalScroll(scrollState)
-                    .onConsumedWindowInsetsChanged {
-                        coroutineScope.launch {
-                            scrollState.scrollBy(0.0f)
-                        }
+            modifier = modifier
+                .fillMaxSize()
+                .drawVerticalScrollbar(scrollState)
+                .onFocusEvent { focusState ->
+                    if (focusState.isFocused) {
+                        valueState.doneButton = true
                     }
-                    .onFocusChanged {
-                        valueState.scrollControl++
-                    }
-            } else {
-                modifier
-                    .fillMaxSize()
-                    .bringIntoViewRequester(bringIntoViewRequester)
-                    .onFocusEvent { focusState ->
-                        coroutineScope.launch {
-                            bringIntoViewRequester.bringIntoView()
-                        }
-                        if (focusState.isFocused) {
-                            valueState.doneButton = true
-                        }
-                    }
-            },
+                },
+            scrollState = scrollState,
             textStyle = TextStyle.Default.copy(
                 fontSize = fontSize,
                 fontWeight = FontWeight.SemiBold,

@@ -87,7 +87,6 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
     var editAction by remember { mutableStateOf(false) }
     if (editAction) {
         valueState.editButton = true
-        valueState.scrollControl = 1
         Log.i("WritingBoardTag", "Edit button is clicked")
         editAction = false
     }
@@ -98,8 +97,6 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         valueState.saveAction = true
         valueState.doneButton = false
         valueState.editButton = false
-        valueState.scrollControl = 1
-        valueState.initLayout = false
         Log.i("WritingBoardTag", "Done action is triggered")
         doneAction = false
     }
@@ -107,11 +104,6 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
     if (onClickSetting) {
         doneAction = true
         navController.navigate("Setting")
-        if (valueState.initScroll > 2) { //to fix an error with open setting
-            valueState.scrollControl = 0
-        } else {
-            valueState.scrollControl = 1
-        }
         onClickSetting = false
     }
 
@@ -207,12 +199,6 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                         .padding(15.dp)
                 ) {
                     WritingBoardText()
-                }
-                if (!valueState.initLayout) { //to fix errors with edit
-                    Handler(Looper.getMainLooper()).postDelayed(550) {
-                        valueState.initLayout = true
-                        Log.i("WritingBoardTag", "Initializing WritingBoard Text")
-                    }
                 }
                 if (valueState.cleanButton) { //to reload texts
                     navController.navigate("WritingBoardNone")
@@ -364,7 +350,6 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             )
         }
         if (valueState.ee) {
-            valueState.scrollControl = 0
             navController.navigate("EE")
             Handler(Looper.getMainLooper()).postDelayed(80000) {
                 navController.popBackStack()
