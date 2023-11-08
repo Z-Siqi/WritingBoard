@@ -47,11 +47,11 @@ import androidx.navigation.compose.rememberNavController
 import com.sqz.writingboard.R
 import com.sqz.writingboard.ValueState
 import com.sqz.writingboard.WritingBoardSettingState
-import com.sqz.writingboard.settingState
 import com.sqz.writingboard.ui.component.CardLayout
 import com.sqz.writingboard.ui.component.ClickCardLayout
 import com.sqz.writingboard.ui.component.SegmentedButtonCardLayout
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
+import com.sqz.writingboard.ui.theme.themeColor
 
 val setting = WritingBoardSettingState()
 
@@ -60,12 +60,7 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
     val valueState: ValueState = viewModel()
     val state = rememberLazyListState()
 
-    val cardColors = when (settingState.readSegmentedButtonState("theme", context)) {
-        0 -> CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest)
-        1 -> CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-        2 -> CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
-        else -> CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-    }
+    val cardColors = CardDefaults.cardColors(containerColor = themeColor("cardColor"))
 
     var allowMultipleLines by setting.rememberSwitchState("allow_multiple_lines", context)
     var cleanPointerFocus by setting.rememberSwitchState("clean_pointer_focus", context)
@@ -76,7 +71,8 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
     var italics by setting.rememberSwitchState("italics", context)
     var fontStyle by setting.rememberSegmentedButtonState("font_style", context)
     var buttonStyle by setting.rememberSegmentedButtonState("button_style", context)
-
+    var fontWeight by setting.rememberSegmentedButtonState("font_weight", context)
+    var disableAutoSave by setting.rememberSwitchState("disable_auto_save", context)
 
     LazyColumn(
         modifier = modifier
@@ -157,7 +153,7 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
         }
         item {
             SegmentedButtonCardLayout(
-                title = stringResource(R.string.choose_font_size),
+                title = stringResource(R.string.font_size),
                 options = listOf(R.string.small, R.string.medium, R.string.large),
                 selectedOption = fontSize,
                 colors = cardColors
@@ -183,7 +179,7 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
         }
         item {
             SegmentedButtonCardLayout(
-                title = stringResource(R.string.choose_font_size),
+                title = stringResource(R.string.font_style),
                 options = listOf(
                     R.string.monospace,
                     R.string.font_default,
@@ -196,6 +192,25 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
                 fontStyle = index
                 setting.writeSegmentedButtonState(
                     "font_style",
+                    context,
+                    index
+                )
+            }
+        }
+        item {
+            SegmentedButtonCardLayout(
+                title = stringResource(R.string.font_weight),
+                options = listOf(
+                    R.string.thin,
+                    R.string.normal,
+                    R.string.thick,
+                ),
+                selectedOption = fontWeight,
+                colors = cardColors
+            ) { index ->
+                fontWeight = index
+                setting.writeSegmentedButtonState(
+                    "font_weight",
                     context,
                     index
                 )
@@ -228,6 +243,17 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
                 onCheckedChange = {
                     allowMultipleLines = it
                     setting.writeSwitchState("allow_multiple_lines", context, it)
+                },
+                colors = cardColors
+            )
+        }
+        item {
+            CardLayout(
+                text = stringResource(R.string.disable_auto_save),
+                checked = disableAutoSave,
+                onCheckedChange = {
+                    disableAutoSave = it
+                    setting.writeSwitchState("disable_auto_save", context, it)
                 },
                 colors = cardColors
             )
@@ -283,35 +309,15 @@ fun WritingBoardSetting(
     val scrollBehavior =
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
-    val themeColorSetting = settingState.readSegmentedButtonState("theme", context)
-    val scrolledContainerColor = when (themeColorSetting) {
-        0 -> MaterialTheme.colorScheme.surfaceDim
-        1 -> MaterialTheme.colorScheme.secondaryContainer
-        2 -> MaterialTheme.colorScheme.tertiaryContainer
-        else -> MaterialTheme.colorScheme.secondaryContainer
-    }
-    val titleContentColor = when (themeColorSetting) {
-        0 -> MaterialTheme.colorScheme.secondary
-        1 -> MaterialTheme.colorScheme.primary
-        2 -> MaterialTheme.colorScheme.tertiary
-        else -> MaterialTheme.colorScheme.primary
-    }
-    val backgroundColor = when (themeColorSetting) {
-        0 -> MaterialTheme.colorScheme.surfaceBright
-        1 -> MaterialTheme.colorScheme.surfaceVariant
-        2 -> MaterialTheme.colorScheme.tertiaryContainer
-        else -> MaterialTheme.colorScheme.surfaceVariant
-    }
-
     Scaffold(
         modifier = modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             LargeTopAppBar(
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
-                    containerColor = backgroundColor,
-                    scrolledContainerColor = scrolledContainerColor,
-                    titleContentColor = titleContentColor,
+                    containerColor = themeColor("settingBackgroundColor"),
+                    scrolledContainerColor = themeColor("scrolledContainerColor"),
+                    titleContentColor = themeColor("titleContentColor"),
                 ),
                 title = {
                     Text(
@@ -338,7 +344,7 @@ fun WritingBoardSetting(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(color = backgroundColor)
+                .background(color = themeColor("settingBackgroundColor"))
         ) {
             SettingFunction(context = context)
         }

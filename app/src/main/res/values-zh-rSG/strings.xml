@@ -10,7 +10,7 @@
     <string name="small">小号字体</string>
     <string name="medium">中号字体</string>
     <string name="large">大号字体</string>
-    <string name="choose_font_size">WritingBoard字体大小</string>
+    <string name="font_size">WritingBoard字体大小</string>
     <string name="light_color">浅色主题</string>
     <string name="theme_default">默认主题</string>
     <string name="distinct">鲜明主题</string>
@@ -19,7 +19,7 @@
     <string name="serif">Serif</string>
     <string name="cursive">Cursive</string>
     <string name="font_default">默认</string>
-    <string name="font_style">WritingBoard字体样式 (EN-only)</string>
+    <string name="font_style">WritingBoard字体样式</string>
     <string name="font_italics">启用斜体WritingBoard字体样式</string>
     <string name="writingboard_app">WritingBoard应用程序</string>
     <string name="writingboard">The WritingBoard</string>
@@ -36,4 +36,9 @@
     <string name="to_the_special_you"><![CDATA[致特别的你 🏳️‍⚧️:\n不要向焦虑与抑郁投降, 这个世界终会有我们存在的地方!\n请不要绝望, 总有人是站在你这边的\n\n - text by MtF.wiki & Z-Siqi]]></string>
     <string name="may_everyone">愿每个人都自由地生活在阳光下</string>
     <string name="see_easter_egg_again">如果你想再次看到彩蛋或者当你感到悲伤或难过时想再次看到它, \n请在文本末尾输入 _-OPEN_IT 然后单击 完成 按钮</string>
+    <string name="font_weight">WritingBoard字体粗细</string>
+    <string name="thin">细</string>
+    <string name="normal">默认</string>
+    <string name="thick">粗</string>
+    <string name="disable_auto_save">禁用自动保存文本，默认:\n"文本更改后2.5秒自动保存"</string>
 </resources>

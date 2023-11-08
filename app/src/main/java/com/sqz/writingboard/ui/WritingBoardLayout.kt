@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -50,6 +49,7 @@ import com.sqz.writingboard.settingState
 import com.sqz.writingboard.ui.component.WritingBoardManual
 import com.sqz.writingboard.ui.theme.PurpleForManual
 import com.sqz.writingboard.ui.theme.RedForManual
+import com.sqz.writingboard.ui.theme.themeColor
 
 @Composable
 fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifier) {
@@ -61,28 +61,8 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
     var isKeyboardVisible by remember { mutableStateOf(false) }
     var hideModeController by remember { mutableStateOf(false) }
 
-    val readTheme = settingState.readSegmentedButtonState("theme", context)
     val readButtonStyle = settingState.readSegmentedButtonState("button_style", context)
     val readEditButton = settingState.readSwitchState("edit_button", context)
-
-    val backgroundColor = when (readTheme) {
-        0 -> MaterialTheme.colorScheme.surfaceContainerLowest
-        1 -> MaterialTheme.colorScheme.surfaceVariant
-        2 -> MaterialTheme.colorScheme.secondaryContainer
-        else -> MaterialTheme.colorScheme.surfaceVariant
-    }
-    val shapeColor = when (readTheme) {
-        0 -> MaterialTheme.colorScheme.secondaryContainer
-        1 -> MaterialTheme.colorScheme.primary
-        2 -> MaterialTheme.colorScheme.secondary
-        else -> MaterialTheme.colorScheme.primary
-    }
-    val boardColor = when (readTheme) {
-        0 -> MaterialTheme.colorScheme.surfaceBright
-        1 -> MaterialTheme.colorScheme.surfaceContainerLow
-        2 -> MaterialTheme.colorScheme.tertiaryContainer
-        else -> MaterialTheme.colorScheme.surfaceContainerLow
-    }
 
     var editAction by remember { mutableStateOf(false) }
     if (editAction) {
@@ -117,63 +97,60 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                     doneAction = true
                 }
             },
-        color = backgroundColor
+        color = themeColor("backgroundColor")
     ) {
-        when (settingState.readSegmentedButtonState("button_style", context)) {
-            0 -> {
-                if (!hideModeController) {
-                    Column(
-                        verticalArrangement = Arrangement.Top
+        if (
+            (!hideModeController) &&
+            (settingState.readSegmentedButtonState("button_style", context) == 0)
+        ) {
+            Column(
+                verticalArrangement = Arrangement.Top
+            ) {
+                val area = modifier
+                    .fillMaxWidth()
+                    .height(80.dp)
+                Spacer(
+                    modifier = if (
+                        (settingState.readSwitchState("off_button_manual", context))
                     ) {
-                        val area = modifier
-                            .fillMaxWidth()
-                            .height(80.dp)
-                        Spacer(
-                            modifier = if (settingState.readSwitchState(
-                                    "off_button_manual",
-                                    context
-                                )
-                            ) {
-                                modifier
-                                    .pointerInput(Unit) {
-                                        detectTapGestures { _ ->
-                                            onClickSetting = true
-                                        }
-                                    } then area
-                            } else {
-                                modifier.background(color = RedForManual) then area
-                            }
-                        )
+                        modifier
+                            .pointerInput(Unit) {
+                                detectTapGestures { _ ->
+                                    onClickSetting = true
+                                }
+                            } then area
+                    } else {
+                        modifier.background(color = RedForManual) then area
                     }
-                    Column(
-                        verticalArrangement = Arrangement.Bottom
+                )
+            }
+            Column(
+                verticalArrangement = Arrangement.Bottom
+            ) {
+                val area = modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+                Spacer(
+                    modifier = if (
+                        (settingState.readSwitchState("off_editButton_manual", context)) &&
+                        (readEditButton)
                     ) {
-                        val area = modifier
-                            .fillMaxWidth()
-                            .height(120.dp)
-                        Spacer(
-                            modifier = if (
-                                (settingState.readSwitchState("off_editButton_manual", context)) &&
-                                (readEditButton)
-                            ) {
-                                modifier
-                                    .pointerInput(Unit) {
-                                        detectTapGestures { _ ->
-                                            editAction = true
-                                        }
-                                    } then area
-                            } else if (
-                                (!settingState.readSwitchState("off_editButton_manual", context)) &&
-                                (readButtonStyle == 0) &&
-                                (readEditButton)
-                            ) {
-                                modifier.background(color = PurpleForManual) then area
-                            } else {
-                                modifier
-                            }
-                        )
+                        modifier
+                            .pointerInput(Unit) {
+                                detectTapGestures { _ ->
+                                    editAction = true
+                                }
+                            } then area
+                    } else if (
+                        (!settingState.readSwitchState("off_editButton_manual", context)) &&
+                        (readButtonStyle == 0) &&
+                        (readEditButton)
+                    ) {
+                        modifier.background(color = PurpleForManual) then area
+                    } else {
+                        modifier
                     }
-                }
+                )
             }
         }
         Column(
@@ -182,14 +159,14 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 .shadow(5.dp, RoundedCornerShape(26.dp))
                 .border(
                     4.dp,
-                    color = shapeColor,
+                    color = themeColor("shapeColor"),
                     RoundedCornerShape(26.dp)
                 ),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Surface(
-                color = boardColor,
+                color = themeColor("boardColor"),
                 modifier = modifier.fillMaxSize(),
                 shape = RoundedCornerShape(26.dp)
             ) {
@@ -305,49 +282,8 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             }
         }
         //manual of button style
-        if (
-            (!settingState.readSwitchState("off_button_manual", context)) &&
-            (readButtonStyle == 0)
-        ) {
-            WritingBoardManual(
-                modifierPadding = modifier.padding(bottom = 380.dp, end = 58.dp),
-                onClick = {
-                    settingState.writeSwitchState(
-                        "off_button_manual",
-                        context,
-                        true
-                    )
-                    navController.navigate("WritingBoardNone")
-                    Handler(Looper.getMainLooper()).postDelayed(50) {
-                        navController.popBackStack()
-                        valueState.updateScreen = false
-                    }
-                },
-                text = stringResource(R.string.button_manual)
-            )
-        }
-        //manual of edit button
-        if (
-            (!settingState.readSwitchState("off_editButton_manual", context)) &&
-            (readButtonStyle == 0) &&
-            (readEditButton)
-        ) {
-            WritingBoardManual(
-                modifierPadding = modifier.padding(top = 300.dp, end = 50.dp),
-                onClick = {
-                    settingState.writeSwitchState(
-                        "off_editButton_manual",
-                        context,
-                        true
-                    )
-                    navController.navigate("WritingBoardNone")
-                    Handler(Looper.getMainLooper()).postDelayed(50) {
-                        navController.popBackStack()
-                        valueState.updateScreen = false
-                    }
-                },
-                text = stringResource(R.string.edit_button_manual)
-            )
+        if (readButtonStyle == 0) {
+            Manual(navController)
         }
         if (valueState.ee) {
             navController.navigate("EE")
@@ -356,19 +292,68 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             }
             valueState.ee = false
         }
-
-        KeyboardVisibilityObserver { isVisible ->
-            isKeyboardVisible = isVisible
-            if (isVisible) {
-                hideModeController = true
-            } else {
-                hideModeController = false
-                if (settingState.readSwitchState("clean_pointer_focus", context)) {
-                    focusManager.clearFocus()
-                    doneAction = true
-                }
+    }
+    KeyboardVisibilityObserver { isVisible ->
+        isKeyboardVisible = isVisible
+        if (isVisible) {
+            hideModeController = true
+        } else {
+            hideModeController = false
+            if (settingState.readSwitchState("clean_pointer_focus", context)) {
+                focusManager.clearFocus()
+                doneAction = true
             }
         }
+    }
+}
+
+
+@Composable
+private fun Manual(navController: NavController, modifier: Modifier = Modifier) {
+    val valueState: ValueState = viewModel()
+    val context = LocalContext.current
+    val readEditButton = settingState.readSwitchState("edit_button", context)
+    if (
+        (!settingState.readSwitchState("off_button_manual", context))
+    ) {
+        WritingBoardManual(
+            modifierPadding = modifier.padding(bottom = 380.dp, end = 58.dp),
+            onClick = {
+                settingState.writeSwitchState(
+                    "off_button_manual",
+                    context,
+                    true
+                )
+                navController.navigate("WritingBoardNone")
+                Handler(Looper.getMainLooper()).postDelayed(50) {
+                    navController.popBackStack()
+                    valueState.updateScreen = false
+                }
+            },
+            text = stringResource(R.string.button_manual)
+        )
+    }
+    //manual of edit button
+    if (
+        (!settingState.readSwitchState("off_editButton_manual", context)) &&
+        (readEditButton)
+    ) {
+        WritingBoardManual(
+            modifierPadding = modifier.padding(top = 300.dp, end = 50.dp),
+            onClick = {
+                settingState.writeSwitchState(
+                    "off_editButton_manual",
+                    context,
+                    true
+                )
+                navController.navigate("WritingBoardNone")
+                Handler(Looper.getMainLooper()).postDelayed(50) {
+                    navController.popBackStack()
+                    valueState.updateScreen = false
+                }
+            },
+            text = stringResource(R.string.edit_button_manual)
+        )
     }
 }
 

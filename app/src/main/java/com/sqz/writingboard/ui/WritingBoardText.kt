@@ -11,7 +11,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text2.BasicTextField2
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,6 +38,7 @@ import com.sqz.writingboard.WritingBoard
 import com.sqz.writingboard.dataStore
 import com.sqz.writingboard.settingState
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
+import com.sqz.writingboard.ui.theme.themeColor
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -70,15 +70,16 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
         3 -> FontFamily.Cursive
         else -> FontFamily.Default
     }
+    val fontWeight = when (settingState.readSegmentedButtonState("font_weight", context)) {
+        0 -> FontWeight.Normal
+        1 -> FontWeight.SemiBold
+        2 -> FontWeight.W900
+        else -> FontWeight.Normal
+    }
     val fontStyle = if (settingState.readSwitchState("italics", context)) {
         FontStyle.Italic
     } else {
         FontStyle.Normal
-    }
-    val color = when (settingState.readSegmentedButtonState("theme", context)) {
-        1 -> MaterialTheme.colorScheme.secondary
-        2 -> MaterialTheme.colorScheme.tertiary
-        else -> MaterialTheme.colorScheme.secondary
     }
 
     LaunchedEffect(true) { //to load saved texts
@@ -155,7 +156,10 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
         }
         valueState.saveAction = false
     }
-    if (autoSave) {
+    if (
+        (autoSave) &&
+        (!settingState.readSwitchState("disable_auto_save", context))
+    ) {
         Handler(Looper.getMainLooper()).postDelayed(2500) {
             valueState.saveAction = true
             autoSave = false
@@ -175,10 +179,10 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
                 .padding(8.dp),
             style = TextStyle.Default.copy(
                 fontSize = fontSize,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = fontWeight,
                 fontFamily = fontFamily,
                 fontStyle = fontStyle,
-                color = color
+                color = themeColor("textColor")
             )
         )
         Log.i("WritingBoardTag", "Read-only text")
@@ -201,10 +205,10 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
                 },
             textStyle = TextStyle.Default.copy(
                 fontSize = fontSize,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = fontWeight,
                 fontFamily = fontFamily,
                 fontStyle = fontStyle,
-                color = color
+                color = themeColor("textColor")
             )
         )
     }

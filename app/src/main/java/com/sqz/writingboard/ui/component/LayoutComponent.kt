@@ -197,7 +197,7 @@ fun ClickCardLayout(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
-            .height(80.dp)
+            .height(85.dp)
     ) {
         Box(
             modifier = modifier
