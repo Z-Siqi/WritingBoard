@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Settings
@@ -66,6 +66,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
 
     val readButtonStyle = settingState.readSegmentedButtonState("button_style", context)
     val readEditButton = settingState.readSwitchState("edit_button", context)
+    val readCleanAllText = settingState.readSwitchState("clean_all_text", context)
 
     var editAction by remember { mutableStateOf(false) }
     if (editAction) {
@@ -104,7 +105,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
     ) {
         if (
             (!hideModeController) &&
-            (settingState.readSegmentedButtonState("button_style", context) == 0)
+            (readButtonStyle == 0)
         ) {
             Column(
                 verticalArrangement = Arrangement.Top
@@ -146,7 +147,6 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                             } then area
                     } else if (
                         (!settingState.readSwitchState("off_editButton_manual", context)) &&
-                        (readButtonStyle == 0) &&
                         (readEditButton)
                     ) {
                         modifier.background(color = PurpleForManual) then area
@@ -166,7 +166,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                         color = themeColor("shapeColor"),
                         RoundedCornerShape(26.dp)
                     )
-            }else {
+            } else {
                 modifier
                     .padding(20.dp)
                     .padding(bottom = 70.dp)
@@ -212,6 +212,11 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 modifier = modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Bottom
             ) {
+                val settingButtonLocation = if (readEditButton) {
+                    Alignment.Start
+                } else {
+                    Alignment.CenterHorizontally
+                }
                 Surface(
                     modifier = modifier
                         .fillMaxWidth()
@@ -219,21 +224,23 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                         .shadow(7.dp),
                     color = MaterialTheme.colorScheme.secondaryContainer
                 ) {
-                    Column(
-                        modifier = modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.Start
-                    ) {
-                        OutlinedButton(
-                            modifier = modifier
-                                .padding(10.dp)
-                                    then modifier.padding(start = 16.dp),
-                            onClick = { onClickSetting = true },
-                            shape = RoundedCornerShape(5.dp)
+                    if (!valueState.doneButton) {
+                        Column(
+                            modifier = modifier.fillMaxWidth(),
+                            horizontalAlignment = settingButtonLocation
                         ) {
-                            Icon(
-                                imageVector = Icons.Filled.Settings,
-                                contentDescription = "Setting"
-                            )
+                            OutlinedButton(
+                                modifier = modifier
+                                    .padding(10.dp)
+                                        then modifier.padding(start = 16.dp),
+                                onClick = { onClickSetting = true },
+                                shape = RoundedCornerShape(5.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Settings,
+                                    contentDescription = "Setting"
+                                )
+                            }
                         }
                     }
                     if (
@@ -258,31 +265,70 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                             }
                         }
                     }
+                    if (valueState.editButton || valueState.doneButton) {
+                        Column(
+                            modifier = modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.End
+                        ) {
+                            OutlinedButton(
+                                modifier = modifier
+                                    .padding(10.dp)
+                                        then modifier.padding(end = 16.dp),
+                                onClick = {
+                                    valueState.buttonSaveAction = true
+                                    doneAction = true
+                                },
+                                shape = RoundedCornerShape(5.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Done,
+                                    contentDescription = "Done"
+                                )
+                            }
+                        }
+                    }
+                    if (valueState.doneButton && readCleanAllText) {
+                        Column(
+                            modifier = modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            OutlinedButton(
+                                modifier = modifier
+                                    .padding(10.dp)
+                                        then modifier.padding(end = 16.dp),
+                                onClick = { valueState.cleanButton = true },
+                                shape = RoundedCornerShape(5.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = "Clean all texts"
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
         //Buttons
-        val padding = if (readButtonStyle == 2) {
-            modifier.padding(0.dp)
-        } else {
-            modifier.padding(6.dp)
-        }
-        if (valueState.doneButton) {
+        if (
+            (valueState.doneButton) && (readButtonStyle == 1)
+            ||
+            (readButtonStyle == 0) && (valueState.editButton)
+        ) {
             Column(
                 modifier = modifier
                     .fillMaxSize()
-                    .padding(30.dp)
-                then padding,
+                    .padding(36.dp),
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.End
             ) {
                 //clean all text button
-                if (settingState.readSwitchState("clean_all_text", context)) {
+                if (readCleanAllText) {
                     FloatingActionButton(onClick = {
                         valueState.cleanButton = true
                     }) {
                         Icon(
-                            imageVector = Icons.Filled.Clear,
+                            imageVector = Icons.Filled.Delete,
                             contentDescription = "Clean all texts"
                         )
                     }
@@ -296,29 +342,6 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                     Icon(
                         imageVector = Icons.Filled.Done,
                         contentDescription = "Done"
-                    )
-                }
-            }
-        }
-        //clean all text button
-        if ((settingState.readSwitchState("clean_all_text", context)) &&
-            (!valueState.doneButton) &&
-            (!readEditButton) &&
-            (readButtonStyle != 1)
-        ) {
-            Column(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(36.dp),
-                verticalArrangement = Arrangement.Bottom,
-                horizontalAlignment = Alignment.End
-            ) {
-                FloatingActionButton(onClick = {
-                    valueState.cleanButton = true
-                }) {
-                    Icon(
-                        imageVector = Icons.Filled.Clear,
-                        contentDescription = "Clean all texts"
                     )
                 }
             }
