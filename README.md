@@ -9,7 +9,7 @@ Sometimes, a brilliant idea may strike you out of nowhere, but it easily slips t
 ## Feature
 
 * There is only one writing pad built into this app.
-* Based on Material Design 3, you have to make sure your system is Android 12+
+* Based on Material Design 3, you have to make sure your system is Android 12+ (Minimum can run on Android 10 but without dynamic colors)
 * Many personalization settings.
 
 ## Screenshot
