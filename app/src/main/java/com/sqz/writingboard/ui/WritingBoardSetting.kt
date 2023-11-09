@@ -108,7 +108,11 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
         item {
             SegmentedButtonCardLayout(
                 title = stringResource(R.string.button_style),
-                options = listOf(R.string.button_hide, R.string.button_default),
+                options = listOf(
+                    R.string.button_hide,
+                    R.string.button_default,
+                    R.string.button_bottom_bar
+                ),
                 selectedOption = buttonStyle,
                 colors = cardColors
             ) { index ->

@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +23,8 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -153,46 +156,123 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 )
             }
         }
-        Column(
-            modifier = modifier
-                .padding(20.dp)
-                .shadow(5.dp, RoundedCornerShape(26.dp))
-                .border(
-                    4.dp,
-                    color = themeColor("shapeColor"),
-                    RoundedCornerShape(26.dp)
-                ),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Surface(
-                color = themeColor("boardColor"),
-                modifier = modifier.fillMaxSize(),
-                shape = RoundedCornerShape(26.dp)
+        Box {
+            val boardBottom = if (readButtonStyle != 2) {
+                modifier
+                    .padding(20.dp)
+                    .shadow(5.dp, RoundedCornerShape(26.dp))
+                    .border(
+                        4.dp,
+                        color = themeColor("shapeColor"),
+                        RoundedCornerShape(26.dp)
+                    )
+            }else {
+                modifier
+                    .padding(20.dp)
+                    .padding(bottom = 70.dp)
+                    .shadow(5.dp, RoundedCornerShape(26.dp))
+                    .border(
+                        4.dp,
+                        color = themeColor("shapeColor"),
+                        RoundedCornerShape(26.dp)
+                    )
+            }
+            Column(
+                modifier = boardBottom,
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                    modifier = modifier
-                        .fillMaxSize()
-                        .padding(8.dp)
+                Surface(
+                    color = themeColor("boardColor"),
+                    modifier = modifier.fillMaxSize(),
+                    shape = RoundedCornerShape(26.dp)
                 ) {
-                    WritingBoardText()
+                    Column(
+                        modifier = modifier
+                            .fillMaxSize()
+                            .padding(8.dp)
+                    ) {
+                        WritingBoardText()
+                    }
+                    if (valueState.cleanButton) { //to reload texts
+                        navController.navigate("WritingBoardNone")
+                        Handler(Looper.getMainLooper()).postDelayed(380) {
+                            navController.popBackStack()
+                            Log.i("WritingBoardTag", "Re-Opening WritingBoard Text")
+                            valueState.cleanButton = false
+                        }
+                    }
                 }
-                if (valueState.cleanButton) { //to reload texts
-                    navController.navigate("WritingBoardNone")
-                    Handler(Looper.getMainLooper()).postDelayed(380) {
-                        navController.popBackStack()
-                        Log.i("WritingBoardTag", "Re-Opening WritingBoard Text")
-                        valueState.cleanButton = false
+            }
+        }
+        if (
+            (readButtonStyle == 2)
+        ) {
+            Column(
+                modifier = modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Bottom
+            ) {
+                Surface(
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .height(70.dp)
+                        .shadow(7.dp),
+                    color = MaterialTheme.colorScheme.secondaryContainer
+                ) {
+                    Column(
+                        modifier = modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.Start
+                    ) {
+                        OutlinedButton(
+                            modifier = modifier
+                                .padding(10.dp)
+                                    then modifier.padding(start = 16.dp),
+                            onClick = { onClickSetting = true },
+                            shape = RoundedCornerShape(5.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Settings,
+                                contentDescription = "Setting"
+                            )
+                        }
+                    }
+                    if (
+                        (readEditButton) &&
+                        (!valueState.editButton)
+                    ) {
+                        Column(
+                            modifier = modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.End
+                        ) {
+                            OutlinedButton(
+                                modifier = modifier
+                                    .padding(10.dp)
+                                        then modifier.padding(end = 16.dp),
+                                onClick = { editAction = true },
+                                shape = RoundedCornerShape(5.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Edit,
+                                    contentDescription = "Edit"
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
         //Buttons
+        val padding = if (readButtonStyle == 2) {
+            modifier.padding(0.dp)
+        } else {
+            modifier.padding(6.dp)
+        }
         if (valueState.doneButton) {
             Column(
                 modifier = modifier
                     .fillMaxSize()
-                    .padding(36.dp),
+                    .padding(30.dp)
+                then padding,
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.End
             ) {
@@ -223,7 +303,8 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         //clean all text button
         if ((settingState.readSwitchState("clean_all_text", context)) &&
             (!valueState.doneButton) &&
-            (!readEditButton)
+            (!readEditButton) &&
+            (readButtonStyle != 1)
         ) {
             Column(
                 modifier = modifier
@@ -247,7 +328,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             (!valueState.doneButton) &&
             (readEditButton) &&
             (!valueState.editButton) &&
-            (readButtonStyle != 0)
+            (readButtonStyle == 1)
         ) {
             Column(
                 modifier = modifier
@@ -265,7 +346,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             }
         }
         //setting button
-        if ((!valueState.doneButton) && (readButtonStyle != 0)) {
+        if ((!valueState.doneButton) && (readButtonStyle == 1)) {
             Column(
                 modifier = modifier
                     .fillMaxSize()
