@@ -61,6 +61,7 @@ fun WritingBoardTheme(
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.secondary.toArgb()
             window.navigationBarColor = colorScheme.secondaryContainer.toArgb()
+            window.isNavigationBarContrastEnforced = false
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
         }
     }
@@ -82,7 +83,7 @@ fun themeColor(themeColor: String): Color {
             return when (readTheme) {
                 0 -> MaterialTheme.colorScheme.surfaceContainerLowest
                 1 -> MaterialTheme.colorScheme.surfaceVariant
-                2 -> MaterialTheme.colorScheme.secondaryContainer
+                2 -> MaterialTheme.colorScheme.primaryContainer
                 else -> MaterialTheme.colorScheme.surfaceVariant
             }
         }

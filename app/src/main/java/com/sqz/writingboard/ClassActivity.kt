@@ -25,6 +25,7 @@ class ValueState : ViewModel() {
     var ee by mutableStateOf(false)
     var editButton by mutableStateOf(false)
     var updateScreen by mutableStateOf(false)
+    var readOnlyText by mutableStateOf(false)
 }
 
 class WritingBoardSettingState {

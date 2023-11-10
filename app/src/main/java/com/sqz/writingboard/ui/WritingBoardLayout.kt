@@ -166,6 +166,16 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                         color = themeColor("shapeColor"),
                         RoundedCornerShape(26.dp)
                     )
+            } else if (valueState.doneButton) {
+                modifier
+                    .padding(20.dp)
+                    .padding(bottom = 55.dp)
+                    .shadow(5.dp, RoundedCornerShape(26.dp))
+                    .border(
+                        4.dp,
+                        color = themeColor("shapeColor"),
+                        RoundedCornerShape(26.dp)
+                    )
             } else {
                 modifier
                     .padding(20.dp)
@@ -212,19 +222,29 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 modifier = modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.Bottom
             ) {
-                val settingButtonLocation = if (readEditButton) {
-                    Alignment.Start
+                val height = if (valueState.doneButton) {
+                    55.dp
                 } else {
-                    Alignment.CenterHorizontally
+                    70.dp
                 }
                 Surface(
                     modifier = modifier
                         .fillMaxWidth()
-                        .height(70.dp)
+                        .height(height)
                         .shadow(7.dp),
                     color = MaterialTheme.colorScheme.secondaryContainer
                 ) {
+                    val settingButtonLocation = if (readEditButton) {
+                        Alignment.Start
+                    } else {
+                        Alignment.CenterHorizontally
+                    }
                     if (!valueState.doneButton) {
+                        val padding = if (readEditButton) {
+                            modifier.padding(start = 16.dp)
+                        } else {
+                            modifier.padding(start = 0.dp)
+                        }
                         Column(
                             modifier = modifier.fillMaxWidth(),
                             horizontalAlignment = settingButtonLocation
@@ -232,7 +252,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                             OutlinedButton(
                                 modifier = modifier
                                     .padding(10.dp)
-                                        then modifier.padding(start = 16.dp),
+                                        then padding,
                                 onClick = { onClickSetting = true },
                                 shape = RoundedCornerShape(5.dp)
                             ) {
@@ -311,9 +331,9 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         }
         //Buttons
         if (
-            (valueState.doneButton) && (readButtonStyle == 1)
-            ||
-            (readButtonStyle == 0) && (valueState.editButton)
+            (valueState.doneButton) && (readButtonStyle == 1) ||
+            (readButtonStyle == 0) && (valueState.editButton) ||
+            (readButtonStyle == 0) && (valueState.doneButton)
         ) {
             Column(
                 modifier = modifier
@@ -420,6 +440,7 @@ private fun Manual(navController: NavController, modifier: Modifier = Modifier) 
     if (
         (!settingState.readSwitchState("off_button_manual", context))
     ) {
+        valueState.readOnlyText = true
         WritingBoardManual(
             modifierPadding = modifier.padding(bottom = 380.dp, end = 58.dp),
             onClick = {
@@ -428,6 +449,7 @@ private fun Manual(navController: NavController, modifier: Modifier = Modifier) 
                     context,
                     true
                 )
+                valueState.readOnlyText = false
                 navController.navigate("WritingBoardNone")
                 Handler(Looper.getMainLooper()).postDelayed(50) {
                     navController.popBackStack()
@@ -442,6 +464,7 @@ private fun Manual(navController: NavController, modifier: Modifier = Modifier) 
         (!settingState.readSwitchState("off_editButton_manual", context)) &&
         (readEditButton)
     ) {
+        valueState.readOnlyText = true
         WritingBoardManual(
             modifierPadding = modifier.padding(top = 300.dp, end = 50.dp),
             onClick = {
@@ -450,6 +473,7 @@ private fun Manual(navController: NavController, modifier: Modifier = Modifier) 
                     context,
                     true
                 )
+                valueState.readOnlyText = false
                 navController.navigate("WritingBoardNone")
                 Handler(Looper.getMainLooper()).postDelayed(50) {
                     navController.popBackStack()

@@ -168,7 +168,8 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
     if (
         (settingState.readSwitchState("edit_button", context)) &&
         (!valueState.editButton) ||
-        (!valueState.initLayout)
+        (!valueState.initLayout) ||
+        (valueState.readOnlyText)
     ) {
         BasicText(
             text = viewModel.textState.text,
