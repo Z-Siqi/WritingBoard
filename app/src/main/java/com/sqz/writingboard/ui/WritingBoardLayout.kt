@@ -219,7 +219,8 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             (readButtonStyle == 2)
         ) {
             Column(
-                modifier = modifier.fillMaxSize(),
+                modifier = modifier
+                    .fillMaxSize(),
                 verticalArrangement = Arrangement.Bottom
             ) {
                 val height = if (valueState.doneButton) {
@@ -231,7 +232,11 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                     modifier = modifier
                         .fillMaxWidth()
                         .height(height)
-                        .shadow(7.dp),
+                        .shadow(7.dp)
+                        .pointerInput(Unit) {
+                            detectTapGestures { _ ->
+                            }
+                        },
                     color = MaterialTheme.colorScheme.secondaryContainer
                 ) {
                     val settingButtonLocation = if (readEditButton) {
