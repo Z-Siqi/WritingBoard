@@ -1,7 +1,6 @@
 package com.sqz.writingboard.ui
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Handler
@@ -53,10 +52,11 @@ import com.sqz.writingboard.ui.component.SegmentedButtonCardLayout
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
 import com.sqz.writingboard.ui.theme.themeColor
 
-val setting = WritingBoardSettingState()
+private val setting = WritingBoardSettingState()
 
 @Composable
-fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
+private fun SettingFunction(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
     val valueState: ValueState = viewModel()
     val state = rememberLazyListState()
 
@@ -306,8 +306,7 @@ fun SettingFunction(modifier: Modifier = Modifier, context: Context) {
 @Composable
 fun WritingBoardSetting(
     navController: NavController,
-    modifier: Modifier = Modifier,
-    context: Context
+    modifier: Modifier = Modifier
 ) {
     val valueState: ValueState = viewModel()
     val scrollBehavior =
@@ -350,7 +349,7 @@ fun WritingBoardSetting(
                 .padding(innerPadding)
                 .background(color = themeColor("settingBackgroundColor"))
         ) {
-            SettingFunction(context = context)
+            SettingFunction()
         }
     }
     if (valueState.updateScreen) {
@@ -365,8 +364,7 @@ fun WritingBoardSetting(
 
 @Preview
 @Composable
-fun WritingBoardSettingPreview() {
+private fun WritingBoardSettingPreview() {
     val navController = rememberNavController()
-    val context = LocalContext.current
-    WritingBoardSetting(navController, context = context)
+    WritingBoardSetting(navController)
 }

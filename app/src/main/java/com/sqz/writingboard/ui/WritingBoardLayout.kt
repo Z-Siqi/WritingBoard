@@ -3,7 +3,6 @@ package com.sqz.writingboard.ui
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -23,8 +21,6 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -49,9 +45,9 @@ import com.sqz.writingboard.KeyboardVisibilityObserver
 import com.sqz.writingboard.R
 import com.sqz.writingboard.ValueState
 import com.sqz.writingboard.settingState
-import com.sqz.writingboard.ui.component.WritingBoardManual
-import com.sqz.writingboard.ui.theme.PurpleForManual
-import com.sqz.writingboard.ui.theme.RedForManual
+import com.sqz.writingboard.ui.component.BottomStyle
+import com.sqz.writingboard.ui.component.HideStyle
+import com.sqz.writingboard.ui.component.ManualLayout
 import com.sqz.writingboard.ui.theme.themeColor
 
 @Composable
@@ -68,27 +64,24 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
     val readEditButton = settingState.readSwitchState("edit_button", context)
     val readCleanAllText = settingState.readSwitchState("clean_all_text", context)
 
-    var editAction by remember { mutableStateOf(false) }
-    if (editAction) {
+    if (valueState.editAction) {
         valueState.editButton = true
         Log.i("WritingBoardTag", "Edit button is clicked")
-        editAction = false
+        valueState.editAction = false
     }
-    var doneAction by remember { mutableStateOf(false) }
-    if (doneAction && valueState.initLayout) {
+    if (valueState.doneAction && valueState.initLayout) {
         keyboardDone?.hide()
         focusManager.clearFocus()
         valueState.saveAction = true
-        valueState.doneButton = false
+        valueState.isEditing = false
         valueState.editButton = false
         Log.i("WritingBoardTag", "Done action is triggered")
-        doneAction = false
+        valueState.doneAction = false
     }
-    var onClickSetting by remember { mutableStateOf(false) }
-    if (onClickSetting) {
-        doneAction = true
+    if (valueState.onClickSetting) {
+        valueState.doneAction = true
         navController.navigate("Setting")
-        onClickSetting = false
+        valueState.onClickSetting = false
     }
 
     //Layout
@@ -98,7 +91,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             .fillMaxSize()
             .pointerInput(Unit) {
                 detectTapGestures { _ ->
-                    doneAction = true
+                    valueState.doneAction = true
                 }
             },
         color = themeColor("backgroundColor")
@@ -107,88 +100,25 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             (!hideModeController) &&
             (readButtonStyle == 0)
         ) {
-            Column(
-                verticalArrangement = Arrangement.Top
-            ) {
-                val area = modifier
-                    .fillMaxWidth()
-                    .height(80.dp)
-                Spacer(
-                    modifier = if (
-                        (settingState.readSwitchState("off_button_manual", context))
-                    ) {
-                        modifier
-                            .pointerInput(Unit) {
-                                detectTapGestures { _ ->
-                                    onClickSetting = true
-                                }
-                            } then area
-                    } else {
-                        modifier.background(color = RedForManual) then area
-                    }
-                )
-            }
-            Column(
-                verticalArrangement = Arrangement.Bottom
-            ) {
-                val area = modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-                Spacer(
-                    modifier = if (
-                        (settingState.readSwitchState("off_editButton_manual", context)) &&
-                        (readEditButton)
-                    ) {
-                        modifier
-                            .pointerInput(Unit) {
-                                detectTapGestures { _ ->
-                                    editAction = true
-                                }
-                            } then area
-                    } else if (
-                        (!settingState.readSwitchState("off_editButton_manual", context)) &&
-                        (readEditButton)
-                    ) {
-                        modifier.background(color = PurpleForManual) then area
-                    } else {
-                        modifier
-                    }
-                )
-            }
+            HideStyle(context)
         }
         Box {
             val boardBottom = if (readButtonStyle != 2) {
-                modifier
-                    .padding(20.dp)
-                    .shadow(5.dp, RoundedCornerShape(26.dp))
-                    .border(
-                        4.dp,
-                        color = themeColor("shapeColor"),
-                        RoundedCornerShape(26.dp)
-                    )
-            } else if (valueState.doneButton) {
-                modifier
-                    .padding(20.dp)
-                    .padding(bottom = 55.dp)
-                    .shadow(5.dp, RoundedCornerShape(26.dp))
-                    .border(
-                        4.dp,
-                        color = themeColor("shapeColor"),
-                        RoundedCornerShape(26.dp)
-                    )
+                modifier.padding(0.dp)
+            } else if (valueState.isEditing) {
+                modifier.padding(bottom = 55.dp)
             } else {
-                modifier
-                    .padding(20.dp)
-                    .padding(bottom = 70.dp)
-                    .shadow(5.dp, RoundedCornerShape(26.dp))
-                    .border(
-                        4.dp,
-                        color = themeColor("shapeColor"),
-                        RoundedCornerShape(26.dp)
-                    )
+                modifier.padding(bottom = 70.dp)
             }
             Column(
-                modifier = boardBottom,
+                modifier = boardBottom then modifier
+                    .padding(20.dp)
+                    .shadow(5.dp, RoundedCornerShape(26.dp))
+                    .border(
+                        4.dp,
+                        color = themeColor("shapeColor"),
+                        RoundedCornerShape(26.dp)
+                    ),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -204,12 +134,12 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                     ) {
                         WritingBoardText()
                     }
-                    if (valueState.cleanButton) { //to reload texts
+                    if (valueState.cleanAllText) { //to reload texts
                         navController.navigate("WritingBoardNone")
                         Handler(Looper.getMainLooper()).postDelayed(380) {
                             navController.popBackStack()
                             Log.i("WritingBoardTag", "Re-Opening WritingBoard Text")
-                            valueState.cleanButton = false
+                            valueState.cleanAllText = false
                         }
                     }
                 }
@@ -218,127 +148,13 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         if (
             (readButtonStyle == 2)
         ) {
-            Column(
-                modifier = modifier
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Bottom
-            ) {
-                val height = if (valueState.doneButton) {
-                    55.dp
-                } else {
-                    70.dp
-                }
-                Surface(
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .height(height)
-                        .shadow(7.dp)
-                        .pointerInput(Unit) {
-                            detectTapGestures { _ ->
-                            }
-                        },
-                    color = MaterialTheme.colorScheme.secondaryContainer
-                ) {
-                    val settingButtonLocation = if (readEditButton) {
-                        Alignment.Start
-                    } else {
-                        Alignment.CenterHorizontally
-                    }
-                    if (!valueState.doneButton) {
-                        val padding = if (readEditButton) {
-                            modifier.padding(start = 16.dp)
-                        } else {
-                            modifier.padding(start = 0.dp)
-                        }
-                        Column(
-                            modifier = modifier.fillMaxWidth(),
-                            horizontalAlignment = settingButtonLocation
-                        ) {
-                            OutlinedButton(
-                                modifier = modifier
-                                    .padding(10.dp)
-                                        then padding,
-                                onClick = { onClickSetting = true },
-                                shape = RoundedCornerShape(5.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Settings,
-                                    contentDescription = "Setting"
-                                )
-                            }
-                        }
-                    }
-                    if (
-                        (readEditButton) &&
-                        (!valueState.editButton)
-                    ) {
-                        Column(
-                            modifier = modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.End
-                        ) {
-                            OutlinedButton(
-                                modifier = modifier
-                                    .padding(10.dp)
-                                        then modifier.padding(end = 16.dp),
-                                onClick = { editAction = true },
-                                shape = RoundedCornerShape(5.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Edit,
-                                    contentDescription = "Edit"
-                                )
-                            }
-                        }
-                    }
-                    if (valueState.editButton || valueState.doneButton) {
-                        Column(
-                            modifier = modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.End
-                        ) {
-                            OutlinedButton(
-                                modifier = modifier
-                                    .padding(10.dp)
-                                        then modifier.padding(end = 16.dp),
-                                onClick = {
-                                    valueState.buttonSaveAction = true
-                                    doneAction = true
-                                },
-                                shape = RoundedCornerShape(5.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Done,
-                                    contentDescription = "Done"
-                                )
-                            }
-                        }
-                    }
-                    if (valueState.doneButton && readCleanAllText) {
-                        Column(
-                            modifier = modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            OutlinedButton(
-                                modifier = modifier
-                                    .padding(10.dp)
-                                        then modifier.padding(end = 16.dp),
-                                onClick = { valueState.cleanButton = true },
-                                shape = RoundedCornerShape(5.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Delete,
-                                    contentDescription = "Clean all texts"
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+            BottomStyle(context)
         }
         //Buttons
         if (
-            (valueState.doneButton) && (readButtonStyle == 1) ||
+            (valueState.isEditing) && (readButtonStyle == 1) ||
             (readButtonStyle == 0) && (valueState.editButton) ||
-            (readButtonStyle == 0) && (valueState.doneButton)
+            (readButtonStyle == 0) && (valueState.isEditing)
         ) {
             Column(
                 modifier = modifier
@@ -350,7 +166,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 //clean all text button
                 if (readCleanAllText) {
                     FloatingActionButton(onClick = {
-                        valueState.cleanButton = true
+                        valueState.cleanAllText = true
                     }) {
                         Icon(
                             imageVector = Icons.Filled.Delete,
@@ -361,8 +177,8 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 //done button
                 Spacer(modifier = modifier.height(10.dp))
                 FloatingActionButton(onClick = {
-                    valueState.buttonSaveAction = true
-                    doneAction = true
+                    valueState.matchText = true
+                    valueState.doneAction = true
                 }) {
                     Icon(
                         imageVector = Icons.Filled.Done,
@@ -373,7 +189,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         }
         //edit button
         if (
-            (!valueState.doneButton) &&
+            (!valueState.isEditing) &&
             (readEditButton) &&
             (!valueState.editButton) &&
             (readButtonStyle == 1)
@@ -385,7 +201,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.End
             ) {
-                FloatingActionButton(onClick = { editAction = true }) {
+                FloatingActionButton(onClick = { valueState.editAction = true }) {
                     Icon(
                         imageVector = Icons.Filled.Edit,
                         contentDescription = "Edit"
@@ -394,7 +210,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             }
         }
         //setting button
-        if ((!valueState.doneButton) && (readButtonStyle == 1)) {
+        if ((!valueState.isEditing) && (readButtonStyle == 1)) {
             Column(
                 modifier = modifier
                     .fillMaxSize()
@@ -402,7 +218,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.Start
             ) {
-                FloatingActionButton(onClick = { onClickSetting = true }) {
+                FloatingActionButton(onClick = { valueState.onClickSetting = true }) {
                     Icon(
                         imageVector = Icons.Filled.Settings,
                         contentDescription = "Setting"
@@ -430,12 +246,11 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             hideModeController = false
             if (settingState.readSwitchState("clean_pointer_focus", context)) {
                 focusManager.clearFocus()
-                doneAction = true
+                valueState.doneAction = true
             }
         }
     }
 }
-
 
 @Composable
 private fun Manual(navController: NavController, modifier: Modifier = Modifier) {
@@ -446,7 +261,7 @@ private fun Manual(navController: NavController, modifier: Modifier = Modifier) 
         (!settingState.readSwitchState("off_button_manual", context))
     ) {
         valueState.readOnlyText = true
-        WritingBoardManual(
+        ManualLayout(
             modifierPadding = modifier.padding(bottom = 380.dp, end = 58.dp),
             onClick = {
                 settingState.writeSwitchState(
@@ -470,7 +285,7 @@ private fun Manual(navController: NavController, modifier: Modifier = Modifier) 
         (readEditButton)
     ) {
         valueState.readOnlyText = true
-        WritingBoardManual(
+        ManualLayout(
             modifierPadding = modifier.padding(top = 300.dp, end = 50.dp),
             onClick = {
                 settingState.writeSwitchState(
@@ -492,7 +307,7 @@ private fun Manual(navController: NavController, modifier: Modifier = Modifier) 
 
 @Preview(showBackground = true)
 @Composable
-fun WritingBoardPreview() {
+private fun WritingBoardPreview() {
     val navController = rememberNavController()
     WritingBoardLayout(navController)
 }

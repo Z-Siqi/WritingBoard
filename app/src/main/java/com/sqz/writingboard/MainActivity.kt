@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -39,7 +38,6 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.surfaceVariant
                 ) {
                     val navController = rememberNavController()
-                    val context = LocalContext.current
                     NavHost(
                         navController = navController,
                         startDestination = "WritingBoard"
@@ -49,7 +47,7 @@ class MainActivity : ComponentActivity() {
                             Log.i("WritingBoardTag", "NavHost: Screen is WritingBoardLayout.")
                         }
                         composable("Setting") {
-                            WritingBoardSetting(navController, context = context)
+                            WritingBoardSetting(navController)
                             Log.i("WritingBoardTag", "NavHost: Screen is WritingBoardSetting.")
                         }
                         composable("WritingBoardNone") {

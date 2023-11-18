@@ -106,7 +106,7 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
     }
 
     //clean all texts action
-    if (valueState.cleanButton) {
+    if (valueState.cleanAllText) {
         viewModel.textState.text.let { newText ->
             coroutineScope.launch {
                 dataStore.edit { preferences ->
@@ -116,9 +116,8 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
             }
         }
     }
-    //save action by done button
-    if (valueState.buttonSaveAction) {
-        valueState.saveAction = true
+    //match action by done button
+    if (valueState.matchText) {
         viewModel.textState.text.let { newText ->
             if (
                 (newText.endsWith("\uD83C\uDFF3️\u200D⚧️")) &&
@@ -129,7 +128,7 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
                 valueState.ee = true
             }
         }
-        valueState.buttonSaveAction = false
+        valueState.matchText = false
     }
     //save action
     if (valueState.saveAction && valueState.initLayout) {
@@ -201,7 +200,7 @@ fun WritingBoardText(modifier: Modifier = Modifier) {
                 .padding(8.dp)
                 .onFocusEvent { focusState ->
                     if (focusState.isFocused) {
-                        valueState.doneButton = true
+                        valueState.isEditing = true
                     }
                 },
             textStyle = TextStyle.Default.copy(

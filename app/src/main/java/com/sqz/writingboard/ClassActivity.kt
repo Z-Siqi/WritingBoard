@@ -10,22 +10,31 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
-import com.sqz.writingboard.ui.setting
 
 class WritingBoard : ViewModel() {
     var textState by mutableStateOf(TextFieldValue())
 }
 
 class ValueState : ViewModel() {
+    /*value*/
     var initLayout by mutableStateOf(false)
-    var doneButton by mutableStateOf(false)
-    var cleanButton by mutableStateOf(false)
-    var saveAction by mutableStateOf(false)
-    var buttonSaveAction by mutableStateOf(false)
-    var ee by mutableStateOf(false)
+    var isEditing by mutableStateOf(false)
+    var cleanAllText by mutableStateOf(false)
     var editButton by mutableStateOf(false)
-    var updateScreen by mutableStateOf(false)
     var readOnlyText by mutableStateOf(false)
+
+    /*action on text*/
+    var saveAction by mutableStateOf(false)
+    var matchText by mutableStateOf(false)
+
+    /*to change screen*/
+    var updateScreen by mutableStateOf(false)
+    var ee by mutableStateOf(false)
+
+    /*for trigger multiple action*/
+    var editAction by mutableStateOf(false)
+    var doneAction by mutableStateOf(false)
+    var onClickSetting by mutableStateOf(false)
 }
 
 class WritingBoardSettingState {
@@ -33,7 +42,7 @@ class WritingBoardSettingState {
     fun rememberSwitchState(key: String, context: Context): MutableState<Boolean> {
         return remember {
             mutableStateOf(
-                setting.readSwitchState(
+                settingState.readSwitchState(
                     key,
                     context
                 )
@@ -57,7 +66,7 @@ class WritingBoardSettingState {
     fun rememberSegmentedButtonState(key: String, context: Context): MutableState<Int> {
         return remember {
             mutableIntStateOf(
-                setting.readSegmentedButtonState(
+                settingState.readSegmentedButtonState(
                     key,
                     context
                 )
