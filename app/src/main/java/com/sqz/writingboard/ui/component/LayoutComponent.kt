@@ -255,7 +255,3 @@ fun ManualLayout(
         }
     }
 }
-
-
-
-
