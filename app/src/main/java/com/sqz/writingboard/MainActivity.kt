@@ -3,6 +3,7 @@ package com.sqz.writingboard
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import android.view.Window
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.WindowCompat
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -21,7 +23,9 @@ import com.sqz.writingboard.ui.component.WritingBoardEE
 import com.sqz.writingboard.ui.WritingBoardLayout
 import com.sqz.writingboard.ui.component.WritingBoardNone
 import com.sqz.writingboard.ui.WritingBoardSetting
+import com.sqz.writingboard.ui.component.ErrorWithSystemVersionA13
 import com.sqz.writingboard.ui.theme.WritingBoardTheme
+import com.sqz.writingboard.ui.theme.themeColor
 
 val settingState = WritingBoardSettingState()
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "WritingBoard")
@@ -30,6 +34,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
+            val window: Window = this.window
+            window.statusBarColor = themeColor("statusBarColor").toArgb()
+            window.navigationBarColor = themeColor("navigationBarColor").toArgb()
             WritingBoardTheme {
                 Surface(
                     modifier = Modifier
@@ -50,12 +57,17 @@ class MainActivity : ComponentActivity() {
                             WritingBoardSetting(navController)
                             Log.i("WritingBoardTag", "NavHost: Screen is WritingBoardSetting.")
                         }
-                        composable("WritingBoardNone") {
+                        composable("UpdateScreen") {
                             WritingBoardNone()
+                            window.statusBarColor = themeColor("statusBarColor").toArgb()
+                            window.navigationBarColor = themeColor("navigationBarColor").toArgb()
                             Log.i("WritingBoardTag", "NavHost: Screen is WritingBoardNone.")
                         }
                         composable("EE") {
                             WritingBoardEE()
+                        }
+                        composable("ErrorWithSystemVersionA13") {
+                            ErrorWithSystemVersionA13(navController)
                         }
                     }
                 }

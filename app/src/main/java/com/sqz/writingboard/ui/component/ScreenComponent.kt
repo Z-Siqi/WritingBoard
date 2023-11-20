@@ -9,10 +9,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -24,13 +27,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.sqz.writingboard.R
 import com.sqz.writingboard.ui.theme.Blue
 import com.sqz.writingboard.ui.theme.Pink
-import com.sqz.writingboard.ui.theme.Pink40
-import com.sqz.writingboard.ui.theme.Purple40
+import com.sqz.writingboard.ui.theme.PinkText
+import com.sqz.writingboard.ui.theme.Purple
 import com.sqz.writingboard.ui.theme.White
 
 @Composable
@@ -40,7 +45,7 @@ fun WritingBoardNone(modifier: Modifier = Modifier) {
             .background(
                 MaterialTheme.colorScheme.surfaceVariant
             )
-    ) { Log.i("WritingBoardTag", "NoneScreen has open") }
+    ) { Log.i("WritingBoardTag", "NoneScreen is open") }
 }
 
 @Composable
@@ -101,7 +106,7 @@ fun WritingBoardEE(modifier: Modifier = Modifier) {
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.SemiBold,
                         modifier = itemPink,
-                        color = Pink40
+                        color = PinkText
                     )
                     Text(
                         text = stringResource(R.string.may_all_people_equal),
@@ -110,7 +115,7 @@ fun WritingBoardEE(modifier: Modifier = Modifier) {
                         fontStyle = FontStyle.Italic,
                         fontWeight = FontWeight.ExtraBold,
                         modifier = itemBlue,
-                        color = Purple40
+                        color = Purple
                     )
                     Text(
                         text = stringResource(R.string.to_the_special_you),
@@ -121,7 +126,7 @@ fun WritingBoardEE(modifier: Modifier = Modifier) {
                         modifier = modifier
                             .weight(1f)
                             .verticalScroll(rememberScrollState()),
-                        color = Pink40
+                        color = PinkText
                     )
                     Text(
                         text = stringResource(R.string.may_everyone),
@@ -130,7 +135,7 @@ fun WritingBoardEE(modifier: Modifier = Modifier) {
                         fontStyle = FontStyle.Italic,
                         fontWeight = FontWeight.SemiBold,
                         modifier = itemBlue,
-                        color = Purple40
+                        color = Purple
                     )
                     Text(
                         text = stringResource(R.string.see_easter_egg_again),
@@ -138,10 +143,48 @@ fun WritingBoardEE(modifier: Modifier = Modifier) {
                         fontFamily = FontFamily.Serif,
                         fontWeight = FontWeight.SemiBold,
                         modifier = itemPink,
-                        color = Pink40
+                        color = PinkText
                     )
                 }
             }
         }
     }
+}
+
+@Composable
+fun ErrorWithSystemVersionA13(navController: NavController, modifier: Modifier = Modifier) {
+    Log.i("WritingBoardTag", "ErrorWithSystemVersion has open")
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(
+                MaterialTheme.colorScheme.errorContainer
+            ),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        ScreenText(text = stringResource(R.string.lower_than_android13))
+        Spacer(modifier = modifier.height(10.dp))
+        ScreenText(text = stringResource(R.string.feature_supports_android13))
+        Spacer(modifier = modifier.height(18.dp))
+        Button(
+            onClick = {
+                navController.popBackStack()
+            },
+            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.tertiary)
+        ) {
+            Text(stringResource(R.string.back))
+        }
+    }
+}
+
+@Composable
+private fun ScreenText(text: String) {
+    Text(
+        text = text,
+        fontSize = 18.sp,
+        fontWeight = FontWeight.ExtraBold,
+        color = MaterialTheme.colorScheme.onErrorContainer,
+        textAlign = TextAlign.Center
+    )
 }

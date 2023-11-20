@@ -38,6 +38,7 @@ import com.sqz.writingboard.ValueState
 import com.sqz.writingboard.settingState
 import com.sqz.writingboard.ui.theme.PurpleForManual
 import com.sqz.writingboard.ui.theme.RedForManual
+import com.sqz.writingboard.ui.theme.themeColor
 
 @Composable
 fun HideStyle(context: Context, modifier: Modifier = Modifier) {
@@ -117,7 +118,7 @@ fun BottomStyle(context: Context, modifier: Modifier = Modifier) {
                     detectTapGestures { _ ->
                     }
                 },
-            color = MaterialTheme.colorScheme.secondaryContainer
+            color = themeColor("navigationBarColor")
         ) {
             val settingButtonLocation = if (readEditButton) {
                 Alignment.Start

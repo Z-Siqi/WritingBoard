@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
@@ -135,7 +136,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                         WritingBoardText()
                     }
                     if (valueState.cleanAllText) { //to reload texts
-                        navController.navigate("WritingBoardNone")
+                        navController.navigate("UpdateScreen")
                         Handler(Looper.getMainLooper()).postDelayed(380) {
                             navController.popBackStack()
                             Log.i("WritingBoardTag", "Re-Opening WritingBoard Text")
@@ -237,6 +238,20 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             }
             valueState.ee = false
         }
+        Column(
+            modifier = modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Bottom
+        ) {
+            val bottomShadow = if (readButtonStyle != 2) {
+                modifier
+                    .fillMaxWidth()
+                    .height(2.dp)
+                    .shadow(10.dp)
+            } else {
+                modifier
+            }
+            Spacer(modifier = bottomShadow)
+        }
     }
     KeyboardVisibilityObserver { isVisible ->
         isKeyboardVisible = isVisible
@@ -270,7 +285,7 @@ private fun Manual(navController: NavController, modifier: Modifier = Modifier) 
                     true
                 )
                 valueState.readOnlyText = false
-                navController.navigate("WritingBoardNone")
+                navController.navigate("UpdateScreen")
                 Handler(Looper.getMainLooper()).postDelayed(50) {
                     navController.popBackStack()
                     valueState.updateScreen = false
@@ -294,7 +309,7 @@ private fun Manual(navController: NavController, modifier: Modifier = Modifier) 
                     true
                 )
                 valueState.readOnlyText = false
-                navController.navigate("WritingBoardNone")
+                navController.navigate("UpdateScreen")
                 Handler(Looper.getMainLooper()).postDelayed(50) {
                     navController.popBackStack()
                     valueState.updateScreen = false

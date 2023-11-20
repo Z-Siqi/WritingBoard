@@ -11,32 +11,71 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.sqz.writingboard.settingState
 
 private val darkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = theme_dark_primary,
+    onPrimary = theme_dark_onPrimary,
+    primaryContainer = theme_dark_primaryContainer,
+    onPrimaryContainer = theme_dark_onPrimaryContainer,
+    secondary = theme_dark_secondary,
+    onSecondary = theme_dark_onSecondary,
+    secondaryContainer = theme_dark_secondaryContainer,
+    onSecondaryContainer = theme_dark_onSecondaryContainer,
+    tertiary = theme_dark_tertiary,
+    onTertiary = theme_dark_onTertiary,
+    tertiaryContainer = theme_dark_tertiaryContainer,
+    onTertiaryContainer = theme_dark_onTertiaryContainer,
+    error = theme_dark_error,
+    errorContainer = theme_dark_errorContainer,
+    onError = theme_dark_onError,
+    onErrorContainer = theme_dark_onErrorContainer,
+    background = theme_dark_background,
+    onBackground = theme_dark_onBackground,
+    surface = theme_dark_surface,
+    onSurface = theme_dark_onSurface,
+    surfaceVariant = theme_dark_surfaceVariant,
+    onSurfaceVariant = theme_dark_onSurfaceVariant,
+    outline = theme_dark_outline,
+    inverseOnSurface = theme_dark_inverseOnSurface,
+    inverseSurface = theme_dark_inverseSurface,
+    inversePrimary = theme_dark_inversePrimary,
+    surfaceTint = theme_dark_surfaceTint,
+    outlineVariant = theme_dark_outlineVariant,
 )
 
 private val lightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = theme_light_primary,
+    onPrimary = theme_light_onPrimary,
+    primaryContainer = theme_light_primaryContainer,
+    onPrimaryContainer = theme_light_onPrimaryContainer,
+    secondary = theme_light_secondary,
+    onSecondary = theme_light_onSecondary,
+    secondaryContainer = theme_light_secondaryContainer,
+    onSecondaryContainer = theme_light_onSecondaryContainer,
+    tertiary = theme_light_tertiary,
+    onTertiary = theme_light_onTertiary,
+    tertiaryContainer = theme_light_tertiaryContainer,
+    onTertiaryContainer = theme_light_onTertiaryContainer,
+    error = theme_light_error,
+    errorContainer = theme_light_errorContainer,
+    onError = theme_light_onError,
+    onErrorContainer = theme_light_onErrorContainer,
+    background = theme_light_background,
+    onBackground = theme_light_onBackground,
+    surface = theme_light_surface,
+    onSurface = theme_light_onSurface,
+    surfaceVariant = theme_light_surfaceVariant,
+    onSurfaceVariant = theme_light_onSurfaceVariant,
+    outline = theme_light_outline,
+    inverseOnSurface = theme_light_inverseOnSurface,
+    inverseSurface = theme_light_inverseSurface,
+    inversePrimary = theme_light_inversePrimary,
+    surfaceTint = theme_light_surfaceTint,
+    outlineVariant = theme_light_outlineVariant,
 )
 
 @Composable
@@ -59,9 +98,6 @@ fun WritingBoardTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.secondary.toArgb()
-            window.navigationBarColor = colorScheme.secondaryContainer.toArgb()
-            window.isNavigationBarContrastEnforced = false
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
         }
     }
@@ -78,6 +114,25 @@ fun themeColor(themeColor: String): Color {
     val context = LocalContext.current
     val readTheme = settingState.readSegmentedButtonState("theme", context)
     when (themeColor) {
+        //App Bars
+        "statusBarColor" -> {
+            return when (readTheme) {
+                0 -> MaterialTheme.colorScheme.outline
+                1 -> MaterialTheme.colorScheme.secondary
+                2 -> MaterialTheme.colorScheme.tertiary
+                else -> MaterialTheme.colorScheme.secondary
+            }
+        }
+
+        "navigationBarColor" -> {
+            return when (readTheme) {
+                0 -> MaterialTheme.colorScheme.surfaceVariant
+                1 -> MaterialTheme.colorScheme.secondaryContainer
+                2 -> MaterialTheme.colorScheme.primaryContainer
+                else -> MaterialTheme.colorScheme.secondaryContainer
+            }
+        }
+
         //WritingBoard screen
         "backgroundColor" -> {
             return when (readTheme) {
@@ -90,7 +145,7 @@ fun themeColor(themeColor: String): Color {
 
         "shapeColor" -> {
             return when (readTheme) {
-                0 -> MaterialTheme.colorScheme.secondaryContainer
+                0 -> MaterialTheme.colorScheme.tertiary
                 1 -> MaterialTheme.colorScheme.primary
                 2 -> MaterialTheme.colorScheme.secondary
                 else -> MaterialTheme.colorScheme.primary
