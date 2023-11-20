@@ -46,9 +46,9 @@ import com.sqz.writingboard.KeyboardVisibilityObserver
 import com.sqz.writingboard.R
 import com.sqz.writingboard.ValueState
 import com.sqz.writingboard.settingState
-import com.sqz.writingboard.ui.component.BottomStyle
-import com.sqz.writingboard.ui.component.HideStyle
-import com.sqz.writingboard.ui.component.ManualLayout
+import com.sqz.writingboard.ui.component.layout.BottomStyle
+import com.sqz.writingboard.ui.component.layout.HideStyle
+import com.sqz.writingboard.ui.component.layout.ManualLayout
 import com.sqz.writingboard.ui.theme.themeColor
 
 @Composable

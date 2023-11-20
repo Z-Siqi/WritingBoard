@@ -35,9 +35,9 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             val window: Window = this.window
-            window.statusBarColor = themeColor("statusBarColor").toArgb()
-            window.navigationBarColor = themeColor("navigationBarColor").toArgb()
             WritingBoardTheme {
+                window.statusBarColor = themeColor("statusBarColor").toArgb()
+                window.navigationBarColor = themeColor("navigationBarColor").toArgb()
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
