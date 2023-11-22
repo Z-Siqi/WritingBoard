@@ -112,6 +112,28 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
             }
         }
         item {
+            CardLayout(
+                text = stringResource(R.string.edit_writingboard_button),
+                checked = editButton,
+                onCheckedChange = {
+                    editButton = it
+                    setting.writeSwitchState("edit_button", context, it)
+                },
+                colors = cardColors
+            )
+        }
+        item {
+            CardLayout(
+                text = stringResource(R.string.clean_all_texts_button),
+                checked = cleanAllText,
+                onCheckedChange = {
+                    cleanAllText = it
+                    setting.writeSwitchState("clean_all_text", context, it)
+                },
+                colors = cardColors
+            )
+        }
+        item {
             SegmentedButtonCardLayout(
                 title = stringResource(R.string.button_style),
                 options = listOf(
@@ -137,28 +159,6 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.tertiary,
                 modifier = modifier.padding(top = 16.dp, start = 18.dp)
-            )
-        }
-        item {
-            CardLayout(
-                text = stringResource(R.string.edit_writingboard_button),
-                checked = editButton,
-                onCheckedChange = {
-                    editButton = it
-                    setting.writeSwitchState("edit_button", context, it)
-                },
-                colors = cardColors
-            )
-        }
-        item {
-            CardLayout(
-                text = stringResource(R.string.clean_all_texts_button),
-                checked = cleanAllText,
-                onCheckedChange = {
-                    cleanAllText = it
-                    setting.writeSwitchState("clean_all_text", context, it)
-                },
-                colors = cardColors
             )
         }
         item {

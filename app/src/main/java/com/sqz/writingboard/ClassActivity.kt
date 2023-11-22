@@ -22,6 +22,7 @@ class ValueState : ViewModel() {
     var cleanAllText by mutableStateOf(false)
     var editButton by mutableStateOf(false)
     var readOnlyText by mutableStateOf(false)
+    var editingHorizontalScreen by mutableStateOf(false)
 
     /*action on text*/
     var saveAction by mutableStateOf(false)

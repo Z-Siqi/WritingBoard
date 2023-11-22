@@ -43,106 +43,108 @@ fun BottomStyle(context: Context, modifier: Modifier = Modifier) {
         } else {
             70.dp
         }
-        Surface(
-            modifier = modifier
-                .fillMaxWidth()
-                .height(height)
-                .shadow(7.dp)
-                .pointerInput(Unit) {
-                    detectTapGestures { _ ->
-                    }
-                },
-            color = themeColor("navigationBarColor")
-        ) {
-            val settingButtonLocation = if (readEditButton) {
-                Alignment.Start
-            } else {
-                Alignment.CenterHorizontally
-            }
-            if (!valueState.isEditing) {
-                val padding = if (readEditButton) {
-                    modifier.padding(start = 16.dp)
-                } else {
-                    modifier.padding(start = 0.dp)
-                }
-                Column(
-                    modifier = modifier.fillMaxWidth(),
-                    horizontalAlignment = settingButtonLocation
-                ) {
-                    OutlinedButton(
-                        modifier = modifier
-                            .padding(10.dp)
-                                then padding,
-                        onClick = { valueState.onClickSetting = true },
-                        shape = RoundedCornerShape(5.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Settings,
-                            contentDescription = "Setting"
-                        )
-                    }
-                }
-            }
-            if (
-                (readEditButton) &&
-                (!valueState.editButton)
+        if (!valueState.editingHorizontalScreen) {
+            Surface(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .height(height)
+                    .shadow(7.dp)
+                    .pointerInput(Unit) {
+                        detectTapGestures { _ ->
+                        }
+                    },
+                color = themeColor("navigationBarColor")
             ) {
-                Column(
-                    modifier = modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.End
-                ) {
-                    OutlinedButton(
-                        modifier = modifier
-                            .padding(10.dp)
-                                then modifier.padding(end = 16.dp),
-                        onClick = { valueState.editAction = true },
-                        shape = RoundedCornerShape(5.dp)
+                val settingButtonLocation = if (readEditButton) {
+                    Alignment.Start
+                } else {
+                    Alignment.CenterHorizontally
+                }
+                if (!valueState.isEditing) {
+                    val padding = if (readEditButton) {
+                        modifier.padding(start = 16.dp)
+                    } else {
+                        modifier.padding(start = 0.dp)
+                    }
+                    Column(
+                        modifier = modifier.fillMaxWidth(),
+                        horizontalAlignment = settingButtonLocation
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.Edit,
-                            contentDescription = "Edit"
-                        )
+                        OutlinedButton(
+                            modifier = modifier
+                                .padding(10.dp)
+                                    then padding,
+                            onClick = { valueState.onClickSetting = true },
+                            shape = RoundedCornerShape(5.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Settings,
+                                contentDescription = "Setting"
+                            )
+                        }
                     }
                 }
-            }
-            if (valueState.editButton || valueState.isEditing) {
-                Column(
-                    modifier = modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.End
+                if (
+                    (readEditButton) &&
+                    (!valueState.editButton)
                 ) {
-                    OutlinedButton(
-                        modifier = modifier
-                            .padding(10.dp)
-                                then modifier.padding(end = 16.dp),
-                        onClick = {
-                            valueState.matchText = true
-                            valueState.doneAction = true
-                        },
-                        shape = RoundedCornerShape(5.dp)
+                    Column(
+                        modifier = modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.End
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = "Done"
-                        )
+                        OutlinedButton(
+                            modifier = modifier
+                                .padding(10.dp)
+                                    then modifier.padding(end = 16.dp),
+                            onClick = { valueState.editAction = true },
+                            shape = RoundedCornerShape(5.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Edit,
+                                contentDescription = "Edit"
+                            )
+                        }
                     }
                 }
-            }
-            if (valueState.isEditing && readCleanAllText) {
-                Column(
-                    modifier = modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    OutlinedButton(
-                        modifier = modifier
-                            .padding(10.dp)
-                                then modifier.padding(end = 16.dp),
-                        onClick = { valueState.cleanAllText = true },
-                        shape = RoundedCornerShape(5.dp)
+                if (valueState.editButton || valueState.isEditing) {
+                    Column(
+                        modifier = modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.End
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.Delete,
-                            contentDescription = "Clean all texts"
-                        )
+                        OutlinedButton(
+                            modifier = modifier
+                                .padding(10.dp)
+                                    then modifier.padding(end = 16.dp),
+                            onClick = {
+                                valueState.matchText = true
+                                valueState.doneAction = true
+                            },
+                            shape = RoundedCornerShape(5.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Done,
+                                contentDescription = "Done"
+                            )
+                        }
+                    }
+                }
+                if (valueState.isEditing && readCleanAllText) {
+                    Column(
+                        modifier = modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        OutlinedButton(
+                            modifier = modifier
+                                .padding(10.dp)
+                                    then modifier.padding(end = 16.dp),
+                            onClick = { valueState.cleanAllText = true },
+                            shape = RoundedCornerShape(5.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = "Clean all texts"
+                            )
+                        }
                     }
                 }
             }

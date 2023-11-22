@@ -11,16 +11,21 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sqz.writingboard.R
+import com.sqz.writingboard.ui.theme.themeColor
 
 @Composable
 fun ClickCardLayout(
@@ -31,13 +36,25 @@ fun ClickCardLayout(
     colors: CardColors,
     modifier: Modifier = Modifier,
 ) {
+    val screenCard = if (LocalConfiguration.current.screenWidthDp < 368) {
+        modifier.height(110.dp)
+    } else {
+        modifier.height(85.dp)
+    }
+    val screenIcon = if (LocalConfiguration.current.screenWidthDp < 392) {
+        modifier
+            .padding(end = 10.dp, top = 10.dp)
+            .wrapContentHeight(Alignment.Top)
+    } else {
+        modifier.padding(end = 27.dp)
+    }
     Card(
         colors = colors,
         border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
-            .height(85.dp)
+            then screenCard
     ) {
         Box(
             modifier = modifier
@@ -59,8 +76,20 @@ fun ClickCardLayout(
                 modifier = modifier
                     .fillMaxSize()
                     .wrapContentWidth(Alignment.End)
-                    .padding(end = 27.dp),
+                    then screenIcon,
             )
         }
     }
+}
+@Preview
+@Composable
+private fun Preview() {
+    val cardColors = CardDefaults.cardColors(containerColor = themeColor("cardColor"))
+    ClickCardLayout(
+        intent = {},
+        text = "test\ntest",
+        painter = R.drawable.ic_launcher_foreground,
+        contentDescription = "About",
+        colors = cardColors
+    )
 }

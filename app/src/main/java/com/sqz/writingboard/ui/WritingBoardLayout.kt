@@ -41,6 +41,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import com.sqz.writingboard.KeyboardVisibilityObserver
 import com.sqz.writingboard.R
@@ -55,11 +56,11 @@ import com.sqz.writingboard.ui.theme.themeColor
 fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifier) {
 
     val valueState: ValueState = viewModel()
-    val keyboardDone = LocalSoftwareKeyboardController.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
     var isKeyboardVisible by remember { mutableStateOf(false) }
-    var hideModeController by remember { mutableStateOf(false) }
+    var softKeyboard by remember { mutableStateOf(false) }
 
     val readButtonStyle = settingState.readSegmentedButtonState("button_style", context)
     val readEditButton = settingState.readSwitchState("edit_button", context)
@@ -71,7 +72,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         valueState.editAction = false
     }
     if (valueState.doneAction && valueState.initLayout) {
-        keyboardDone?.hide()
+        keyboardController?.hide()
         focusManager.clearFocus()
         valueState.saveAction = true
         valueState.isEditing = false
@@ -84,6 +85,14 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         navController.navigate("Setting")
         valueState.onClickSetting = false
     }
+    if (
+        (LocalConfiguration.current.screenWidthDp > 600) &&
+        (valueState.isEditing) &&
+        (softKeyboard)
+    ) { valueState.editingHorizontalScreen = true } else if (!softKeyboard) {
+        valueState.editingHorizontalScreen = false
+    }
+
 
     //Layout
     Surface(
@@ -98,22 +107,29 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         color = themeColor("backgroundColor")
     ) {
         if (
-            (!hideModeController) &&
+            (!softKeyboard) &&
             (readButtonStyle == 0)
         ) {
             HideStyle(context)
         }
         Box {
-            val boardBottom = if (readButtonStyle != 2) {
-                modifier.padding(0.dp)
-            } else if (valueState.isEditing) {
+            val boardBottom = if (
+                (valueState.editingHorizontalScreen) ||
+                (readButtonStyle != 2)
+            ) { modifier.padding(0.dp) }
+            else if (valueState.isEditing) {
                 modifier.padding(bottom = 55.dp)
-            } else {
+            }
+            else {
                 modifier.padding(bottom = 70.dp)
             }
+            val screen = if (valueState.editingHorizontalScreen) {
+                modifier.padding(start = 25.dp, end = 25.dp, top = 5.dp, bottom = 4.dp)
+            } else {
+                modifier.padding(20.dp)
+            }
             Column(
-                modifier = boardBottom then modifier
-                    .padding(20.dp)
+                modifier = boardBottom then screen then modifier
                     .shadow(5.dp, RoundedCornerShape(26.dp))
                     .border(
                         4.dp,
@@ -155,7 +171,9 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         if (
             (valueState.isEditing) && (readButtonStyle == 1) ||
             (readButtonStyle == 0) && (valueState.editButton) ||
-            (readButtonStyle == 0) && (valueState.isEditing)
+            (readButtonStyle == 0) && (valueState.isEditing) ||
+            (readButtonStyle == 2) &&
+            (valueState.editingHorizontalScreen) && (valueState.isEditing)
         ) {
             Column(
                 modifier = modifier
@@ -256,9 +274,9 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
     KeyboardVisibilityObserver { isVisible ->
         isKeyboardVisible = isVisible
         if (isVisible) {
-            hideModeController = true
+            softKeyboard = true
         } else {
-            hideModeController = false
+            softKeyboard = false
             if (settingState.readSwitchState("clean_pointer_focus", context)) {
                 focusManager.clearFocus()
                 valueState.doneAction = true
