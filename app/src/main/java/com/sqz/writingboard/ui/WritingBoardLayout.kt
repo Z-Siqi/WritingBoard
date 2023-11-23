@@ -3,6 +3,9 @@ package com.sqz.writingboard.ui
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -59,12 +63,15 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
+    val scrollState = rememberScrollState()
     var isKeyboardVisible by remember { mutableStateOf(false) }
     var softKeyboard by remember { mutableStateOf(false) }
+    var screenController by remember { mutableStateOf(false) }
 
     val readButtonStyle = settingState.readSegmentedButtonState("button_style", context)
     val readEditButton = settingState.readSwitchState("edit_button", context)
     val readCleanAllText = settingState.readSwitchState("clean_all_text", context)
+    val readAlwaysVisibleText = settingState.readSwitchState("always_visible_text", context)
 
     if (valueState.editAction) {
         valueState.editButton = true
@@ -89,7 +96,9 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         (LocalConfiguration.current.screenWidthDp > 600) &&
         (valueState.isEditing) &&
         (softKeyboard)
-    ) { valueState.editingHorizontalScreen = true } else if (!softKeyboard) {
+    ) {
+        valueState.editingHorizontalScreen = true
+    } else if (!softKeyboard) {
         valueState.editingHorizontalScreen = false
     }
 
@@ -113,23 +122,49 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             HideStyle(context)
         }
         Box {
+            //for bottom style
             val boardBottom = if (
                 (valueState.editingHorizontalScreen) ||
                 (readButtonStyle != 2)
-            ) { modifier.padding(0.dp) }
-            else if (valueState.isEditing) {
+            ) {
+                modifier
+            } else if (valueState.isEditing) {
                 modifier.padding(bottom = 55.dp)
-            }
-            else {
+            } else {
                 modifier.padding(bottom = 70.dp)
             }
-            val screen = if (valueState.editingHorizontalScreen) {
+            //for horizontal screen
+            val horizontalScreen = if (valueState.editingHorizontalScreen) {
                 modifier.padding(start = 25.dp, end = 25.dp, top = 5.dp, bottom = 4.dp)
             } else {
                 modifier.padding(20.dp)
             }
+            //for always visible test
+            if (readAlwaysVisibleText) {
+                if (scrollState.value == scrollState.maxValue && !valueState.isEditing) {
+                    Handler(Looper.getMainLooper()).postDelayed(50) {
+                        if (scrollState.value == scrollState.maxValue) {
+                            Handler(Looper.getMainLooper()).postDelayed(50) {
+                                screenController = true
+                            }
+                        }
+                    }
+                } else if (scrollState.value < scrollState.maxValue - 200) {
+                    screenController = false
+                }
+            }
+            val screen = if (screenController) {
+                modifier.padding(bottom = 60.dp)
+            } else {
+                modifier
+            }
             Column(
-                modifier = boardBottom then screen then modifier
+                modifier = modifier.animateContentSize(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioLowBouncy,
+                        stiffness = Spring.StiffnessMediumLow
+                    )
+                ) then boardBottom then horizontalScreen then screen
                     .shadow(5.dp, RoundedCornerShape(26.dp))
                     .border(
                         4.dp,
@@ -149,7 +184,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                             .fillMaxSize()
                             .padding(8.dp)
                     ) {
-                        WritingBoardText()
+                        WritingBoardText(scrollState)
                     }
                     if (valueState.cleanAllText) { //to reload texts
                         navController.navigate("UpdateScreen")
@@ -213,10 +248,13 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             (!valueState.editButton) &&
             (readButtonStyle == 1)
         ) {
+            val padding = if (screenController) {
+                modifier.padding(end = 36.dp, top = 16.dp)
+            } else {
+                modifier.padding(36.dp)
+            }
             Column(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(36.dp),
+                modifier = modifier.fillMaxSize() then padding,
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.End
             ) {
@@ -230,10 +268,13 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         }
         //setting button
         if ((!valueState.isEditing) && (readButtonStyle == 1)) {
+            val padding = if (screenController) {
+                modifier.padding(start = 36.dp, bottom = 16.dp)
+            } else {
+                modifier.padding(36.dp)
+            }
             Column(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(36.dp),
+                modifier = modifier.fillMaxSize() then padding,
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.Start
             ) {

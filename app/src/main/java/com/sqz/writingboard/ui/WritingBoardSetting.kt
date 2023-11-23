@@ -52,10 +52,12 @@ import androidx.navigation.compose.rememberNavController
 import com.sqz.writingboard.R
 import com.sqz.writingboard.ValueState
 import com.sqz.writingboard.WritingBoardSettingState
-import com.sqz.writingboard.ui.component.setting.CardLayout
+import com.sqz.writingboard.settingState
 import com.sqz.writingboard.ui.component.setting.ClickCardLayout
 import com.sqz.writingboard.ui.component.setting.SegmentedButtonCardLayout
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
+import com.sqz.writingboard.ui.component.setting.ExtraButtonCardLayout
+import com.sqz.writingboard.ui.component.setting.SwitchCardLayout
 import com.sqz.writingboard.ui.theme.themeColor
 
 private val setting = WritingBoardSettingState()
@@ -79,6 +81,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
     var buttonStyle by setting.rememberSegmentedButtonState("button_style", context)
     var fontWeight by setting.rememberSegmentedButtonState("font_weight", context)
     var disableAutoSave by setting.rememberSwitchState("disable_auto_save", context)
+    var alwaysVisibleText by setting.rememberSwitchState("always_visible_text", context)
 
     LazyColumn(
         modifier = modifier
@@ -112,7 +115,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
             }
         }
         item {
-            CardLayout(
+            SwitchCardLayout(
                 text = stringResource(R.string.edit_writingboard_button),
                 checked = editButton,
                 onCheckedChange = {
@@ -123,7 +126,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
             )
         }
         item {
-            CardLayout(
+            SwitchCardLayout(
                 text = stringResource(R.string.clean_all_texts_button),
                 checked = cleanAllText,
                 onCheckedChange = {
@@ -134,7 +137,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
             )
         }
         item {
-            SegmentedButtonCardLayout(
+            ExtraButtonCardLayout(
                 title = stringResource(R.string.button_style),
                 options = listOf(
                     R.string.button_hide,
@@ -142,7 +145,14 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                     R.string.button_bottom_bar
                 ),
                 selectedOption = buttonStyle,
-                colors = cardColors
+                colors = cardColors,
+                expanded = (settingState.readSegmentedButtonState("button_style", context) <= 1),
+                switchText = "Prevent text\nfrom being obscured",
+                checked = alwaysVisibleText,
+                onCheckedChange = {
+                    alwaysVisibleText = it
+                    setting.writeSwitchState("always_visible_text", context, it)
+                },
             ) { index ->
                 buttonStyle = index
                 setting.writeSegmentedButtonState(
@@ -177,7 +187,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
             }
         }
         item {
-            CardLayout(
+            SwitchCardLayout(
                 text = stringResource(R.string.font_italics),
                 checked = italics,
                 onCheckedChange = {
@@ -236,7 +246,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
             )
         }
         item {
-            CardLayout(
+            SwitchCardLayout(
                 text = stringResource(R.string.clean_pointer_focus),
                 checked = cleanPointerFocus,
                 onCheckedChange = {
@@ -247,7 +257,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
             )
         }
         item {
-            CardLayout(
+            SwitchCardLayout(
                 text = stringResource(R.string.allow_multiple_lines),
                 checked = allowMultipleLines,
                 onCheckedChange = {
@@ -258,7 +268,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
             )
         }
         item {
-            CardLayout(
+            SwitchCardLayout(
                 text = stringResource(R.string.disable_auto_save),
                 checked = disableAutoSave,
                 onCheckedChange = {

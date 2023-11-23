@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -47,14 +48,13 @@ import java.io.IOException
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun WritingBoardText(modifier: Modifier = Modifier) {
+fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
 
     val valueState: ValueState = viewModel()
     val viewModel: WritingBoard = viewModel()
     val dataStore = LocalContext.current.dataStore
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    val scrollState = rememberScrollState()
     var autoSave by remember { mutableStateOf(false) }
 
     val fontSize = when (settingState.readSegmentedButtonState("font_size", context)) {
