@@ -115,6 +115,32 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
             }
         }
         item {
+            ExtraButtonCardLayout(
+                title = stringResource(R.string.button_style),
+                options = listOf(
+                    R.string.button_hide,
+                    R.string.button_default,
+                    R.string.button_bottom_bar
+                ),
+                selectedOption = buttonStyle,
+                colors = cardColors,
+                expanded = (settingState.readSegmentedButtonState("button_style", context) <= 1),
+                switchText = stringResource(R.string.always_visible_text),
+                checked = alwaysVisibleText,
+                onCheckedChange = {
+                    alwaysVisibleText = it
+                    setting.writeSwitchState("always_visible_text", context, it)
+                },
+            ) { index ->
+                buttonStyle = index
+                setting.writeSegmentedButtonState(
+                    "button_style",
+                    context,
+                    index
+                )
+            }
+        }
+        item {
             SwitchCardLayout(
                 text = stringResource(R.string.edit_writingboard_button),
                 checked = editButton,
@@ -135,32 +161,6 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                 },
                 colors = cardColors
             )
-        }
-        item {
-            ExtraButtonCardLayout(
-                title = stringResource(R.string.button_style),
-                options = listOf(
-                    R.string.button_hide,
-                    R.string.button_default,
-                    R.string.button_bottom_bar
-                ),
-                selectedOption = buttonStyle,
-                colors = cardColors,
-                expanded = (settingState.readSegmentedButtonState("button_style", context) <= 1),
-                switchText = "Prevent text\nfrom being obscured",
-                checked = alwaysVisibleText,
-                onCheckedChange = {
-                    alwaysVisibleText = it
-                    setting.writeSwitchState("always_visible_text", context, it)
-                },
-            ) { index ->
-                buttonStyle = index
-                setting.writeSegmentedButtonState(
-                    "button_style",
-                    context,
-                    index
-                )
-            }
         }
         item {
             Text(

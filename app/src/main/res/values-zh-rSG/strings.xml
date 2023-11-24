@@ -45,4 +45,5 @@
     <string name="lower_than_android13">您的系统版本低于Android 13</string>
     <string name="feature_supports_android13">此功能仅支持Android 13+</string>
     <string name="back">返回</string>
+    <string name="always_visible_text">防止文本被遮挡</string>
 </resources>

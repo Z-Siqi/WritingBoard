@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
@@ -124,14 +126,31 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         Box {
             //for bottom style
             val boardBottom = if (
-                (valueState.editingHorizontalScreen) ||
-                (readButtonStyle != 2)
+                (!valueState.editingHorizontalScreen) &&
+                (readButtonStyle == 1) &&
+                (!valueState.isEditing) &&
+                (screenController)
             ) {
-                modifier
-            } else if (valueState.isEditing) {
+                modifier.padding(bottom = 60.dp)
+            } else if (
+                (valueState.isEditing) &&
+                (readButtonStyle == 2) &&
+                (!valueState.editingHorizontalScreen)
+            ) {
                 modifier.padding(bottom = 55.dp)
-            } else {
+            } else if (
+                (valueState.isEditing) &&
+                (screenController) &&
+                (!valueState.editingHorizontalScreen)
+            ) {
+                modifier.padding(bottom = 45.dp)
+            } else if (
+                (readButtonStyle == 2) &&
+                (!valueState.editingHorizontalScreen)
+            ) {
                 modifier.padding(bottom = 70.dp)
+            } else {
+                modifier
             }
             //for horizontal screen
             val horizontalScreen = if (valueState.editingHorizontalScreen) {
@@ -139,9 +158,12 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             } else {
                 modifier.padding(20.dp)
             }
-            //for always visible test
-            if (readAlwaysVisibleText) {
-                if (scrollState.value == scrollState.maxValue && !valueState.isEditing) {
+            //for calculate always visible test
+            if (readAlwaysVisibleText && readButtonStyle != 2) {
+                if (
+                    (scrollState.value == scrollState.maxValue) &&
+                    (scrollState.canScrollBackward)
+                ) {
                     Handler(Looper.getMainLooper()).postDelayed(50) {
                         if (scrollState.value == scrollState.maxValue) {
                             Handler(Looper.getMainLooper()).postDelayed(50) {
@@ -153,18 +175,14 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                     screenController = false
                 }
             }
-            val screen = if (screenController) {
-                modifier.padding(bottom = 60.dp)
-            } else {
-                modifier
-            }
+            //writing board
             Column(
                 modifier = modifier.animateContentSize(
                     animationSpec = spring(
                         dampingRatio = Spring.DampingRatioLowBouncy,
                         stiffness = Spring.StiffnessMediumLow
                     )
-                ) then boardBottom then horizontalScreen then screen
+                ) then boardBottom then horizontalScreen
                     .shadow(5.dp, RoundedCornerShape(26.dp))
                     .border(
                         4.dp,
@@ -210,34 +228,85 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             (readButtonStyle == 2) &&
             (valueState.editingHorizontalScreen) && (valueState.isEditing)
         ) {
-            Column(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(36.dp),
-                verticalArrangement = Arrangement.Bottom,
-                horizontalAlignment = Alignment.End
-            ) {
-                //clean all text button
-                if (readCleanAllText) {
+            if (!readAlwaysVisibleText) {
+                Column(
+                    modifier = modifier
+                        .fillMaxSize()
+                        .padding(36.dp),
+                    verticalArrangement = Arrangement.Bottom,
+                    horizontalAlignment = Alignment.End
+                ) {
+                    //clean all text button
+                    if (readCleanAllText) {
+                        FloatingActionButton(onClick = {
+                            valueState.cleanAllText = true
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = "Clean all texts"
+                            )
+                        }
+                    }
+                    //done button
+                    Spacer(modifier = modifier.height(10.dp))
                     FloatingActionButton(onClick = {
-                        valueState.cleanAllText = true
+                        valueState.matchText = true
+                        valueState.doneAction = true
                     }) {
                         Icon(
-                            imageVector = Icons.Filled.Delete,
-                            contentDescription = "Clean all texts"
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = "Done"
                         )
                     }
                 }
-                //done button
-                Spacer(modifier = modifier.height(10.dp))
-                FloatingActionButton(onClick = {
-                    valueState.matchText = true
-                    valueState.doneAction = true
-                }) {
-                    Icon(
-                        imageVector = Icons.Filled.Done,
-                        contentDescription = "Done"
-                    )
+            } else {
+                val bottom = if (screenController) {
+                    2.dp
+                } else {
+                    25.dp
+                }
+                Column(
+                    modifier = modifier.fillMaxWidth().height(30.dp),
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.Bottom
+                ) {
+                    ExtendedFloatingActionButton(
+                        modifier = modifier
+                            .padding(10.dp)
+                            .padding(end = 26.dp, bottom = bottom)
+                            .size(80.dp, 45.dp),
+                        onClick = {
+                            valueState.matchText = true
+                            valueState.doneAction = true
+                        },
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = "Done"
+                        )
+                    }
+                }
+                if (readCleanAllText) {
+                    Column(
+                        modifier = modifier.fillMaxWidth().height(30.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Bottom
+                    ) {
+                        FloatingActionButton(
+                            modifier = modifier
+                                .padding(10.dp)
+                                .padding(start = 50.dp, bottom = bottom)
+                                .size(45.dp, 45.dp),
+                            onClick = { valueState.cleanAllText = true },
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = "Clean all texts"
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -249,7 +318,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             (readButtonStyle == 1)
         ) {
             val padding = if (screenController) {
-                modifier.padding(end = 36.dp, top = 16.dp)
+                modifier.padding(end = 36.dp, bottom = 16.dp)
             } else {
                 modifier.padding(36.dp)
             }

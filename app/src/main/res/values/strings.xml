@@ -44,4 +44,5 @@
     <string name="lower_than_android13">Your system version is lower than Android 13</string>
     <string name="feature_supports_android13">This feature only supports Android 13+</string>
     <string name="back">Go Back</string>
+    <string name="always_visible_text">Prevent text\nfrom being obscured</string>
 </resources>

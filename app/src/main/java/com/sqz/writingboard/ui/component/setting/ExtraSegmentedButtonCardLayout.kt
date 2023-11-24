@@ -112,12 +112,12 @@ fun ExtraButtonCardLayout(
                         fontSize = 18.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.secondary,
-                        modifier = modifier.padding(start = 16.dp)
+                        modifier = modifier.padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
                     )
                     Switch(
                         modifier = modifier
                             .fillMaxSize()
-                            .padding(16.dp)
+                            .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
                             .wrapContentWidth(Alignment.End),
                         checked = checked,
                         onCheckedChange = onCheckedChange
