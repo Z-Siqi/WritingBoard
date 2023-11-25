@@ -6,6 +6,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
@@ -20,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -201,6 +203,9 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                     if (focusState.isFocused) {
                         valueState.isEditing = true
                     }
+                }
+                .pointerInput(Unit) {
+                    detectVerticalDragGestures { _, _ -> }
                 },
             textStyle = TextStyle.Default.copy(
                 fontSize = fontSize,

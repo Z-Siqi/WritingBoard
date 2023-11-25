@@ -391,6 +391,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 focusManager.clearFocus()
                 valueState.doneAction = true
             }
+            screenController = false
         }
     }
 }
