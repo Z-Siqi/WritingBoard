@@ -49,9 +49,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
-import com.sqz.writingboard.KeyboardVisibilityObserver
+import com.sqz.writingboard.component.KeyboardVisibilityObserver
 import com.sqz.writingboard.R
 import com.sqz.writingboard.ValueState
+import com.sqz.writingboard.component.Vibrate
 import com.sqz.writingboard.settingState
 import com.sqz.writingboard.ui.component.layout.BottomStyle
 import com.sqz.writingboard.ui.component.layout.HideStyle
@@ -77,6 +78,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
 
     if (valueState.editAction) {
         valueState.editButton = true
+        Vibrate()
         Log.i("WritingBoardTag", "Edit button is clicked")
         valueState.editAction = false
     }
@@ -103,7 +105,6 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
     } else if (!softKeyboard) {
         valueState.editingHorizontalScreen = false
     }
-
 
     //Layout
     Surface(
