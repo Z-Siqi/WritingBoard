@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -35,11 +36,13 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.sqz.writingboard.R
 import com.sqz.writingboard.ValueState
 import com.sqz.writingboard.WritingBoard
 import com.sqz.writingboard.dataStore
 import com.sqz.writingboard.settingState
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
+import com.sqz.writingboard.ui.theme.CursiveCN
 import com.sqz.writingboard.ui.theme.themeColor
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
@@ -64,11 +67,15 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
         2 -> 33.sp
         else -> 18.sp
     }
+    val fontLanguage = if (
+        (stringResource(R.string.used_language) == "CN") ||
+        (stringResource(R.string.used_language) == "TW")
+    ) CursiveCN else FontFamily.Cursive
     val fontFamily = when (settingState.readSegmentedButtonState("font_style", context)) {
         0 -> FontFamily.Monospace
         1 -> FontFamily.Default
         2 -> FontFamily.Serif
-        3 -> FontFamily.Cursive
+        3 -> fontLanguage
         else -> FontFamily.Default
     }
     val fontWeight = when (settingState.readSegmentedButtonState("font_weight", context)) {

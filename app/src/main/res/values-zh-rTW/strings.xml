@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="used_language">TW</string>
     <string name="app_name">寫字板</string>
     <string name="settings">設置</string>
     <string name="allow_multiple_lines">允許末尾有多個換行符\n(多於一個換行符)</string>
