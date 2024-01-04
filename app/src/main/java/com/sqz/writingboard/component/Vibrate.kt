@@ -14,6 +14,7 @@ fun Vibrate(){
 
     if (vibrator != null) {
         vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK))
+        Log.i("WritingBoardTag", "vibrator have on")
     } else {
         Log.e("WritingBoardTag", "vibrator is not null")
     }

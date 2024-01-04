@@ -68,6 +68,7 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("ErrorWithSystemVersionA13") {
                             ErrorWithSystemVersionA13(navController)
+                            Log.i("WritingBoardTag", "NavHost: Screen is ErrorWithSystemVersionA13.")
                         }
                     }
                 }

@@ -108,6 +108,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         (softKeyboard)
     ) {
         valueState.editingHorizontalScreen = true
+        Log.i("WritingBoardTag", "editingHorizontalScreen is true")
     } else if (!softKeyboard) {
         valueState.editingHorizontalScreen = false
     }
@@ -165,7 +166,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             } else {
                 modifier.padding(20.dp)
             }
-            //for calculate always visible test
+            //for calculate always visible text
             if (readAlwaysVisibleText && readButtonStyle != 2) {
                 if (
                     (scrollState.value == scrollState.maxValue) &&
@@ -175,11 +176,13 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                         if (scrollState.value == scrollState.maxValue) {
                             Handler(Looper.getMainLooper()).postDelayed(50) {
                                 screenController = true
+                                Log.i("WritingBoardTag", "screenController is true")
                             }
                         }
                     }
                 } else if (scrollState.value < scrollState.maxValue - 200) {
                     screenController = false
+                    Log.i("WritingBoardTag", "screenController is false")
                 }
             }
             //writing board
@@ -396,6 +399,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         isKeyboardVisible = isVisible
         if (isVisible) {
             softKeyboard = true
+            Log.i("WritingBoardTag", "Keyboard is visible")
         } else {
             softKeyboard = false
             if (settingState.readSwitchState("clean_pointer_focus", context)) {
@@ -403,6 +407,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 valueState.doneAction = true
             }
             screenController = false
+            Log.i("WritingBoardTag", "Keyboard is close")
         }
     }
     LaunchedEffect(true) {
