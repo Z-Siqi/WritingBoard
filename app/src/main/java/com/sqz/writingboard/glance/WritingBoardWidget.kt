@@ -1,8 +1,6 @@
 package com.sqz.writingboard.glance
 
 import android.content.Context
-import android.os.Build
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -12,6 +10,7 @@ import androidx.glance.Button
 import androidx.glance.ButtonDefaults
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.GlanceTheme
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.action.actionStartActivity
@@ -21,15 +20,15 @@ import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.lazy.LazyColumn
 import androidx.glance.appwidget.provideContent
-import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
+import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.text.Text
-import androidx.glance.unit.ColorProvider
+import androidx.glance.text.TextStyle
 import com.sqz.writingboard.MainActivity
 import com.sqz.writingboard.dataStore
 import kotlinx.coroutines.flow.map
@@ -44,12 +43,12 @@ class WritingBoardWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         provideContent {
-            MyContent()
+            Content()
         }
     }
 
     @Composable
-    private fun MyContent() {
+    private fun Content() {
         val context = LocalContext.current
         val text = stringPreferencesKey("saved_text")
         val savedText by context.dataStore.data
@@ -59,33 +58,39 @@ class WritingBoardWidget : GlanceAppWidget() {
             .collectAsState(initial = "")
 
         val size = LocalSize.current
-        val background = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            GlanceModifier.background(MaterialTheme.colorScheme.primary)
-        } else {
-            GlanceModifier
-        }
         Box(
-            modifier = GlanceModifier
-                .size(size.width, size.height)
-                then background,
+            modifier = GlanceModifier,
             contentAlignment = Alignment.Center
         ) {
             Button(
                 text = "",
                 onClick = actionStartActivity<MainActivity>(),
-                colors = ButtonDefaults.buttonColors(ColorProvider(MaterialTheme.colorScheme.surfaceVariant)),
+                colors = ButtonDefaults.buttonColors(GlanceTheme.colors.primary),
+                modifier = GlanceModifier.size(size.width, size.height)
+            )
+            Button(
+                text = "",
+                onClick = actionStartActivity<MainActivity>(),
+                colors = ButtonDefaults.buttonColors(GlanceTheme.colors.surfaceVariant),
                 modifier = GlanceModifier.size(size.width - 5.dp, size.height - 5.dp)
             )
             LazyColumn(
                 modifier = GlanceModifier
-                    .size(size.width - 10.dp, size.height - 8.dp)
+                    .size(size.width - 12.dp, size.height - 8.dp)
                     .clickable(actionStartActivity<MainActivity>())
             ) {
                 item {
                     Text(
                         text = savedText,
+                        style = TextStyle(
+                            color = GlanceTheme.colors.onSurfaceVariant,
+                            fontWeight = androidx.glance.text.FontWeight.Medium
+                        ),
                         modifier = GlanceModifier.fillMaxSize()
                     )
+                }
+                item {
+                    Spacer(modifier = GlanceModifier.size(size.width, 25.dp))
                 }
             }
         }

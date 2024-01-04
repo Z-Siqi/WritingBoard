@@ -84,6 +84,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
     var fontWeight by setting.rememberSegmentedButtonState("font_weight", context)
     var disableAutoSave by setting.rememberSwitchState("disable_auto_save", context)
     var alwaysVisibleText by setting.rememberSwitchState("always_visible_text", context)
+    var vibrate by setting.rememberSegmentedButtonState("vibrate_settings", context)
 
     LazyColumn(
         modifier = modifier
@@ -103,7 +104,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
         item {
             SegmentedButtonCardLayout(
                 title = stringResource(R.string.choose_theme),
-                options = listOf(R.string.light_color, R.string.theme_default, R.string.distinct),
+                options = listOf(R.string.light_color, R.string.default_string, R.string.distinct),
                 selectedOption = theme,
                 colors = cardColors
             ) { index ->
@@ -121,7 +122,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                 title = stringResource(R.string.button_style),
                 options = listOf(
                     R.string.button_hide,
-                    R.string.button_default,
+                    R.string.default_string,
                     R.string.button_bottom_bar
                 ),
                 selectedOption = buttonStyle,
@@ -204,7 +205,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                 title = stringResource(R.string.font_style),
                 options = listOf(
                     R.string.monospace,
-                    R.string.font_default,
+                    R.string.default_string,
                     R.string.serif,
                     R.string.cursive,
                 ),
@@ -288,6 +289,25 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                 color = MaterialTheme.colorScheme.tertiary,
                 modifier = modifier.padding(top = 16.dp, start = 18.dp)
             )
+        }
+        item {
+            SegmentedButtonCardLayout(
+                title = stringResource(R.string.vibrate_settings),
+                options = listOf(
+                    R.string.disable,
+                    R.string.default_string,
+                    R.string.more
+                ),
+                selectedOption = vibrate,
+                colors = cardColors
+            ) { index ->
+                vibrate = index
+                setting.writeSegmentedButtonState(
+                    "vibrate_settings",
+                    context,
+                    index
+                )
+            }
         }
         item {
             ClickCardLayout(

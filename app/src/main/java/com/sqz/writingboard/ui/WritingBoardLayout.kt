@@ -30,6 +30,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,10 +50,12 @@ import androidx.navigation.compose.rememberNavController
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.glance.appwidget.updateAll
 import com.sqz.writingboard.component.KeyboardVisibilityObserver
 import com.sqz.writingboard.R
 import com.sqz.writingboard.ValueState
 import com.sqz.writingboard.component.Vibrate
+import com.sqz.writingboard.glance.WritingBoardWidget
 import com.sqz.writingboard.settingState
 import com.sqz.writingboard.ui.component.layout.BottomStyle
 import com.sqz.writingboard.ui.component.layout.HideStyle
@@ -75,10 +78,11 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
     val readEditButton = settingState.readSwitchState("edit_button", context)
     val readCleanAllText = settingState.readSwitchState("clean_all_text", context)
     val readAlwaysVisibleText = settingState.readSwitchState("always_visible_text", context)
+    val readVibrateSettings = settingState.readSegmentedButtonState("vibrate_settings", context)
 
     if (valueState.editAction) {
         valueState.editButton = true
-        Vibrate()
+        if (readVibrateSettings != 0) Vibrate()
         Log.i("WritingBoardTag", "Edit button is clicked")
         valueState.editAction = false
     }
@@ -88,11 +92,13 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         valueState.saveAction = true
         valueState.isEditing = false
         valueState.editButton = false
+        if (readVibrateSettings == 2) Vibrate()
         Log.i("WritingBoardTag", "Done action is triggered")
         valueState.doneAction = false
     }
     if (valueState.onClickSetting) {
         valueState.doneAction = true
+        if (readVibrateSettings == 2) Vibrate()
         navController.navigate("Setting")
         valueState.onClickSetting = false
     }
@@ -267,7 +273,9 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                     25.dp
                 }
                 Column(
-                    modifier = modifier.fillMaxWidth().height(30.dp),
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .height(30.dp),
                     horizontalAlignment = Alignment.End,
                     verticalArrangement = Arrangement.Bottom
                 ) {
@@ -290,7 +298,9 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 }
                 if (readCleanAllText) {
                     Column(
-                        modifier = modifier.fillMaxWidth().height(30.dp),
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .height(30.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Bottom
                     ) {
@@ -394,6 +404,9 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             }
             screenController = false
         }
+    }
+    LaunchedEffect(true) {
+        WritingBoardWidget().updateAll(context)
     }
 }
 

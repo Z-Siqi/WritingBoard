@@ -5,5 +5,6 @@
     android:minWidth="80dp"
     android:minHeight="40dp"
     android:targetCellHeight="2"
-    android:targetCellWidth="2">
+    android:targetCellWidth="2"
+    android:previewImage="@drawable/ic_launcher_foreground">
 </appwidget-provider>

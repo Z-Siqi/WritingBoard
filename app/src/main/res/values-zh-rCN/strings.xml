@@ -2,6 +2,7 @@
 <resources>
     <string name="used_language">CN</string>
     <string name="app_name">书写板</string>
+    <string name="default_string">默认</string>
     <string name="settings">设置</string>
     <string name="allow_multiple_lines">允许末尾有多个换行符\n(多于一个换行符)</string>
     <string name="clean_pointer_focus">键盘收起时清除键盘指针焦点</string>
@@ -13,13 +14,11 @@
     <string name="large">大号字体</string>
     <string name="font_size">书写板字体大小</string>
     <string name="light_color">浅色主题</string>
-    <string name="theme_default">默认主题</string>
     <string name="distinct">鲜明主题</string>
     <string name="choose_theme">书写板软件主题</string>
     <string name="monospace">等宽</string>
     <string name="serif">衬线</string>
     <string name="cursive">草书</string>
-    <string name="font_default">默认</string>
     <string name="font_style">书写板字体样式</string>
     <string name="font_italics">启用斜体书写板字体样式</string>
     <string name="writingboard_app">书写板应用</string>
@@ -29,7 +28,6 @@
     <string name="about">关于\ngithub.com/Z-Siqi/WrtingBoard/</string>
     <string name="button_style">书写板按钮风格</string>
     <string name="button_hide">隐藏</string>
-    <string name="button_default">默认</string>
     <string name="button_bottom_bar">导航栏</string>
     <string name="button_manual">点击红色区域打开设置屏幕</string>
     <string name="edit_button_manual">单击紫色区域以编辑书写板文本</string>
@@ -47,4 +45,6 @@
     <string name="feature_supports_android13">此功能仅支持Android 13+</string>
     <string name="back">返回</string>
     <string name="always_visible_text">防止文本被遮挡</string>
+    <string name="disable">禁用</string>
+    <string name="more">较多</string>
 </resources>

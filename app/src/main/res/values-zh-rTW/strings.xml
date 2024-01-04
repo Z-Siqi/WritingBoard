@@ -2,6 +2,7 @@
 <resources>
     <string name="used_language">TW</string>
     <string name="app_name">寫字板</string>
+    <string name="default_string">默認</string>
     <string name="settings">設置</string>
     <string name="allow_multiple_lines">允許末尾有多個換行符\n(多於一個換行符)</string>
     <string name="clean_pointer_focus">鍵盤收起時清除鍵盤指針焦點</string>
@@ -13,13 +14,11 @@
     <string name="large">大號字體</string>
     <string name="font_size">WritingBoard字體大小</string>
     <string name="light_color">淺色主題</string>
-    <string name="theme_default">默認主題</string>
     <string name="distinct">鮮明主題</string>
     <string name="choose_theme">WritingBoard應用程序主題</string>
     <string name="monospace">Monospace</string>
     <string name="serif">Serif</string>
     <string name="cursive">Cursive</string>
-    <string name="font_default">默認</string>
     <string name="font_style">WritingBoard字體樣式</string>
     <string name="font_italics">啟用斜體WritingBoard字體樣式</string>
     <string name="writingboard_app">WritingBoard應用程式</string>
@@ -29,7 +28,6 @@
     <string name="about">關於\ngithub.com/Z-Siqi/WrtingBoard/</string>
     <string name="button_style">WritingBoard按鈕樣式</string>
     <string name="button_hide">隱藏</string>
-    <string name="button_default">默認</string>
     <string name="button_bottom_bar">導覽列</string>
     <string name="button_manual">點選紅色區域開啟設定畫面。</string>
     <string name="edit_button_manual">點擊紫色區域可編輯WritingBoard文本</string>
@@ -47,4 +45,7 @@
     <string name="feature_supports_android13">此功能僅支援Android 13+</string>
     <string name="back">返回</string>
     <string name="always_visible_text">防止文字被遮擋</string>
+    <string name="vibrate_settings">震動回饋</string>
+    <string name="disable">停用</string>
+    <string name="more">更多</string>
 </resources>
