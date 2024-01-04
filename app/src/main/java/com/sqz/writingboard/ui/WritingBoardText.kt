@@ -35,11 +35,13 @@ import androidx.core.os.postDelayed
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sqz.writingboard.R
 import com.sqz.writingboard.ValueState
 import com.sqz.writingboard.WritingBoard
 import com.sqz.writingboard.dataStore
+import com.sqz.writingboard.glance.WritingBoardWidget
 import com.sqz.writingboard.settingState
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
 import com.sqz.writingboard.ui.theme.CursiveCN
@@ -160,6 +162,9 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                 }
                 Log.i("WritingBoardTag", "Save writing board texts")
             }
+        }
+        LaunchedEffect(true) {
+            WritingBoardWidget().updateAll(context)
         }
         valueState.saveAction = false
     }
