@@ -1,6 +1,9 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="used_language">EN</string>
     <string name="app_name">WritingBoard</string>
+    <string name="widget_textonly">WritingBoard - Text Only</string>
+    <string name="widget_description">WritingBoard widget</string>
+    <string name="widget_textonly_description">WritingBoard text only widget</string>
     <string name="default_string">Default</string>
     <string name="settings">Settings</string>
     <string name="allow_multiple_lines">Allow save multiple lines at end.\n(more than one lines)</string>

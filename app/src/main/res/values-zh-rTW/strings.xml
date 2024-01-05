@@ -2,6 +2,9 @@
 <resources>
     <string name="used_language">TW</string>
     <string name="app_name">寫字板</string>
+    <string name="widget_textonly">寫字板 - 純文字</string>
+    <string name="widget_description">寫字板小部件</string>
+    <string name="widget_textonly_description">WritingBoard 純文字小部件</string>
     <string name="default_string">默認</string>
     <string name="settings">設置</string>
     <string name="allow_multiple_lines">允許末尾有多個換行符\n(多於一個換行符)</string>

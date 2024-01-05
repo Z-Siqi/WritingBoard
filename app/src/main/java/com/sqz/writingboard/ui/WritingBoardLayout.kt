@@ -55,6 +55,7 @@ import com.sqz.writingboard.component.KeyboardVisibilityObserver
 import com.sqz.writingboard.R
 import com.sqz.writingboard.ValueState
 import com.sqz.writingboard.component.Vibrate
+import com.sqz.writingboard.glance.WritingBoardTextOnlyWidget
 import com.sqz.writingboard.glance.WritingBoardWidget
 import com.sqz.writingboard.settingState
 import com.sqz.writingboard.ui.component.layout.BottomStyle
@@ -412,6 +413,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
     }
     LaunchedEffect(true) {
         WritingBoardWidget().updateAll(context)
+        WritingBoardTextOnlyWidget().updateAll(context)
     }
 }
 

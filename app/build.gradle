@@ -11,8 +11,8 @@ android {
         applicationId "com.sqz.writingboard"
         minSdk 29
         targetSdk 34
-        versionCode 45
-        versionName "0.4.5-beta"
+        versionCode 46
+        versionName "0.4.6-beta"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
