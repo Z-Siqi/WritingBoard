@@ -36,10 +36,10 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.appwidget.updateAll
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sqz.writingboard.R
-import com.sqz.writingboard.ValueState
-import com.sqz.writingboard.WritingBoard
+import com.sqz.writingboard.classes.ValueState
 import com.sqz.writingboard.dataStore
 import com.sqz.writingboard.glance.WritingBoardWidget
 import com.sqz.writingboard.settingState
@@ -51,6 +51,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.io.IOException
+
+class WritingBoard : ViewModel() {
+    var textState by mutableStateOf(TextFieldValue())
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

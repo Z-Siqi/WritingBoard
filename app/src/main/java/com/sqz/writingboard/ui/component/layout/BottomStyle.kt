@@ -24,7 +24,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.sqz.writingboard.ValueState
+import com.sqz.writingboard.classes.ValueState
 import com.sqz.writingboard.settingState
 import com.sqz.writingboard.ui.theme.themeColor
 

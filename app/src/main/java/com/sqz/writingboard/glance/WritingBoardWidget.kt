@@ -1,6 +1,7 @@
 package com.sqz.writingboard.glance
 
 import android.content.Context
+import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -15,6 +16,7 @@ import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
+import androidx.glance.action.action
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
@@ -94,7 +96,7 @@ class WritingBoardWidget : GlanceAppWidget() {
                     )
                 }
                 item {
-                    Spacer(modifier = GlanceModifier.size(size.width, 40.dp))
+                    Spacer(modifier = GlanceModifier.size(size.width, 45.dp))
                 }
             }
         }
@@ -107,7 +109,12 @@ class WritingBoardWidget : GlanceAppWidget() {
                 provider = ImageProvider(R.drawable.widget_button),
                 contentDescription = "",
                 contentScale = ContentScale.FillBounds,
-                modifier = GlanceModifier.size(40.dp).clickable(actionStartActivity<MainActivity>())
+                modifier = GlanceModifier.size(45.dp).clickable(action {
+                    val intent = Intent(context, MainActivity::class.java)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    context.startActivity(intent)
+                })
             )
         }
     }

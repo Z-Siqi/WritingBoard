@@ -53,7 +53,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.glance.appwidget.updateAll
 import com.sqz.writingboard.component.KeyboardVisibilityObserver
 import com.sqz.writingboard.R
-import com.sqz.writingboard.ValueState
+import com.sqz.writingboard.classes.ValueState
 import com.sqz.writingboard.component.Vibrate
 import com.sqz.writingboard.glance.WritingBoardTextOnlyWidget
 import com.sqz.writingboard.glance.WritingBoardWidget

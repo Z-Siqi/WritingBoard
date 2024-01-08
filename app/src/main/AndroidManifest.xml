@@ -9,26 +9,27 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:localeConfig="@xml/locales_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.WritingBoard.Starting"
-        android:localeConfig="@xml/locales_config"
         tools:targetApi="tiramisu">
         <activity
             android:name=".MainActivity"
-            android:windowSoftInputMode="adjustResize"
             android:exported="true"
-            android:theme="@style/Theme.WritingBoard.Starting">
+            android:theme="@style/Theme.WritingBoard.Starting"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <receiver
-            android:label="@string/app_name"
             android:name=".glance.WritingBoardWidgetReceiver"
-            android:exported="true">
+            android:exported="true"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -37,9 +38,9 @@
                 android:resource="@xml/writingboard_widget_info" />
         </receiver>
         <receiver
-            android:label="@string/widget_textonly"
             android:name=".glance.WritingBoardTextOnlyWidgetReceiver"
-            android:exported="true">
+            android:exported="true"
+            android:label="@string/widget_textonly">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -47,6 +48,20 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/writingboard_textonly_widget_info" />
         </receiver>
+
+        <service
+            android:name=".classes.QSTileService"
+            android:exported="true"
+            android:icon="@drawable/writingboard_logo"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.quick-settings.ACTIVE_TILE"
+                android:value="ture" />
+        </service>
     </application>
 
 </manifest>

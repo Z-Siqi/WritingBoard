@@ -52,8 +52,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.sqz.writingboard.R
-import com.sqz.writingboard.ValueState
-import com.sqz.writingboard.WritingBoardSettingState
+import com.sqz.writingboard.classes.ValueState
+import com.sqz.writingboard.classes.WritingBoardSettingState
 import com.sqz.writingboard.settingState
 import com.sqz.writingboard.ui.component.setting.ClickCardLayout
 import com.sqz.writingboard.ui.component.setting.SegmentedButtonCardLayout
