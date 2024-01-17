@@ -2,9 +2,11 @@ package com.sqz.writingboard.glance
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.Button
@@ -34,6 +36,7 @@ import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
+import androidx.glance.unit.ColorProvider
 import com.sqz.writingboard.MainActivity
 import com.sqz.writingboard.dataStore
 import com.sqz.writingboard.R
@@ -68,18 +71,33 @@ class WritingBoardWidget : GlanceAppWidget() {
             modifier = GlanceModifier,
             contentAlignment = Alignment.Center
         ) {
-            Button(
-                text = "",
-                onClick = actionStartActivity<MainActivity>(),
-                colors = ButtonDefaults.buttonColors(GlanceTheme.colors.primary),
-                modifier = GlanceModifier.size(size.width, size.height)
-            )
-            Button(
-                text = "",
-                onClick = actionStartActivity<MainActivity>(),
-                colors = ButtonDefaults.buttonColors(GlanceTheme.colors.surfaceVariant),
-                modifier = GlanceModifier.size(size.width - 5.dp, size.height - 5.dp)
-            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                Button(
+                    text = "",
+                    onClick = actionStartActivity<MainActivity>(),
+                    colors = ButtonDefaults.buttonColors(GlanceTheme.colors.primary),
+                    modifier = GlanceModifier.size(size.width, size.height)
+                )
+                Button(
+                    text = "",
+                    onClick = actionStartActivity<MainActivity>(),
+                    colors = ButtonDefaults.buttonColors(GlanceTheme.colors.surfaceVariant),
+                    modifier = GlanceModifier.size(size.width - 5.dp, size.height - 5.dp)
+                )
+            } else {
+                Button(
+                    text = "",
+                    onClick = actionStartActivity<MainActivity>(),
+                    colors = ButtonDefaults.buttonColors(ColorProvider(Color(0xFF00668B))),
+                    modifier = GlanceModifier.size(size.width, size.height)
+                )
+                Button(
+                    text = "",
+                    onClick = actionStartActivity<MainActivity>(),
+                    colors = ButtonDefaults.buttonColors(ColorProvider(Color(0xFFDCE3E9))),
+                    modifier = GlanceModifier.size(size.width - 5.dp, size.height - 5.dp)
+                )
+            }
             LazyColumn(
                 modifier = GlanceModifier
                     .size(size.width - 12.dp, size.height - 8.dp)
@@ -149,28 +167,53 @@ class WritingBoardTextOnlyWidget : GlanceAppWidget() {
             modifier = GlanceModifier,
             contentAlignment = Alignment.Center
         ) {
-            Button(
-                text = "",
-                onClick = actionStartActivity<MainActivity>(),
-                colors = ButtonDefaults.buttonColors(GlanceTheme.colors.primary),
-                modifier = GlanceModifier.size(size.width, size.height)
-            )
-            Button(
-                text = "",
-                onClick = actionStartActivity<MainActivity>(),
-                colors = ButtonDefaults.buttonColors(GlanceTheme.colors.surfaceVariant),
-                modifier = GlanceModifier.size(size.width - 5.dp, size.height - 5.dp)
-            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                Button(
+                    text = "",
+                    onClick = actionStartActivity<MainActivity>(),
+                    colors = ButtonDefaults.buttonColors(GlanceTheme.colors.primary),
+                    modifier = GlanceModifier.size(size.width, size.height)
+                )
+                Button(
+                    text = "",
+                    onClick = actionStartActivity<MainActivity>(),
+                    colors = ButtonDefaults.buttonColors(GlanceTheme.colors.surfaceVariant),
+                    modifier = GlanceModifier.size(size.width - 5.dp, size.height - 5.dp)
+                )
+            } else {
+                Button(
+                    text = "",
+                    onClick = actionStartActivity<MainActivity>(),
+                    colors = ButtonDefaults.buttonColors(ColorProvider(Color(0xFF00668B))),
+                    modifier = GlanceModifier.size(size.width, size.height)
+                )
+                Button(
+                    text = "",
+                    onClick = actionStartActivity<MainActivity>(),
+                    colors = ButtonDefaults.buttonColors(ColorProvider(Color(0xFFDCE3E9))),
+                    modifier = GlanceModifier.size(size.width - 5.dp, size.height - 5.dp)
+                )
+            }
             LazyColumn(
                 modifier = GlanceModifier
                     .size(size.width - 12.dp, size.height - 8.dp)
-                    .clickable(actionStartActivity<MainActivity>())
+                    .clickable(action {
+                        val intent = Intent(context, MainActivity::class.java)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        context.startActivity(intent)
+                    })
             ) {
                 item {
                     Text(
                         text = savedText,
                         modifier = GlanceModifier.fillMaxSize()
-                            .clickable(actionStartActivity<MainActivity>()),
+                            .clickable(action {
+                                val intent = Intent(context, MainActivity::class.java)
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                context.startActivity(intent)
+                            }),
                         style = TextStyle(
                             color = GlanceTheme.colors.onSurfaceVariant,
                             fontWeight = androidx.glance.text.FontWeight.Medium

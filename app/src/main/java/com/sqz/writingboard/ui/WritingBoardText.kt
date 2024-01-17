@@ -11,10 +11,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text2.BasicTextField2
+import androidx.compose.foundation.text2.input.insert
+import androidx.compose.foundation.text2.input.placeCursorAtEnd
+import androidx.compose.foundation.text2.input.rememberTextFieldState
+import androidx.compose.foundation.text2.input.selectAll
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,8 +27,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -59,6 +66,9 @@ class WritingBoard : ViewModel() {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
+
+    val fixChooseAllWay = true
+    val text2 = rememberTextFieldState()
 
     val valueState: ValueState = viewModel()
     val viewModel: WritingBoard = viewModel()
@@ -109,10 +119,16 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
             .map { preferences ->
                 preferences[stringPreferencesKey("saved_text")] ?: ""
             }.first()
-        viewModel.textState = TextFieldValue(savedText)
+        viewModel.textState = TextFieldValue(savedText, TextRange(0, savedText.length))
+
+        if (fixChooseAllWay && !valueState.initLayout) { //text2
+            text2.edit { insert(0, viewModel.textState.text) }
+        }
 
         if (!valueState.initLayout) { //to block save if text not load
-            valueState.initLayout = true
+            Handler(Looper.getMainLooper()).postDelayed(88) {
+                valueState.initLayout = true
+            }
             Log.i("WritingBoardTag", "Initializing WritingBoard Text")
         }
 
@@ -132,55 +148,93 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
     }
     //match action by done button
     if (valueState.matchText) {
-        viewModel.textState.text.let { newText ->
-            if (
-                (newText.endsWith("\uD83C\uDFF3️\u200D⚧️")) &&
-                (!settingState.readSwitchState("easter_eggs", context)) ||
-                (newText.endsWith("_-OPEN_IT"))
-            ) {
-                settingState.writeSwitchState("easter_eggs", context, true)
-                valueState.ee = true
+        if (fixChooseAllWay) {
+            valueState.saveAction = true
+            text2.text.let { newText ->
+                if (
+                    (newText.endsWith("\uD83C\uDFF3️\u200D⚧️")) &&
+                    (!settingState.readSwitchState("easter_eggs", context)) ||
+                    (newText.endsWith("_-OPEN_IT"))
+                ) {
+                    settingState.writeSwitchState("easter_eggs", context, true)
+                    valueState.ee = true
+                }
+            }
+        } else {
+            viewModel.textState.text.let { newText ->
+                if (
+                    (newText.endsWith("\uD83C\uDFF3️\u200D⚧️")) &&
+                    (!settingState.readSwitchState("easter_eggs", context)) ||
+                    (newText.endsWith("_-OPEN_IT"))
+                ) {
+                    settingState.writeSwitchState("easter_eggs", context, true)
+                    valueState.ee = true
+                }
             }
         }
         valueState.matchText = false
     }
     //save action
+    var diskProtect by remember { mutableStateOf(false) }
     if (valueState.saveAction && valueState.initLayout) {
-        viewModel.textState.text.let { newText ->
-            val textToSave = if (!settingState.readSwitchState(
-                    "allow_multiple_lines",
-                    context
-                ) && newText.isNotEmpty() && newText.last() == '\n'
-            ) {
-                Log.i("WritingBoardTag", "Removing line breaks and adding a new line.")
-                newText.trimEnd { it == '\n' }.plus('\n')
-            } else if (newText.isEmpty()) {
-                Log.w("WritingBoardTag", "Saved Nothing!")
-                newText
-            } else {
-                newText
+
+        if (fixChooseAllWay) { //text2
+            viewModel.textState = TextFieldValue(text2.text.toString())
+        }
+
+        if (diskProtect) {
+            Handler(Looper.getMainLooper()).postDelayed(1000) {
+                diskProtect = false
             }
-            coroutineScope.launch {
-                dataStore.edit { preferences ->
-                    preferences[stringPreferencesKey("saved_text")] = textToSave
+        }
+        if (!diskProtect || valueState.matchText) {
+            viewModel.textState.text.let { newText ->
+                val textToSave = if (!settingState.readSwitchState(
+                        "allow_multiple_lines",
+                        context
+                    ) && newText.isNotEmpty() && newText.last() == '\n'
+                ) {
+                    Log.i("WritingBoardTag", "Removing line breaks and adding a new line.")
+                    newText.trimEnd { it == '\n' }.plus('\n')
+                } else if (newText.isEmpty()) {
+                    Log.w("WritingBoardTag", "Saved Nothing!")
+                    newText
+                } else {
+                    newText
                 }
-                Log.i("WritingBoardTag", "Save writing board texts")
+                coroutineScope.launch {
+                    dataStore.edit { preferences ->
+                        preferences[stringPreferencesKey("saved_text")] = textToSave
+                    }
+                    Log.i("WritingBoardTag", "Save writing board texts")
+                }
             }
+            diskProtect = true
         }
         LaunchedEffect(true) {
             WritingBoardWidget().updateAll(context)
         }
         valueState.saveAction = false
     }
+
     if (
         (autoSave) &&
+        (valueState.initLayout) &&
         (!settingState.readSwitchState("disable_auto_save", context))
     ) {
-        Handler(Looper.getMainLooper()).postDelayed(2500) {
+        var save by remember { mutableIntStateOf(0) }
+        save++
+        if (save == 1) {
             valueState.saveAction = true
-            autoSave = false
         }
+        Handler(Looper.getMainLooper()).postDelayed(3000) {
+            if (save > 1) {
+                save = 0
+            }
+        }
+        autoSave = false
     }
+
     if (
         (settingState.readSwitchState("edit_button", context)) &&
         (!valueState.editButton) ||
@@ -204,32 +258,89 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
         )
         Log.i("WritingBoardTag", "Read-only text")
     } else {
-        BasicTextField2(
-            value = viewModel.textState.text,
-            onValueChange = { newText ->
-                viewModel.textState = TextFieldValue(newText)
-                autoSave = true
-            },
-            scrollState = scrollState,
-            modifier = modifier
-                .fillMaxSize()
-                .drawVerticalScrollbar(scrollState)
-                .padding(8.dp)
-                .onFocusEvent { focusState ->
-                    if (focusState.isFocused) {
-                        valueState.isEditing = true
-                    }
+        var autoSaveByChar by remember { mutableIntStateOf(0) }
+        if (autoSaveByChar == 20) {
+            autoSave = true
+            autoSaveByChar = 0
+        }
+        if (fixChooseAllWay) {
+            var fixChooseAll by remember { mutableStateOf(false) }
+            if (
+                (!fixChooseAll) &&
+                (text2.text.selectionInChars.length == text2.text.length) &&
+                (valueState.initLayout) &&
+                (text2.text.isNotEmpty())
+            ) {
+                text2.edit { placeCursorAtEnd() }
+                text2.edit { selectAll() }
+                fixChooseAll = true
+            } else if (text2.text.selectionInChars.length < text2.text.length) {
+                fixChooseAll = false
+            }
+            if (text2.undoState.canUndo) {
+                Handler(Looper.getMainLooper()).postDelayed(1000) {
+                    autoSaveByChar++
                 }
-                .pointerInput(Unit) {
-                    detectVerticalDragGestures { _, _ -> }
-                },
-            textStyle = TextStyle.Default.copy(
-                fontSize = fontSize,
-                fontWeight = fontWeight,
-                fontFamily = fontFamily,
-                fontStyle = fontStyle,
-                color = themeColor("textColor")
+                text2.undoState.clearHistory()
+            }
+            BasicTextField2(
+                state = text2,
+                scrollState = scrollState,
+                modifier = modifier
+                    .fillMaxSize()
+                    .drawVerticalScrollbar(scrollState)
+                    .padding(8.dp)
+                    .onFocusEvent { focusState ->
+                        if (focusState.isFocused) {
+                            valueState.isEditing = true
+                        }
+                    }
+                    .onSizeChanged {
+                        autoSave = true
+                    }
+                    .pointerInput(Unit) {
+                        detectVerticalDragGestures { _, _ -> }
+                    },
+                textStyle = TextStyle.Default.copy(
+                    fontSize = fontSize,
+                    fontWeight = fontWeight,
+                    fontFamily = fontFamily,
+                    fontStyle = fontStyle,
+                    color = themeColor("textColor")
+                )
             )
-        )
+        } else {
+            BasicTextField2(
+                value = viewModel.textState.text,
+                onValueChange = { newText ->
+                    viewModel.textState = TextFieldValue(newText)
+                    autoSaveByChar++
+                },
+                scrollState = scrollState,
+                modifier = modifier
+                    .fillMaxSize()
+                    .drawVerticalScrollbar(scrollState)
+                    .padding(8.dp)
+                    .onFocusEvent { focusState ->
+                        if (focusState.isFocused) {
+                            valueState.isEditing = true
+                            autoSaveByChar++
+                        }
+                    }
+                    .onSizeChanged {
+                        autoSave = true
+                    }
+                    .pointerInput(Unit) {
+                        detectVerticalDragGestures { _, _ -> }
+                    },
+                textStyle = TextStyle.Default.copy(
+                    fontSize = fontSize,
+                    fontWeight = fontWeight,
+                    fontFamily = fontFamily,
+                    fontStyle = fontStyle,
+                    color = themeColor("textColor")
+                )
+            )
+        }
     }
 }

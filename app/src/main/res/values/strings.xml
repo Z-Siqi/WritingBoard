@@ -42,7 +42,7 @@
     <string name="thin">Thin</string>
     <string name="normal">Normal</string>
     <string name="thick">Thick</string>
-    <string name="disable_auto_save">Disable auto save text. Default:\n"After changes 2.5s auto save"</string>
+    <string name="disable_auto_save">Disable auto save text. Default:\n"auto save text"</string>
     <string name="lower_than_android13">Your system version is lower than Android 13</string>
     <string name="feature_supports_android13">This feature only supports Android 13+</string>
     <string name="back">Go Back</string>

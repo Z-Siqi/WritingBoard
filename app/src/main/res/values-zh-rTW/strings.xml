@@ -43,7 +43,7 @@
     <string name="thin">細的</string>
     <string name="normal">正常</string>
     <string name="thick">粗的</string>
-    <string name="disable_auto_save">停用自動儲存文字，預設:\n"文字更改後2.5秒自動儲存"</string>
+    <string name="disable_auto_save">停用自動儲存文字，預設:\n"自動儲存更改後的文字"</string>
     <string name="lower_than_android13">您的系統版本低於Android 13</string>
     <string name="feature_supports_android13">此功能僅支援Android 13+</string>
     <string name="back">返回</string>

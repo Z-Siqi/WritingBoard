@@ -1,6 +1,8 @@
 package com.sqz.writingboard.ui
 
 import android.app.Activity
+import android.app.StatusBarManager
+import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -8,6 +10,8 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
+import androidx.annotation.RequiresApi
+import android.graphics.drawable.Icon
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -46,7 +50,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat.getString
 import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.os.postDelayed
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -329,6 +335,30 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
         item {
             ClickCardLayout(
                 intent = {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        val statusBarManager = getSystemService(
+                            context, StatusBarManager::class.java
+                        ) as StatusBarManager
+                        statusBarManager.requestAddTileService(
+                            ComponentName(context, "com.sqz.writingboard.classes.QSTileService"),
+                            getString(context, R.string.app_name),
+                            Icon.createWithResource(context, R.drawable.writingboard_logo),
+                            { },
+                            { }
+                        )
+                    } else {
+                        navController.navigate("ErrorWithSystemVersionA13")
+                    }
+                },
+                text = "Add QS Tile",
+                painter = R.drawable.ic_launcher_foreground,
+                contentDescription = "Language",
+                colors = cardColors
+            )
+        }
+        item {
+            ClickCardLayout(
+                intent = {
                     val intent = Intent(
                         Intent.ACTION_VIEW,
                         Uri.parse("https://github.com/Z-Siqi/WritingBoard/")
@@ -422,6 +452,7 @@ fun WritingBoardSetting(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Preview
 @Composable
 private fun WritingBoardSettingPreview() {

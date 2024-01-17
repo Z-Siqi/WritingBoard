@@ -9,7 +9,7 @@ import android.service.quicksettings.TileService
 import com.sqz.writingboard.MainActivity
 
 @Suppress("DEPRECATION")
-class QSTileService: TileService() {
+class QSTileService : TileService() {
 
     override fun onStartListening() {
         super.onStartListening()
@@ -23,13 +23,20 @@ class QSTileService: TileService() {
         qsTile.updateTile()
     }
 
-    @SuppressLint("NewApi")
+    @SuppressLint("NewApi", "StartActivityAndCollapseDeprecated")
     override fun onClick() {
         super.onClick()
         val intent = Intent(this, MainActivity::class.java)
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.TIRAMISU) {
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-            startActivityAndCollapse(PendingIntent.getActivity(this, 0, intent,PendingIntent.FLAG_IMMUTABLE))
+            startActivityAndCollapse(
+                PendingIntent.getActivity(
+                    this,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_IMMUTABLE
+                )
+            )
         } else {
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
