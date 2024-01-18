@@ -1,6 +1,7 @@
 package com.sqz.writingboard.classes
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -26,4 +27,7 @@ class ValueState : ViewModel() {
     var editAction by mutableStateOf(false)
     var doneAction by mutableStateOf(false)
     var onClickSetting by mutableStateOf(false)
+
+    /*QSTileRequestResult value*/
+    var resultOfQST by mutableIntStateOf(0)
 }

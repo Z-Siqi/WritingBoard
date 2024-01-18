@@ -1,5 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="used_language">EN</string>
+    <!-- DO NOT TRANSLATE "used_language" -->
+    <string name="used_language">EN</string> <!-- DO NOT TRANSLATE IT -->
+    <!-- DO NOT TRANSLATE "used_language" -->
     <string name="app_name">WritingBoard</string>
     <string name="widget_textonly">WritingBoard - Text Only</string>
     <string name="widget_description">WritingBoard widget</string>
@@ -50,4 +52,11 @@
     <string name="vibrate_settings">Vibration feedback</string>
     <string name="disable">Disable</string>
     <string name="more">More</string>
+    <string name="Add_QS_Tile">Add Quick Setting Tile \nOpen the app by click the Tile</string>
+    <string name="TILE_ADD_REQUEST_NO_SUPPORT">Not support! \nplease follow below: \n1,Swipe down to open the Quick Settings panel.\n2,Tap the edit button.\n3,Find the app tile.\n4,Hold down the tile and drag it to the list of active tiles.</string>
+    <string name="TILE_ADD_REQUEST_0">Not add, but request is sent</string>
+    <string name="TILE_ADD_REQUEST_1">Already added</string>
+    <string name="TILE_ADD_REQUEST_2">Tile is added</string>
+    <string name="language_no_support">Language setting is not support below Android13 \nPlease try to update your system!</string>
+    <string name="request_widget">Add WritingBoard Widget</string>
 </resources>

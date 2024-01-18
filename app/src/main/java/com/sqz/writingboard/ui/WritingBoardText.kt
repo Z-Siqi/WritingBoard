@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text2.BasicTextField2
+import androidx.compose.foundation.text2.input.clearText
 import androidx.compose.foundation.text2.input.insert
 import androidx.compose.foundation.text2.input.placeCursorAtEnd
 import androidx.compose.foundation.text2.input.rememberTextFieldState
@@ -137,12 +138,17 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
 
     //clean all texts action
     if (valueState.cleanAllText) {
-        viewModel.textState.text.let { newText ->
-            coroutineScope.launch {
-                dataStore.edit { preferences ->
-                    preferences[stringPreferencesKey("saved_text")] = newText.drop(Int.MAX_VALUE)
+        if (fixChooseAllWay) {
+            text2.clearText()
+            valueState.saveAction = true
+        } else {
+            viewModel.textState.text.let { newText ->
+                coroutineScope.launch {
+                    dataStore.edit { preferences ->
+                        preferences[stringPreferencesKey("saved_text")] = newText.drop(Int.MAX_VALUE)
+                    }
+                    Log.i("WritingBoardTag", "Save writing board texts")
                 }
-                Log.i("WritingBoardTag", "Save writing board texts")
             }
         }
     }

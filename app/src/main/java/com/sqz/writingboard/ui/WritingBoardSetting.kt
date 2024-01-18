@@ -12,6 +12,7 @@ import android.provider.Settings
 import android.util.Log
 import androidx.annotation.RequiresApi
 import android.graphics.drawable.Icon
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,12 +56,15 @@ import androidx.core.app.ActivityCompat.getString
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.os.postDelayed
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.sqz.writingboard.R
+import com.sqz.writingboard.classes.QSTileRequestResult
 import com.sqz.writingboard.classes.ValueState
 import com.sqz.writingboard.classes.WritingBoardSettingState
+import com.sqz.writingboard.glance.WritingBoardWidgetReceiver
 import com.sqz.writingboard.settingState
 import com.sqz.writingboard.ui.component.setting.ClickCardLayout
 import com.sqz.writingboard.ui.component.setting.SegmentedButtonCardLayout
@@ -67,6 +72,8 @@ import com.sqz.writingboard.ui.component.drawVerticalScrollbar
 import com.sqz.writingboard.ui.component.setting.ExtraButtonCardLayout
 import com.sqz.writingboard.ui.component.setting.SwitchCardLayout
 import com.sqz.writingboard.ui.theme.themeColor
+import java.util.concurrent.Executors
+import java.util.function.Consumer
 
 private val setting = WritingBoardSettingState()
 
@@ -316,42 +323,76 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
             }
         }
         item {
+            var onClick by remember { mutableStateOf(false) }
             ClickCardLayout(
                 intent = {
+                    onClick = true
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                        intent.data = Uri.fromParts("package", context.packageName, null)
-                        startActivityForResult(context as Activity, intent, 0, null)
+                        val statusBarManager = getSystemService(
+                            context, StatusBarManager::class.java
+                        ) as StatusBarManager
+                        val callback = Consumer<Int> { result -> valueState.resultOfQST = result }
+                        statusBarManager.requestAddTileService(
+                            ComponentName(context, "com.sqz.writingboard.classes.QSTileService"),
+                            getString(context, R.string.app_name),
+                            Icon.createWithResource(context, R.drawable.writingboard_logo),
+                            Executors.newSingleThreadExecutor(),
+                            callback
+                        )
                     } else {
+                        valueState.resultOfQST = -1
                         navController.navigate("ErrorWithSystemVersionA13")
                     }
                 },
-                text = stringResource(R.string.language),
-                painter = R.drawable.ic_language,
-                contentDescription = "Language",
+                text = stringResource(R.string.Add_QS_Tile),
+                painter = R.drawable.writingboard_logo,
+                contentDescription = "QS_Tile",
                 colors = cardColors
             )
+            if (onClick) {
+                QSTileRequestResult().makeToast()
+                QSTileRequestResult().makeErrorLog()
+                onClick = false
+            }
+        }
+        item {
+            var onClick by remember { mutableStateOf(false) }
+            ClickCardLayout(
+                intent = {
+                    onClick = true
+                },
+                text = stringResource(R.string.request_widget),
+                painter = R.drawable.writingboard_logo,
+                contentDescription = "WritingBoardWidget",
+                colors = cardColors
+            )
+            if (onClick) {
+                LaunchedEffect(true) {
+                    GlanceAppWidgetManager(context).requestPinGlanceAppWidget(
+                        WritingBoardWidgetReceiver::class.java
+                    )
+                }
+                onClick = false
+            }
         }
         item {
             ClickCardLayout(
                 intent = {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        val statusBarManager = getSystemService(
-                            context, StatusBarManager::class.java
-                        ) as StatusBarManager
-                        statusBarManager.requestAddTileService(
-                            ComponentName(context, "com.sqz.writingboard.classes.QSTileService"),
-                            getString(context, R.string.app_name),
-                            Icon.createWithResource(context, R.drawable.writingboard_logo),
-                            { },
-                            { }
-                        )
+                        val intent = Intent(Settings.ACTION_APP_LOCALE_SETTINGS)
+                        intent.data = Uri.fromParts("package", context.packageName, null)
+                        startActivityForResult(context as Activity, intent, 0, null)
                     } else {
+                        Toast.makeText(
+                            context,
+                            getString(context, R.string.language_no_support),
+                            Toast.LENGTH_SHORT
+                        ).show()
                         navController.navigate("ErrorWithSystemVersionA13")
                     }
                 },
-                text = "Add QS Tile",
-                painter = R.drawable.ic_launcher_foreground,
+                text = stringResource(R.string.language),
+                painter = R.drawable.ic_language,
                 contentDescription = "Language",
                 colors = cardColors
             )
