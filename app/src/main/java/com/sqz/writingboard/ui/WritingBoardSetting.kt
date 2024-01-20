@@ -1,8 +1,6 @@
 package com.sqz.writingboard.ui
 
 import android.app.Activity
-import android.app.StatusBarManager
-import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -11,7 +9,6 @@ import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import androidx.annotation.RequiresApi
-import android.graphics.drawable.Icon
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -33,6 +31,7 @@ import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -54,7 +53,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat.getString
 import androidx.core.app.ActivityCompat.startActivityForResult
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.os.postDelayed
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -62,18 +60,19 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.sqz.writingboard.R
 import com.sqz.writingboard.classes.QSTileRequestResult
+import com.sqz.writingboard.classes.QSTileService
 import com.sqz.writingboard.classes.ValueState
 import com.sqz.writingboard.classes.WritingBoardSettingState
+import com.sqz.writingboard.glance.WritingBoardTextOnlyWidgetReceiver
 import com.sqz.writingboard.glance.WritingBoardWidgetReceiver
 import com.sqz.writingboard.settingState
 import com.sqz.writingboard.ui.component.setting.ClickCardLayout
 import com.sqz.writingboard.ui.component.setting.SegmentedButtonCardLayout
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
+import com.sqz.writingboard.ui.component.setting.DoubleButtonCard
 import com.sqz.writingboard.ui.component.setting.ExtraButtonCardLayout
 import com.sqz.writingboard.ui.component.setting.SwitchCardLayout
 import com.sqz.writingboard.ui.theme.themeColor
-import java.util.concurrent.Executors
-import java.util.function.Consumer
 
 private val setting = WritingBoardSettingState()
 
@@ -86,7 +85,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
     val cardColors = CardDefaults.cardColors(containerColor = themeColor("cardColor"))
 
     var allowMultipleLines by setting.rememberSwitchState("allow_multiple_lines", context)
-    var cleanPointerFocus by setting.rememberSwitchState("clean_pointer_focus", context)
+    //var cleanPointerFocus by setting.rememberSwitchState("clean_pointer_focus", context)
     var cleanAllText by setting.rememberSwitchState("clean_all_text", context)
     var editButton by setting.rememberSwitchState("edit_button", context)
     var theme by setting.rememberSegmentedButtonState("theme", context)
@@ -98,6 +97,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
     var disableAutoSave by setting.rememberSwitchState("disable_auto_save", context)
     var alwaysVisibleText by setting.rememberSwitchState("always_visible_text", context)
     var vibrate by setting.rememberSegmentedButtonState("vibrate_settings", context)
+    var optEditText by setting.rememberSwitchState("opt_edit_text", context)
 
     LazyColumn(
         modifier = modifier
@@ -261,6 +261,8 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                 modifier = modifier.padding(top = 16.dp, start = 18.dp)
             )
         }
+        /*
+        //Temporarily disabled, bad compatible in BasicTextField2
         item {
             SwitchCardLayout(
                 text = stringResource(R.string.clean_pointer_focus),
@@ -272,6 +274,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                 colors = cardColors
             )
         }
+         */
         item {
             SwitchCardLayout(
                 text = stringResource(R.string.allow_multiple_lines),
@@ -290,6 +293,17 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                 onCheckedChange = {
                     disableAutoSave = it
                     setting.writeSwitchState("disable_auto_save", context, it)
+                },
+                colors = cardColors
+            )
+        }
+        item {
+            SwitchCardLayout(
+                text = stringResource(R.string.opt_edit_text),
+                checked = optEditText,
+                onCheckedChange = {
+                    optEditText = it
+                    setting.writeSwitchState("opt_edit_text", context, it)
                 },
                 colors = cardColors
             )
@@ -324,55 +338,64 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
         }
         item {
             var onClick by remember { mutableStateOf(false) }
+            var cannot by remember { mutableStateOf(false) }
             ClickCardLayout(
-                intent = {
-                    onClick = true
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        val statusBarManager = getSystemService(
-                            context, StatusBarManager::class.java
-                        ) as StatusBarManager
-                        val callback = Consumer<Int> { result -> valueState.resultOfQST = result }
-                        statusBarManager.requestAddTileService(
-                            ComponentName(context, "com.sqz.writingboard.classes.QSTileService"),
-                            getString(context, R.string.app_name),
-                            Icon.createWithResource(context, R.drawable.writingboard_logo),
-                            Executors.newSingleThreadExecutor(),
-                            callback
-                        )
-                    } else {
-                        valueState.resultOfQST = -1
-                        navController.navigate("ErrorWithSystemVersionA13")
-                    }
-                },
+                intent = { onClick = true },
                 text = stringResource(R.string.Add_QS_Tile),
                 painter = R.drawable.writingboard_logo,
                 contentDescription = "QS_Tile",
                 colors = cardColors
             )
             if (onClick) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    QSTileService().RequestAdd()
+                } else {
+                    valueState.resultOfQST = -1
+                    cannot = true
+                }
                 QSTileRequestResult().makeToast()
                 QSTileRequestResult().makeErrorLog()
                 onClick = false
+            } else if (cannot) {
+                AlertDialog(
+                    icon = { Icon(painterResource(id = R.drawable.warning), "") },
+                    title = { Text(text = "Not Support") },
+                    text = { Text(text = stringResource(R.string.not_support)) },
+                    dismissButton = {
+                        TextButton(onClick = { cannot = false })
+                        { Text(stringResource(R.string.dismiss)) }
+                    },
+                    onDismissRequest = { cannot = false },
+                    confirmButton = { /*TODO*/ }
+                )
             }
         }
         item {
-            var onClick by remember { mutableStateOf(false) }
-            ClickCardLayout(
-                intent = {
-                    onClick = true
-                },
-                text = stringResource(R.string.request_widget),
-                painter = R.drawable.writingboard_logo,
-                contentDescription = "WritingBoardWidget",
+            var onClick1 by remember { mutableStateOf(false) }
+            var onClick2 by remember { mutableStateOf(false) }
+            DoubleButtonCard(
+                title = stringResource(R.string.request_widget),
+                buttonStartName = stringResource(R.string.text_only),
+                buttonStartAction = { onClick1 = true },
+                buttonEndName = stringResource(R.string.default_string),
+                buttonEndAction = { onClick2 = true },
                 colors = cardColors
             )
-            if (onClick) {
+            if (onClick1) {
+                LaunchedEffect(true) {
+                    GlanceAppWidgetManager(context).requestPinGlanceAppWidget(
+                        WritingBoardTextOnlyWidgetReceiver::class.java
+                    )
+                }
+                onClick1 = false
+            }
+            if (onClick2) {
                 LaunchedEffect(true) {
                     GlanceAppWidgetManager(context).requestPinGlanceAppWidget(
                         WritingBoardWidgetReceiver::class.java
                     )
                 }
-                onClick = false
+                onClick2 = false
             }
         }
         item {

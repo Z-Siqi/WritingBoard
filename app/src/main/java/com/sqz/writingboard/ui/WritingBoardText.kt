@@ -8,10 +8,12 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.onConsumedWindowInsetsChanged
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text2.BasicTextField2
 import androidx.compose.foundation.text2.input.clearText
+import androidx.compose.foundation.text2.input.delete
 import androidx.compose.foundation.text2.input.insert
 import androidx.compose.foundation.text2.input.placeCursorAtEnd
 import androidx.compose.foundation.text2.input.rememberTextFieldState
@@ -30,6 +32,7 @@ import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
@@ -54,6 +57,7 @@ import com.sqz.writingboard.settingState
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
 import com.sqz.writingboard.ui.theme.CursiveCN
 import com.sqz.writingboard.ui.theme.themeColor
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -133,7 +137,7 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
             Log.i("WritingBoardTag", "Initializing WritingBoard Text")
         }
 
-        Log.i("WritingBoardTag", "LaunchedEffect: val savedText")
+        Log.d("WritingBoardTag", "LaunchedEffect: val savedText")
     }
 
     //clean all texts action
@@ -145,7 +149,8 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
             viewModel.textState.text.let { newText ->
                 coroutineScope.launch {
                     dataStore.edit { preferences ->
-                        preferences[stringPreferencesKey("saved_text")] = newText.drop(Int.MAX_VALUE)
+                        preferences[stringPreferencesKey("saved_text")] =
+                            newText.drop(Int.MAX_VALUE)
                     }
                     Log.i("WritingBoardTag", "Save writing board texts")
                 }
@@ -181,41 +186,32 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
         valueState.matchText = false
     }
     //save action
-    var diskProtect by remember { mutableStateOf(false) }
     if (valueState.saveAction && valueState.initLayout) {
 
         if (fixChooseAllWay) { //text2
             viewModel.textState = TextFieldValue(text2.text.toString())
         }
 
-        if (diskProtect) {
-            Handler(Looper.getMainLooper()).postDelayed(1000) {
-                diskProtect = false
+        viewModel.textState.text.let { newText ->
+            val textToSave = if (!settingState.readSwitchState(
+                    "allow_multiple_lines",
+                    context
+                ) && newText.isNotEmpty() && newText.last() == '\n'
+            ) {
+                Log.d("WritingBoardTag", "Removing line breaks and adding a new line.")
+                newText.trimEnd { it == '\n' }.plus('\n')
+            } else if (newText.isEmpty()) {
+                Log.w("WritingBoardTag", "Saved Nothing!")
+                newText
+            } else {
+                newText
             }
-        }
-        if (!diskProtect || valueState.matchText) {
-            viewModel.textState.text.let { newText ->
-                val textToSave = if (!settingState.readSwitchState(
-                        "allow_multiple_lines",
-                        context
-                    ) && newText.isNotEmpty() && newText.last() == '\n'
-                ) {
-                    Log.i("WritingBoardTag", "Removing line breaks and adding a new line.")
-                    newText.trimEnd { it == '\n' }.plus('\n')
-                } else if (newText.isEmpty()) {
-                    Log.w("WritingBoardTag", "Saved Nothing!")
-                    newText
-                } else {
-                    newText
+            coroutineScope.launch {
+                dataStore.edit { preferences ->
+                    preferences[stringPreferencesKey("saved_text")] = textToSave
                 }
-                coroutineScope.launch {
-                    dataStore.edit { preferences ->
-                        preferences[stringPreferencesKey("saved_text")] = textToSave
-                    }
-                    Log.i("WritingBoardTag", "Save writing board texts")
-                }
+                Log.i("WritingBoardTag", "Save writing board texts")
             }
-            diskProtect = true
         }
         LaunchedEffect(true) {
             WritingBoardWidget().updateAll(context)
@@ -233,12 +229,13 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
         if (save == 1) {
             valueState.saveAction = true
         }
-        Handler(Looper.getMainLooper()).postDelayed(3000) {
+        LaunchedEffect(true) {
+            delay(1500)
             if (save > 1) {
                 save = 0
             }
+            autoSave = false
         }
-        autoSave = false
     }
 
     if (
@@ -262,14 +259,18 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                 color = themeColor("textColor")
             )
         )
-        Log.i("WritingBoardTag", "Read-only text")
+        Log.d("WritingBoardTag", "Read-only text")
     } else {
+        //auto save by char
         var autoSaveByChar by remember { mutableIntStateOf(0) }
         if (autoSaveByChar == 20) {
             autoSave = true
             autoSaveByChar = 0
         }
+
         if (fixChooseAllWay) {
+            val isWindowFocused = LocalWindowInfo.current.isWindowFocused
+            //fix choose all
             var fixChooseAll by remember { mutableStateOf(false) }
             if (
                 (!fixChooseAll) &&
@@ -283,12 +284,55 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
             } else if (text2.text.selectionInChars.length < text2.text.length) {
                 fixChooseAll = false
             }
-            if (text2.undoState.canUndo) {
-                Handler(Looper.getMainLooper()).postDelayed(1000) {
-                    autoSaveByChar++
+
+            //opt editing when reopen app
+            var judgeCondition by remember { mutableStateOf(false) }
+            if (!settingState.readSwitchState("opt_edit_text", context)) {
+                var rememberScroll by remember { mutableIntStateOf(0) }
+                var scrollIt by remember { mutableStateOf(false) }
+                if (scrollIt && judgeCondition && valueState.isEditing && rememberScroll != 0) {
+                    LaunchedEffect(true) {
+                        scrollState.scrollTo(rememberScroll)
+                    }
+                    scrollIt = false
+                } else if (!valueState.isEditing) rememberScroll = 0
+                var oldChar by remember { mutableIntStateOf(0) }
+                if (text2.text.selectionInChars.collapsed && valueState.softKeyboard) {
+                    if (text2.text.selectionInChars.start != oldChar) {
+                        rememberScroll = scrollState.value
+                        LaunchedEffect(true) {
+                            delay(500)
+                            oldChar = text2.text.selectionInChars.start
+                        }
+                    }
                 }
+                if (valueState.softKeyboard && rememberScroll != 0 && isWindowFocused) {
+                    Handler(Looper.getMainLooper()).postDelayed(200) {
+                        scrollIt = true
+                    }
+                    Handler(Looper.getMainLooper()).postDelayed(300) {
+                        judgeCondition = false
+                    }
+                }
+            } else {
+                if (valueState.isEditing && valueState.softKeyboard && isWindowFocused) {
+                    LaunchedEffect(true) {
+                        delay(200)
+                        text2.edit { insert(text2.text.selectionInChars.start, " ") }
+                        Handler(Looper.getMainLooper()).postDelayed(1) {
+                            text2.edit { placeCursorBeforeCharAt(text2.text.selectionInChars.start -1) }
+                            text2.edit { delete(text2.text.selectionInChars.start, text2.text.selectionInChars.start +1) }
+                        }
+                    }
+                }
+            }
+
+            //catch typing
+            if (text2.undoState.canUndo) {
+                autoSaveByChar++
                 text2.undoState.clearHistory()
             }
+            //text function
             BasicTextField2(
                 state = text2,
                 scrollState = scrollState,
@@ -301,8 +345,11 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                             valueState.isEditing = true
                         }
                     }
-                    .onSizeChanged {
-                        autoSave = true
+                    .onConsumedWindowInsetsChanged {
+                        if (!isWindowFocused) {
+                            autoSave = true
+                            judgeCondition = true
+                        }
                     }
                     .pointerInput(Unit) {
                         detectVerticalDragGestures { _, _ -> }

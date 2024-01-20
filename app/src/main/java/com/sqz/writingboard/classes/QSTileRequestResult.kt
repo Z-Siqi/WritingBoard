@@ -18,7 +18,7 @@ class QSTileRequestResult {
         val context = LocalContext.current
         val valueState: ValueState = viewModel()
         if (valueState.resultOfQST == -1) {
-            Toast.makeText(context, result(), Toast.LENGTH_LONG).show()
+            Toast.makeText(context, result(), Toast.LENGTH_SHORT).show()
         } else if (valueState.resultOfQST <= 3) {
             Toast.makeText(context, result(), Toast.LENGTH_SHORT).show()
         } else if (valueState.resultOfQST > 1000) {

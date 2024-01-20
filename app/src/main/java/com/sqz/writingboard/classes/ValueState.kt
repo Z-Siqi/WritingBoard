@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 class ValueState : ViewModel() {
     /*value*/
     var initLayout by mutableStateOf(false)
+    var softKeyboard by mutableStateOf(false)
     var isEditing by mutableStateOf(false)
     var cleanAllText by mutableStateOf(false)
     var editButton by mutableStateOf(false)

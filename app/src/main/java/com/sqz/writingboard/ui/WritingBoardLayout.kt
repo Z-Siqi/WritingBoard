@@ -72,7 +72,6 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
     val context = LocalContext.current
     val scrollState = rememberScrollState()
     var isKeyboardVisible by remember { mutableStateOf(false) }
-    var softKeyboard by remember { mutableStateOf(false) }
     var screenController by remember { mutableStateOf(false) }
 
     val readButtonStyle = settingState.readSegmentedButtonState("button_style", context)
@@ -84,7 +83,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
     if (valueState.editAction) {
         valueState.editButton = true
         if (readVibrateSettings != 0) Vibrate()
-        Log.i("WritingBoardTag", "Edit button is clicked")
+        Log.d("WritingBoardTag", "Edit button is clicked")
         valueState.editAction = false
     }
     if (valueState.doneAction && valueState.initLayout) {
@@ -94,7 +93,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         valueState.isEditing = false
         valueState.editButton = false
         if (readVibrateSettings == 2) Vibrate()
-        Log.i("WritingBoardTag", "Done action is triggered")
+        Log.d("WritingBoardTag", "Done action is triggered")
         valueState.doneAction = false
     }
     if (valueState.onClickSetting) {
@@ -106,11 +105,11 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
     if (
         (LocalConfiguration.current.screenWidthDp > 600) &&
         (valueState.isEditing) &&
-        (softKeyboard)
+        (valueState.softKeyboard)
     ) {
         valueState.editingHorizontalScreen = true
-        Log.i("WritingBoardTag", "editingHorizontalScreen is true")
-    } else if (!softKeyboard) {
+        Log.d("WritingBoardTag", "editingHorizontalScreen is true")
+    } else if (!valueState.softKeyboard) {
         valueState.editingHorizontalScreen = false
     }
 
@@ -127,7 +126,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         color = themeColor("backgroundColor")
     ) {
         if (
-            (!softKeyboard) &&
+            (!valueState.softKeyboard) &&
             (readButtonStyle == 0)
         ) {
             HideStyle(context)
@@ -399,16 +398,16 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
     KeyboardVisibilityObserver { isVisible ->
         isKeyboardVisible = isVisible
         if (isVisible) {
-            softKeyboard = true
-            Log.i("WritingBoardTag", "Keyboard is visible")
+            valueState.softKeyboard = true
+            Log.d("WritingBoardTag", "Keyboard is visible")
         } else {
-            softKeyboard = false
+            valueState.softKeyboard = false
             if (settingState.readSwitchState("clean_pointer_focus", context)) {
                 focusManager.clearFocus()
                 valueState.doneAction = true
             }
             screenController = false
-            Log.i("WritingBoardTag", "Keyboard is close")
+            Log.d("WritingBoardTag", "Keyboard is close")
         }
     }
     LaunchedEffect(true) {

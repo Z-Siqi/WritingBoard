@@ -52,24 +52,24 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable("WritingBoard") {
                             WritingBoardLayout(navController)
-                            Log.i("WritingBoardTag", "NavHost: Screen is WritingBoardLayout.")
+                            Log.d("WritingBoardTag", "NavHost: Screen is WritingBoardLayout.")
                         }
                         composable("Setting") {
                             WritingBoardSetting(navController)
-                            Log.i("WritingBoardTag", "NavHost: Screen is WritingBoardSetting.")
+                            Log.d("WritingBoardTag", "NavHost: Screen is WritingBoardSetting.")
                         }
                         composable("UpdateScreen") {
                             WritingBoardNone()
                             window.statusBarColor = themeColor("statusBarColor").toArgb()
                             window.navigationBarColor = themeColor("navigationBarColor").toArgb()
-                            Log.i("WritingBoardTag", "NavHost: Screen is WritingBoardNone.")
+                            Log.d("WritingBoardTag", "NavHost: Screen is WritingBoardNone.")
                         }
                         composable("EE") {
                             WritingBoardEE()
                         }
                         composable("ErrorWithSystemVersionA13") {
                             ErrorWithSystemVersionA13(navController)
-                            Log.i("WritingBoardTag", "NavHost: Screen is ErrorWithSystemVersionA13.")
+                            Log.d("WritingBoardTag", "NavHost: Screen is ErrorWithSystemVersionA13.")
                         }
                     }
                 }

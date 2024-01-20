@@ -2,11 +2,24 @@ package com.sqz.writingboard.classes
 
 import android.annotation.SuppressLint
 import android.app.PendingIntent
+import android.app.StatusBarManager
+import android.content.ComponentName
 import android.content.Intent
+import android.graphics.drawable.Icon
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
+import android.util.Log
+import androidx.annotation.RequiresApi
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sqz.writingboard.MainActivity
+import com.sqz.writingboard.R
+import java.util.concurrent.Executors
+import java.util.function.Consumer
 
 @Suppress("DEPRECATION")
 class QSTileService : TileService() {
@@ -19,8 +32,7 @@ class QSTileService : TileService() {
 
     override fun onStopListening() {
         super.onStopListening()
-        qsTile.state = Tile.STATE_ACTIVE
-        qsTile.updateTile()
+        Log.w("WritingBoardTag", "onStopListening")
     }
 
     @SuppressLint("NewApi", "StartActivityAndCollapseDeprecated")
@@ -42,5 +54,23 @@ class QSTileService : TileService() {
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivityAndCollapse(intent)
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    @Composable
+    fun RequestAdd() {
+        val context = LocalContext.current
+        val valueState: ValueState = viewModel()
+        val statusBarManager = ContextCompat.getSystemService(
+            context, StatusBarManager::class.java
+        ) as StatusBarManager
+        val callback = Consumer<Int> { result -> valueState.resultOfQST = result }
+        statusBarManager.requestAddTileService(
+            ComponentName(context, "com.sqz.writingboard.classes.QSTileService"),
+            ActivityCompat.getString(context, R.string.app_name),
+            Icon.createWithResource(context, R.drawable.writingboard_logo),
+            Executors.newSingleThreadExecutor(),
+            callback
+        )
     }
 }

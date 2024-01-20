@@ -43,7 +43,7 @@
     <string name="thin">細的</string>
     <string name="normal">正常</string>
     <string name="thick">粗的</string>
-    <string name="disable_auto_save">停用自動儲存文字，預設:\n"自動儲存更改後的文字"</string>
+    <string name="disable_auto_save">停用自動儲存文字</string>
     <string name="lower_than_android13">您的系統版本低於Android 13</string>
     <string name="feature_supports_android13">此功能僅支援Android 13+</string>
     <string name="back">返回</string>
@@ -52,10 +52,14 @@
     <string name="disable">停用</string>
     <string name="more">更多</string>
     <string name="Add_QS_Tile">新增快速設定圖塊 \n點擊磁貼以開啟應用程式</string>
-    <string name="TILE_ADD_REQUEST_NO_SUPPORT">不支援! \n請跟隨下面: \n1,向下滑動以開啟“快速設定”面板。\n2,點選編輯按鈕。\n3,找到應用程式圖塊。\n4,按住圖塊並將其拖曳到活動圖塊清單中。</string>
-    <string name="TILE_ADD_REQUEST_0">瓷磚未添加，但已發送請求</string>
+    <string name="TILE_ADD_REQUEST_NO_SUPPORT">不支援 Android 13 以下的系統!</string>
+    <string name="TILE_ADD_REQUEST_0">未偵測到或未添加</string>
     <string name="TILE_ADD_REQUEST_1">已經加入</string>
     <string name="TILE_ADD_REQUEST_2">瓷磚已添加</string>
     <string name="language_no_support">Android13以下不支援語言設定 \n請嘗試更新您的系統!</string>
     <string name="request_widget">添加書寫板小工具</string>
+    <string name="text_only">仅文本</string>
+    <string name="opt_edit_text">優化軟鍵盤遮擋文字時 \n編輯文字的問題</string>
+    <string name="not_support">Android 13 以下不允許透過應用程式新增 QS 磁貼! \n\n請按照以下方式添加: \n1, 向下滑動以開啟“快速設定”面板。\n2, 點選編輯按鈕。\n3, 找到應用程式圖塊。\n4, 按住圖塊並將其拖曳到活動圖塊清單中。</string>
+    <string name="dismiss">Dismiss</string>
 </resources>
