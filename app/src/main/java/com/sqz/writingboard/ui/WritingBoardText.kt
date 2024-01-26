@@ -283,67 +283,64 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
             val isWindowFocused = LocalWindowInfo.current.isWindowFocused
             val density = LocalDensity.current.density
             var initScroll by remember { mutableStateOf(false) }
-
             var judgeCondition by remember { mutableStateOf(false) }
-            if (!settingState.readSwitchState("opt_edit_text", context)) {
-                //opt editing when back app
-                var rememberScroll by remember { mutableIntStateOf(0) }
-                var scrollIt by remember { mutableStateOf(false) }
-                if (scrollIt && judgeCondition && valueState.isEditing && rememberScroll != 0) {
+
+            //fix delete text after choose all
+            var fixChooseAll by remember { mutableStateOf(false) }
+            if (
+                (!fixChooseAll) &&
+                (text2.text.selectionInChars.length == text2.text.length) &&
+                (valueState.initLayout) &&
+                (text2.text.isNotEmpty())
+            ) {
+                text2.edit { placeCursorAtEnd() }
+                text2.edit { selectAll() }
+                fixChooseAll = true
+            } else if (text2.text.selectionInChars.length < text2.text.length) {
+                fixChooseAll = false
+            }
+            //opt editing when back app
+            var rememberScroll by remember { mutableIntStateOf(0) }
+            var scrollIt by remember { mutableStateOf(false) }
+            if (scrollIt && judgeCondition && valueState.isEditing && rememberScroll != 0) {
+                LaunchedEffect(true) {
+                    scrollState.scrollTo(rememberScroll)
+                }
+                scrollIt = false
+            } else if (!valueState.isEditing) rememberScroll = 0
+            var oldChar by remember { mutableIntStateOf(0) }
+            if (text2.text.selectionInChars.collapsed && valueState.softKeyboard) {
+                if (text2.text.selectionInChars.start != oldChar) {
+                    rememberScroll = scrollState.value
                     LaunchedEffect(true) {
-                        scrollState.scrollTo(rememberScroll)
+                        delay(500)
+                        oldChar = text2.text.selectionInChars.start
                     }
-                    scrollIt = false
-                } else if (!valueState.isEditing) rememberScroll = 0
-                var oldChar by remember { mutableIntStateOf(0) }
-                if (text2.text.selectionInChars.collapsed && valueState.softKeyboard) {
-                    if (text2.text.selectionInChars.start != oldChar) {
-                        rememberScroll = scrollState.value
-                        LaunchedEffect(true) {
-                            delay(500)
-                            oldChar = text2.text.selectionInChars.start
+                }
+            }
+            if (valueState.softKeyboard && rememberScroll != 0 && isWindowFocused) {
+                Handler(Looper.getMainLooper()).postDelayed(200) {
+                    scrollIt = true
+                }
+                Handler(Looper.getMainLooper()).postDelayed(300) {
+                    judgeCondition = false
+                }
+            }
+            //opt edit when scrollable
+            val keyboardHeight = KeyboardHeight.currentPx
+            val screenHeight = KeyboardHeight.screenHigh
+            if (valueState.softKeyboard && !valueState.editingHorizontalScreen) {
+                val high = screenHeight - (48 * density).toInt()
+                LaunchedEffect(true) {
+                    delay(300)
+                    if (yInScreenFromClick >= high - keyboardHeight) {
+                        if (!initScroll) {
+                            yInScreenFromClick += 100
+                            initScroll = true
                         }
+                        scrollState.scrollTo(scrollState.value + (yInScreenFromClick - (high - keyboardHeight)))
+                        yInScreenFromClick = 0
                     }
-                }
-                if (valueState.softKeyboard && rememberScroll != 0 && isWindowFocused) {
-                    Handler(Looper.getMainLooper()).postDelayed(200) {
-                        scrollIt = true
-                    }
-                    Handler(Looper.getMainLooper()).postDelayed(300) {
-                        judgeCondition = false
-                    }
-                }
-                //opt edit when scrollable
-                val keyboardHeight = KeyboardHeight.currentPx
-                val screenHeight = KeyboardHeight.screenHigh
-                if (valueState.softKeyboard && !valueState.editingHorizontalScreen) {
-                    val high = screenHeight - (48 * density).toInt()
-                    LaunchedEffect(true) {
-                        delay(222)
-                        if (yInScreenFromClick >= high - keyboardHeight) {
-                            if (!initScroll) {
-                                yInScreenFromClick += 100
-                                initScroll = true
-                            }
-                            scrollState.scrollTo(scrollState.value + (yInScreenFromClick - (high - keyboardHeight)))
-                            yInScreenFromClick = 0
-                        }
-                    }
-                }
-            } else {
-                //fix choose all (outdated, keep for some device)
-                var fixChooseAll by remember { mutableStateOf(false) }
-                if (
-                    (!fixChooseAll) &&
-                    (text2.text.selectionInChars.length == text2.text.length) &&
-                    (valueState.initLayout) &&
-                    (text2.text.isNotEmpty())
-                ) {
-                    text2.edit { placeCursorAtEnd() }
-                    text2.edit { selectAll() }
-                    fixChooseAll = true
-                } else if (text2.text.selectionInChars.length < text2.text.length) {
-                    fixChooseAll = false
                 }
             }
             //catch typing
@@ -379,14 +376,13 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                             MotionEvent.ACTION_DOWN -> {
                                 val y = motionEvent.y
                                 yInScreenFromClick = y.toInt() + (48 * density).toInt()
-                                Log.i("WritingBoardTag", "$yInScreenFromClick")
                             }
                         }
                         false
                     }
                     .onKeyEvent { keyEvent ->
                         //fix delete after choose errors
-                        if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Backspace) {
+                        if (keyEvent.key == Key.Backspace) {
                             text2.edit {
                                 delete(
                                     text2.text.selectionInChars.end,

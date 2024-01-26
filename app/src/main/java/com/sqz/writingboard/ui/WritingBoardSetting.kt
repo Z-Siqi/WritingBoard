@@ -297,6 +297,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                 colors = cardColors
             )
         }
+        /*
         item {
             SwitchCardLayout(
                 text = stringResource(R.string.opt_edit_text),
@@ -308,6 +309,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                 colors = cardColors
             )
         }
+         */
         item {
             Text(
                 text = stringResource(R.string.others),
