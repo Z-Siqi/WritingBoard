@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.MotionEvent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -27,11 +28,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
@@ -51,6 +60,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sqz.writingboard.R
 import com.sqz.writingboard.classes.ValueState
+import com.sqz.writingboard.component.KeyboardHeight
 import com.sqz.writingboard.dataStore
 import com.sqz.writingboard.glance.WritingBoardWidget
 import com.sqz.writingboard.settingState
@@ -68,7 +78,7 @@ class WritingBoard : ViewModel() {
     var textState by mutableStateOf(TextFieldValue())
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
 
@@ -269,25 +279,14 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
         }
 
         if (fixChooseAllWay) {
+            var yInScreenFromClick by remember { mutableIntStateOf(0) }
             val isWindowFocused = LocalWindowInfo.current.isWindowFocused
-            //fix choose all
-            var fixChooseAll by remember { mutableStateOf(false) }
-            if (
-                (!fixChooseAll) &&
-                (text2.text.selectionInChars.length == text2.text.length) &&
-                (valueState.initLayout) &&
-                (text2.text.isNotEmpty())
-            ) {
-                text2.edit { placeCursorAtEnd() }
-                text2.edit { selectAll() }
-                fixChooseAll = true
-            } else if (text2.text.selectionInChars.length < text2.text.length) {
-                fixChooseAll = false
-            }
+            val density = LocalDensity.current.density
+            var initScroll by remember { mutableStateOf(false) }
 
-            //opt editing when reopen app
             var judgeCondition by remember { mutableStateOf(false) }
             if (!settingState.readSwitchState("opt_edit_text", context)) {
+                //opt editing when back app
                 var rememberScroll by remember { mutableIntStateOf(0) }
                 var scrollIt by remember { mutableStateOf(false) }
                 if (scrollIt && judgeCondition && valueState.isEditing && rememberScroll != 0) {
@@ -314,19 +313,39 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                         judgeCondition = false
                     }
                 }
-            } else {
-                if (valueState.isEditing && valueState.softKeyboard && isWindowFocused) {
+                //opt edit when scrollable
+                val keyboardHeight = KeyboardHeight.currentPx
+                val screenHeight = KeyboardHeight.screenHigh
+                if (valueState.softKeyboard && !valueState.editingHorizontalScreen) {
+                    val high = screenHeight - (48 * density).toInt()
                     LaunchedEffect(true) {
-                        delay(200)
-                        text2.edit { insert(text2.text.selectionInChars.start, " ") }
-                        Handler(Looper.getMainLooper()).postDelayed(1) {
-                            text2.edit { placeCursorBeforeCharAt(text2.text.selectionInChars.start -1) }
-                            text2.edit { delete(text2.text.selectionInChars.start, text2.text.selectionInChars.start +1) }
+                        delay(222)
+                        if (yInScreenFromClick >= high - keyboardHeight) {
+                            if (!initScroll) {
+                                yInScreenFromClick += 100
+                                initScroll = true
+                            }
+                            scrollState.scrollTo(scrollState.value + (yInScreenFromClick - (high - keyboardHeight)))
+                            yInScreenFromClick = 0
                         }
                     }
                 }
+            } else {
+                //fix choose all (outdated, keep for some device)
+                var fixChooseAll by remember { mutableStateOf(false) }
+                if (
+                    (!fixChooseAll) &&
+                    (text2.text.selectionInChars.length == text2.text.length) &&
+                    (valueState.initLayout) &&
+                    (text2.text.isNotEmpty())
+                ) {
+                    text2.edit { placeCursorAtEnd() }
+                    text2.edit { selectAll() }
+                    fixChooseAll = true
+                } else if (text2.text.selectionInChars.length < text2.text.length) {
+                    fixChooseAll = false
+                }
             }
-
             //catch typing
             if (text2.undoState.canUndo) {
                 autoSaveByChar++
@@ -353,6 +372,31 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                     }
                     .pointerInput(Unit) {
                         detectVerticalDragGestures { _, _ -> }
+                    }
+                    .pointerInteropFilter { motionEvent: MotionEvent ->
+                        //detect screen y coordinate when click
+                        when (motionEvent.action) {
+                            MotionEvent.ACTION_DOWN -> {
+                                val y = motionEvent.y
+                                yInScreenFromClick = y.toInt() + (48 * density).toInt()
+                                Log.i("WritingBoardTag", "$yInScreenFromClick")
+                            }
+                        }
+                        false
+                    }
+                    .onKeyEvent { keyEvent ->
+                        //fix delete after choose errors
+                        if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Backspace) {
+                            text2.edit {
+                                delete(
+                                    text2.text.selectionInChars.end,
+                                    text2.text.selectionInChars.start
+                                )
+                            }
+                            true
+                        } else {
+                            false
+                        }
                     },
                 textStyle = TextStyle.Default.copy(
                     fontSize = fontSize,
