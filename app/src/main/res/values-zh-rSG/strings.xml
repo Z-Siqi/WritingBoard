@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="used_language">CN</string> <!-- DO NOT TRANSLATE IT -->
     <string name="app_name">WritingBoard</string>
     <string name="widget_textonly">WritingBoard - 仅文本</string>
     <string name="widget_description">WritingBoard 小部件</string>
     <string name="widget_textonly_description">WritingBoard 仅文本小部件</string>
+    <string name="loading" tools:ignore="TypographyEllipsis">加载中...</string>
     <string name="default_string">默认</string>
     <string name="settings">设置</string>
     <string name="allow_multiple_lines">允许末尾有多个换行符\n(多于一个换行符)</string>

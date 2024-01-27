@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.onConsumedWindowInsetsChanged
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text2.BasicTextField2
 import androidx.compose.foundation.text2.input.clearText
 import androidx.compose.foundation.text2.input.delete
@@ -30,17 +31,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
@@ -271,6 +274,7 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
         )
         Log.d("WritingBoardTag", "Read-only text")
     } else {
+        val focusRequester = remember { FocusRequester() }
         //auto save by char
         var autoSaveByChar by remember { mutableIntStateOf(0) }
         if (autoSaveByChar == 20) {
@@ -285,6 +289,22 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
             var initScroll by remember { mutableStateOf(false) }
             var judgeCondition by remember { mutableStateOf(false) }
 
+            //fix keyboard function may break
+            val focusManager = LocalFocusManager.current
+            var moveControl by remember { mutableStateOf(false) }
+            if (!isWindowFocused && valueState.isEditing && valueState.softKeyboard) {
+                focusRequester.saveFocusedChild()
+                if (!moveControl) {
+                    focusManager.moveFocus(FocusDirection.Next)
+                    moveControl = true
+                }
+            }
+            if (moveControl && isWindowFocused) {
+                focusManager.clearFocus()
+                focusRequester.requestFocus()
+                focusRequester.restoreFocusedChild()
+                moveControl = false
+            }
             //fix delete text after choose all
             var fixChooseAll by remember { mutableStateOf(false) }
             if (
@@ -343,10 +363,22 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                     }
                 }
             }
-            //catch typing
-            if (text2.undoState.canUndo) {
+            //catch text change
+            var oldText by remember { mutableIntStateOf(0) }
+            if (text2.text.length != oldText) {
+                // fix a enter error
+                if (
+                    (isWindowFocused && valueState.isEditing) &&
+                    (text2.text.selectionInChars.start == text2.text.length) &&
+                    (scrollState.value > scrollState.maxValue - 50)
+                ) {
+                    LaunchedEffect(true) {
+                        scrollState.scrollTo(scrollState.maxValue)
+                    }
+                }
+                //codes
                 autoSaveByChar++
-                text2.undoState.clearHistory()
+                oldText = text2.text.length
             }
             //text function
             BasicTextField2(
@@ -356,6 +388,7 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                     .fillMaxSize()
                     .drawVerticalScrollbar(scrollState)
                     .padding(8.dp)
+                    .focusRequester(focusRequester)
                     .onFocusEvent { focusState ->
                         if (focusState.isFocused) {
                             valueState.isEditing = true
@@ -384,10 +417,13 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                         //fix delete after choose errors
                         if (keyEvent.key == Key.Backspace) {
                             text2.edit {
-                                delete(
-                                    text2.text.selectionInChars.end,
-                                    text2.text.selectionInChars.start
-                                )
+                                val end = text2.text.selectionInChars.end
+                                val start = text2.text.selectionInChars.start
+                                if (end < start) {
+                                    delete(end, start)
+                                } else if (start < end) {
+                                    delete(start, end)
+                                }
                             }
                             true
                         } else {
@@ -401,6 +437,12 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                     fontStyle = fontStyle,
                     color = themeColor("textColor")
                 )
+            )
+            BasicTextField(
+                modifier = modifier
+                    .pointerInteropFilter { true },
+                value = "",
+                onValueChange = {}
             )
         } else {
             BasicTextField2(

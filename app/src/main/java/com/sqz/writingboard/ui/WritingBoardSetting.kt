@@ -97,7 +97,6 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
     var disableAutoSave by setting.rememberSwitchState("disable_auto_save", context)
     var alwaysVisibleText by setting.rememberSwitchState("always_visible_text", context)
     var vibrate by setting.rememberSegmentedButtonState("vibrate_settings", context)
-    var optEditText by setting.rememberSwitchState("opt_edit_text", context)
 
     LazyColumn(
         modifier = modifier
@@ -297,19 +296,6 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                 colors = cardColors
             )
         }
-        /*
-        item {
-            SwitchCardLayout(
-                text = stringResource(R.string.opt_edit_text),
-                checked = optEditText,
-                onCheckedChange = {
-                    optEditText = it
-                    setting.writeSwitchState("opt_edit_text", context, it)
-                },
-                colors = cardColors
-            )
-        }
-         */
         item {
             Text(
                 text = stringResource(R.string.others),
