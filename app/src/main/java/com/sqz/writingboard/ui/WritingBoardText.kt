@@ -1,10 +1,12 @@
 package com.sqz.writingboard.ui
 
 import android.content.ContentValues
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.MotionEvent
+import android.view.inputmethod.InputMethodManager
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -44,6 +46,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
@@ -380,6 +383,35 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                 autoSaveByChar++
                 oldText = text2.text.length
             }
+            //fix delete after choose in english issue
+            var oldTextLength by remember { mutableIntStateOf(0) }
+            var restartDecider by remember { mutableStateOf(false) }
+            var rememberLocate by remember { mutableIntStateOf(0) }
+            val rootView = LocalView.current
+            val imm =
+                context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            if (isWindowFocused) {
+                if (oldTextLength > text2.text.length) {
+                    restartDecider = true
+                    oldTextLength = text2.text.length
+                }
+                oldTextLength = text2.text.length
+            } else {
+                oldTextLength = 0
+            }
+            if (restartDecider) {
+                LaunchedEffect(true) {
+                    rememberLocate = text2.text.selectionInChars.start
+                }
+                if (!text2.text.selectionInChars.collapsed && text2.text.selectionInChars.start == rememberLocate) {
+                    imm.restartInput(rootView)
+                }
+                if (text2.text.selectionInChars.collapsed && text2.text.selectionInChars.start != rememberLocate) {
+                    rememberLocate = 0
+                    restartDecider = false
+                }
+            }
+
             //text function
             BasicTextField2(
                 state = text2,
