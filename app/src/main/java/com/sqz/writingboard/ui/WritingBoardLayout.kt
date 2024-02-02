@@ -49,6 +49,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.glance.appwidget.updateAll
 import com.sqz.writingboard.component.KeyboardVisibilityObserver
@@ -62,6 +63,7 @@ import com.sqz.writingboard.ui.component.layout.BottomStyle
 import com.sqz.writingboard.ui.component.layout.HideStyle
 import com.sqz.writingboard.ui.component.layout.ManualLayout
 import com.sqz.writingboard.ui.theme.themeColor
+import kotlinx.coroutines.delay
 
 @Composable
 fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifier) {
@@ -167,22 +169,30 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 modifier.padding(20.dp)
             }
             //for calculate always visible text
+            val highValue = (77 * LocalDensity.current.density).toInt()
+            if (screenController && readEditButton && !valueState.isEditing) {
+                LaunchedEffect(true) {
+                    valueState.readOnlyTextScroll = false
+                    delay(100)
+                    scrollState.scrollTo(scrollState.maxValue)
+                    valueState.readOnlyTextScroll = true
+                }
+            }
             if (readAlwaysVisibleText && readButtonStyle != 2) {
                 if (
                     (scrollState.value == scrollState.maxValue) &&
                     (scrollState.canScrollBackward)
                 ) {
-                    Handler(Looper.getMainLooper()).postDelayed(50) {
+                    LaunchedEffect(true) {
+                        delay(50)
                         if (scrollState.value == scrollState.maxValue) {
-                            Handler(Looper.getMainLooper()).postDelayed(50) {
-                                screenController = true
-                                Log.i("WritingBoardTag", "screenController is true")
-                            }
+                            delay(50)
+                            screenController = true
+                            Log.i("WritingBoardTag", "screenController is true")
                         }
                     }
-                } else if (scrollState.value < scrollState.maxValue - 200) {
+                } else if (scrollState.value < scrollState.maxValue - highValue) {
                     screenController = false
-                    Log.i("WritingBoardTag", "screenController is false")
                 }
             }
             //writing board
@@ -402,10 +412,6 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             Log.d("WritingBoardTag", "Keyboard is visible")
         } else {
             valueState.softKeyboard = false
-            if (settingState.readSwitchState("clean_pointer_focus", context)) {
-                focusManager.clearFocus()
-                valueState.doneAction = true
-            }
             screenController = false
             Log.d("WritingBoardTag", "Keyboard is close")
         }

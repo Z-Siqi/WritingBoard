@@ -85,7 +85,6 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
     val cardColors = CardDefaults.cardColors(containerColor = themeColor("cardColor"))
 
     var allowMultipleLines by setting.rememberSwitchState("allow_multiple_lines", context)
-    //var cleanPointerFocus by setting.rememberSwitchState("clean_pointer_focus", context)
     var cleanAllText by setting.rememberSwitchState("clean_all_text", context)
     var editButton by setting.rememberSwitchState("edit_button", context)
     var theme by setting.rememberSegmentedButtonState("theme", context)
@@ -260,20 +259,6 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                 modifier = modifier.padding(top = 16.dp, start = 18.dp)
             )
         }
-        /*
-        //Temporarily disabled, bad compatible in BasicTextField2
-        item {
-            SwitchCardLayout(
-                text = stringResource(R.string.clean_pointer_focus),
-                checked = cleanPointerFocus,
-                onCheckedChange = {
-                    cleanPointerFocus = it
-                    setting.writeSwitchState("clean_pointer_focus", context, it)
-                },
-                colors = cardColors
-            )
-        }
-         */
         item {
             SwitchCardLayout(
                 text = stringResource(R.string.allow_multiple_lines),
@@ -409,6 +394,15 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
             )
         }
         item {
+            Text(
+                text = stringResource(R.string.about),
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.tertiary,
+                modifier = modifier.padding(top = 16.dp, start = 18.dp)
+            )
+        }
+        item {
             ClickCardLayout(
                 intent = {
                     val intent = Intent(
@@ -417,7 +411,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                     )
                     startActivityForResult(context as Activity, intent, 0, null)
                 },
-                text = stringResource(R.string.about),
+                text = stringResource(R.string.about_app),
                 painter = R.drawable.github_mark,
                 contentDescription = "About",
                 colors = cardColors

@@ -27,9 +27,10 @@
     <string name="font_italics">啟用斜體WritingBoard字體樣式</string>
     <string name="writingboard_app">WritingBoard應用程式</string>
     <string name="writingboard">寫字板</string>
-    <string name="keyboard_texts_action">鍵盤和文字行為</string>
+    <string name="keyboard_texts_action">文字行為</string>
     <string name="others">其它</string>
-    <string name="about">關於\ngithub.com/Z-Siqi/WrtingBoard/</string>
+    <string name="about">關於</string>
+    <string name="about_app">關於寫字板\ngithub.com/Z-Siqi/WrtingBoard</string>
     <string name="button_style">WritingBoard按鈕樣式</string>
     <string name="button_hide">隱藏</string>
     <string name="button_bottom_bar">導覽列</string>
@@ -60,7 +61,6 @@
     <string name="language_no_support">Android13以下不支援語言設定 \n請嘗試更新您的系統!</string>
     <string name="request_widget">添加書寫板小工具</string>
     <string name="text_only">仅文本</string>
-    <string name="opt_edit_text">Back to last version of edit optimize</string>
     <string name="not_support">Android 13 以下不允許透過應用程式新增 QS 磁貼! \n\n請按照以下方式添加: \n1, 向下滑動以開啟“快速設定”面板。\n2, 點選編輯按鈕。\n3, 找到應用程式圖塊。\n4, 按住圖塊並將其拖曳到活動圖塊清單中。</string>
     <string name="dismiss">Dismiss</string>
 </resources>

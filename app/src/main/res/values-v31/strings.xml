@@ -2,4 +2,5 @@
 <resources>
     <!-- Don't care this -->
     <string name="used_language">EN</string>
+    <string name="app_name">WritingBoard</string>
 </resources>

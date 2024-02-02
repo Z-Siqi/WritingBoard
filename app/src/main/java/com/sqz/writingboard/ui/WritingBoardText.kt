@@ -7,6 +7,7 @@ import android.os.Looper
 import android.util.Log
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
+import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -265,7 +266,7 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
             modifier = modifier
                 .fillMaxSize()
                 .drawVerticalScrollbar(scrollState)
-                .verticalScroll(scrollState)
+                .verticalScroll(scrollState, valueState.readOnlyTextScroll)
                 .padding(8.dp),
             style = TextStyle.Default.copy(
                 fontSize = fontSize,
@@ -353,7 +354,12 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
             val keyboardHeight = KeyboardHeight.currentPx
             val screenHeight = KeyboardHeight.screenHigh
             if (valueState.softKeyboard && !valueState.editingHorizontalScreen) {
-                val high = screenHeight - (48 * density).toInt()
+                val button = settingState.readSegmentedButtonState("button_style", context) == 2
+                val high = if (button) {
+                    screenHeight - (110 * density).toInt()
+                } else {
+                    screenHeight - (58 * density).toInt()
+                }
                 LaunchedEffect(true) {
                     delay(300)
                     if (yInScreenFromClick >= high - keyboardHeight) {
@@ -361,7 +367,9 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                             yInScreenFromClick += 100
                             initScroll = true
                         }
-                        scrollState.scrollTo(scrollState.value + (yInScreenFromClick - (high - keyboardHeight)))
+                        val scroll =
+                            scrollState.value + (yInScreenFromClick - (high - keyboardHeight))
+                        scrollState.animateScrollTo(scroll, SpringSpec(0.8F))
                         yInScreenFromClick = 0
                     }
                 }

@@ -11,8 +11,8 @@ android {
         applicationId "com.sqz.writingboard"
         minSdk 29
         targetSdk 34
-        versionCode 51
-        versionName "0.5.1-beta2"
+        versionCode 52
+        versionName "0.5.2"
     }
 
     buildTypes {
@@ -52,7 +52,7 @@ dependencies {
     implementation 'androidx.compose.ui:ui-tooling-preview'
     implementation 'androidx.compose.material3:material3-android:1.2.0-rc01'
     implementation 'androidx.compose.foundation:foundation-android:1.7.0-alpha01'
-    debugImplementation 'androidx.compose.ui:ui-tooling:1.5.4'
+    debugImplementation 'androidx.compose.ui:ui-tooling:1.6.0'
     //ViewModel
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0"
     //navigation
