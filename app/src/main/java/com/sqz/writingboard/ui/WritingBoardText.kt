@@ -1,12 +1,10 @@
 package com.sqz.writingboard.ui
 
 import android.content.ContentValues
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.MotionEvent
-import android.view.inputmethod.InputMethodManager
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.ScrollState
@@ -16,13 +14,11 @@ import androidx.compose.foundation.layout.onConsumedWindowInsetsChanged
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text2.BasicTextField2
-import androidx.compose.foundation.text2.input.clearText
-import androidx.compose.foundation.text2.input.delete
-import androidx.compose.foundation.text2.input.insert
-import androidx.compose.foundation.text2.input.placeCursorAtEnd
-import androidx.compose.foundation.text2.input.rememberTextFieldState
-import androidx.compose.foundation.text2.input.selectAll
+import androidx.compose.foundation.text.BasicTextField2
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.delete
+import androidx.compose.foundation.text.input.insert
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,7 +43,6 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
@@ -89,7 +84,7 @@ class WritingBoard : ViewModel() {
 @Composable
 fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
 
-    val fixChooseAllWay = true
+    val fixBasicTextField2 = true
     val text2 = rememberTextFieldState()
 
     val valueState: ValueState = viewModel()
@@ -143,7 +138,7 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
             }.first()
         viewModel.textState = TextFieldValue(savedText, TextRange(0, savedText.length))
 
-        if (fixChooseAllWay && !valueState.initLayout) { //text2
+        if (fixBasicTextField2 && !valueState.initLayout) { //text2
             text2.edit { insert(0, viewModel.textState.text) }
         }
 
@@ -159,7 +154,7 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
 
     //clean all texts action
     if (valueState.cleanAllText) {
-        if (fixChooseAllWay) {
+        if (fixBasicTextField2) {
             text2.clearText()
             valueState.saveAction = true
         } else {
@@ -176,7 +171,7 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
     }
     //match action by done button
     if (valueState.matchText) {
-        if (fixChooseAllWay) {
+        if (fixBasicTextField2) {
             valueState.saveAction = true
             text2.text.let { newText ->
                 if (
@@ -205,7 +200,7 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
     //save action
     if (valueState.saveAction && valueState.initLayout) {
 
-        if (fixChooseAllWay) { //text2
+        if (fixBasicTextField2) { //text2
             viewModel.textState = TextFieldValue(text2.text.toString())
         }
 
@@ -286,7 +281,7 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
             autoSaveByChar = 0
         }
 
-        if (fixChooseAllWay) {
+        if (fixBasicTextField2) {
             var yInScreenFromClick by remember { mutableIntStateOf(0) }
             val isWindowFocused = LocalWindowInfo.current.isWindowFocused
             val density = LocalDensity.current.density
@@ -309,19 +304,12 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                 focusRequester.restoreFocusedChild()
                 moveControl = false
             }
-            //fix delete text after choose all
-            var fixChooseAll by remember { mutableStateOf(false) }
-            if (
-                (!fixChooseAll) &&
-                (text2.text.selectionInChars.length == text2.text.length) &&
-                (valueState.initLayout) &&
-                (text2.text.isNotEmpty())
-            ) {
-                text2.edit { placeCursorAtEnd() }
-                text2.edit { selectAll() }
-                fixChooseAll = true
-            } else if (text2.text.selectionInChars.length < text2.text.length) {
-                fixChooseAll = false
+            //fix delete text with selection issues
+            if (text2.text.selectionInChars.start != text2.text.selectionInChars.end) {
+                LaunchedEffect(true) {
+                    text2.edit { selectCharsIn(TextRange(text2.text.selectionInChars.start, text2.text.selectionInChars.end - 1)) }
+                    text2.edit { selectCharsIn(TextRange(text2.text.selectionInChars.start, text2.text.selectionInChars.end + 1)) }
+                }
             }
             //opt editing when back app
             var rememberScroll by remember { mutableIntStateOf(0) }
@@ -390,34 +378,6 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                 //codes
                 autoSaveByChar++
                 oldText = text2.text.length
-            }
-            //fix delete after choose in english issue
-            var oldTextLength by remember { mutableIntStateOf(0) }
-            var restartDecider by remember { mutableStateOf(false) }
-            var rememberLocate by remember { mutableIntStateOf(0) }
-            val rootView = LocalView.current
-            val imm =
-                context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            if (isWindowFocused) {
-                if (oldTextLength > text2.text.length) {
-                    restartDecider = true
-                    oldTextLength = text2.text.length
-                }
-                oldTextLength = text2.text.length
-            } else {
-                oldTextLength = 0
-            }
-            if (restartDecider) {
-                LaunchedEffect(true) {
-                    rememberLocate = text2.text.selectionInChars.start
-                }
-                if (!text2.text.selectionInChars.collapsed && text2.text.selectionInChars.start == rememberLocate) {
-                    imm.restartInput(rootView)
-                }
-                if (text2.text.selectionInChars.collapsed && text2.text.selectionInChars.start != rememberLocate) {
-                    rememberLocate = 0
-                    restartDecider = false
-                }
             }
 
             //text function
