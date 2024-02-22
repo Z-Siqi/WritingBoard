@@ -11,7 +11,7 @@
     <string name="allow_multiple_lines">允許末尾有多個換行符\n(多於一個換行符)</string>
     <string name="clean_pointer_focus">鍵盤收起時清除鍵盤指針焦點</string>
     <string name="clean_all_texts_button">刪除所有文本按鈕</string>
-    <string name="edit_writingboard_button">編輯書寫板按鈕\n(僅允許點擊按鈕編輯)</string>
+    <string name="edit_writingboard_button">唯讀模式\n(新增一個按鈕來編輯文本)</string>
     <string name="language">語言 (Android 13+)\n單擊以打開App系統設置進行更改</string>
     <string name="small">小號字體</string>
     <string name="medium">中號字體</string>
@@ -31,7 +31,7 @@
     <string name="others">其它</string>
     <string name="about">關於</string>
     <string name="about_app">關於寫字板\ngithub.com/Z-Siqi/WrtingBoard</string>
-    <string name="button_style">WritingBoard按鈕樣式</string>
+    <string name="button_style">WritingBoard 控制項樣式</string>
     <string name="button_hide">隱藏</string>
     <string name="button_bottom_bar">導覽列</string>
     <string name="button_manual">點選紅色區域開啟設定畫面。</string>

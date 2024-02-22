@@ -12,7 +12,7 @@
     <string name="allow_multiple_lines">Allow save multiple lines at end.\n(more than one lines)</string>
     <string name="clean_pointer_focus">Clean pointer focus when\nkeyboard is retracted.</string>
     <string name="clean_all_texts_button">Clean all texts button</string>
-    <string name="edit_writingboard_button">Edit WritingBoard button\n(Only allow click to edit)</string>
+    <string name="edit_writingboard_button">Read-only mode\n(Add a button to edit text)</string>
     <string name="language">Language (Android 13+)\nClick to open AppSettings to change</string>
     <string name="small">Small</string>
     <string name="medium">Medium</string>
@@ -32,7 +32,7 @@
     <string name="others">Others</string>
     <string name="about">About</string>
     <string name="about_app">About WritingBoard \ngithub.com/Z-Siqi/WrtingBoard/</string>
-    <string name="button_style">WritingBoard button style</string>
+    <string name="button_style">WritingBoard control style</string>
     <string name="button_hide">Hide</string>
     <string name="button_bottom_bar">Bottom Bar</string>
     <string name="button_manual">Click the red area to open setting screen.</string>

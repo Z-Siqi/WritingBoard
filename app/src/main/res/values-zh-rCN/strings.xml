@@ -11,7 +11,7 @@
     <string name="allow_multiple_lines">允许末尾有多个换行符\n(多于一个换行符)</string>
     <string name="clean_pointer_focus">键盘收起时清除键盘指针焦点</string>
     <string name="clean_all_texts_button">删除所有文本按钮</string>
-    <string name="edit_writingboard_button">编辑书写板按钮\n(仅允许点击按钮编辑)</string>
+    <string name="edit_writingboard_button">只读模式\n(添加一个编辑文本按钮)</string>
     <string name="language">语言 (Android 13+)\n点击以打开应用设置进行更改</string>
     <string name="small">小号字体</string>
     <string name="medium">中号字体</string>
@@ -31,7 +31,7 @@
     <string name="others">其它</string>
     <string name="about">关于</string>
     <string name="about_app">关于书写板\ngithub.com/Z-Siqi/WrtingBoard/</string>
-    <string name="button_style">书写板按钮风格</string>
+    <string name="button_style">书写板控件样式</string>
     <string name="button_hide">隐藏</string>
     <string name="button_bottom_bar">导航栏</string>
     <string name="button_manual">点击红色区域打开设置屏幕</string>

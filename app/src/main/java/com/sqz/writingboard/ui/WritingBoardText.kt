@@ -49,7 +49,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.os.postDelayed
@@ -57,7 +56,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.appwidget.updateAll
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sqz.writingboard.R
 import com.sqz.writingboard.classes.ValueState
@@ -75,10 +73,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.io.IOException
 
-class WritingBoard : ViewModel() {
-    var textState by mutableStateOf(TextFieldValue())
-}
-
 @OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
@@ -86,7 +80,6 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
     val textFieldState = rememberTextFieldState()
 
     val valueState: ValueState = viewModel()
-    val viewModel: WritingBoard = viewModel()
     val dataStore = LocalContext.current.dataStore
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -134,10 +127,8 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
             .map { preferences ->
                 preferences[stringPreferencesKey("saved_text")] ?: ""
             }.first()
-        viewModel.textState = TextFieldValue(savedText, TextRange(0, savedText.length))
-
-        if (!valueState.initLayout) { //text2
-            textFieldState.edit { insert(0, viewModel.textState.text) }
+        if (!valueState.initLayout) {
+            textFieldState.edit { insert(0, savedText) }
         }
 
         if (!valueState.initLayout) { //to block save if text not load
@@ -173,10 +164,7 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
     }
     //save action
     if (valueState.saveAction && valueState.initLayout) {
-
-        viewModel.textState = TextFieldValue(textFieldState.text.toString())
-
-        viewModel.textState.text.let { newText ->
+        textFieldState.text.toString().let { newText ->
             val textToSave = if (!settingState.readSwitchState(
                     "allow_multiple_lines",
                     context
@@ -229,7 +217,7 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
         (valueState.readOnlyText)
     ) {
         BasicText(
-            text = viewModel.textState.text,
+            text = textFieldState.text.toString(),
             modifier = modifier
                 .fillMaxSize()
                 .drawVerticalScrollbar(scrollState)
