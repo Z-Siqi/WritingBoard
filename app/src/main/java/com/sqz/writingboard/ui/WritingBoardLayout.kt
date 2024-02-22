@@ -224,14 +224,6 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                     ) {
                         WritingBoardText(scrollState)
                     }
-                    if (valueState.cleanAllText) { //to reload texts
-                        navController.navigate("UpdateScreen")
-                        Handler(Looper.getMainLooper()).postDelayed(380) {
-                            navController.popBackStack()
-                            Log.i("WritingBoardTag", "Re-Opening WritingBoard Text")
-                            valueState.cleanAllText = false
-                        }
-                    }
                 }
             }
         }

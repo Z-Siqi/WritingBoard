@@ -39,7 +39,6 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -84,8 +83,7 @@ class WritingBoard : ViewModel() {
 @Composable
 fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
 
-    val fixBasicTextField2 = true
-    val text2 = rememberTextFieldState()
+    val textFieldState = rememberTextFieldState()
 
     val valueState: ValueState = viewModel()
     val viewModel: WritingBoard = viewModel()
@@ -138,8 +136,8 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
             }.first()
         viewModel.textState = TextFieldValue(savedText, TextRange(0, savedText.length))
 
-        if (fixBasicTextField2 && !valueState.initLayout) { //text2
-            text2.edit { insert(0, viewModel.textState.text) }
+        if (!valueState.initLayout) { //text2
+            textFieldState.edit { insert(0, viewModel.textState.text) }
         }
 
         if (!valueState.initLayout) { //to block save if text not load
@@ -154,45 +152,21 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
 
     //clean all texts action
     if (valueState.cleanAllText) {
-        if (fixBasicTextField2) {
-            text2.clearText()
-            valueState.saveAction = true
-        } else {
-            viewModel.textState.text.let { newText ->
-                coroutineScope.launch {
-                    dataStore.edit { preferences ->
-                        preferences[stringPreferencesKey("saved_text")] =
-                            newText.drop(Int.MAX_VALUE)
-                    }
-                    Log.i("WritingBoardTag", "Save writing board texts")
-                }
-            }
-        }
+        textFieldState.clearText()
+        valueState.saveAction = true
+        valueState.cleanAllText = false
     }
     //match action by done button
     if (valueState.matchText) {
-        if (fixBasicTextField2) {
-            valueState.saveAction = true
-            text2.text.let { newText ->
-                if (
-                    (newText.endsWith("\uD83C\uDFF3️\u200D⚧️")) &&
-                    (!settingState.readSwitchState("easter_eggs", context)) ||
-                    (newText.endsWith("_-OPEN_IT"))
-                ) {
-                    settingState.writeSwitchState("easter_eggs", context, true)
-                    valueState.ee = true
-                }
-            }
-        } else {
-            viewModel.textState.text.let { newText ->
-                if (
-                    (newText.endsWith("\uD83C\uDFF3️\u200D⚧️")) &&
-                    (!settingState.readSwitchState("easter_eggs", context)) ||
-                    (newText.endsWith("_-OPEN_IT"))
-                ) {
-                    settingState.writeSwitchState("easter_eggs", context, true)
-                    valueState.ee = true
-                }
+        valueState.saveAction = true
+        textFieldState.text.let { newText ->
+            if (
+                (newText.endsWith("\uD83C\uDFF3️\u200D⚧️")) &&
+                (!settingState.readSwitchState("easter_eggs", context)) ||
+                (newText.endsWith("_-OPEN_IT"))
+            ) {
+                settingState.writeSwitchState("easter_eggs", context, true)
+                valueState.ee = true
             }
         }
         valueState.matchText = false
@@ -200,9 +174,7 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
     //save action
     if (valueState.saveAction && valueState.initLayout) {
 
-        if (fixBasicTextField2) { //text2
-            viewModel.textState = TextFieldValue(text2.text.toString())
-        }
+        viewModel.textState = TextFieldValue(textFieldState.text.toString())
 
         viewModel.textState.text.let { newText ->
             val textToSave = if (!settingState.readSwitchState(
@@ -281,201 +253,181 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
             autoSaveByChar = 0
         }
 
-        if (fixBasicTextField2) {
-            var yInScreenFromClick by remember { mutableIntStateOf(0) }
-            val isWindowFocused = LocalWindowInfo.current.isWindowFocused
-            val density = LocalDensity.current.density
-            var initScroll by remember { mutableStateOf(false) }
-            var judgeCondition by remember { mutableStateOf(false) }
+        var yInScreenFromClick by remember { mutableIntStateOf(0) }
+        val isWindowFocused = LocalWindowInfo.current.isWindowFocused
+        val density = LocalDensity.current.density
+        var initScroll by remember { mutableStateOf(false) }
+        var judgeCondition by remember { mutableStateOf(false) }
 
-            //fix keyboard function may break
-            val focusManager = LocalFocusManager.current
-            var moveControl by remember { mutableStateOf(false) }
-            if (!isWindowFocused && valueState.isEditing && valueState.softKeyboard) {
-                focusRequester.saveFocusedChild()
-                if (!moveControl) {
-                    focusManager.moveFocus(FocusDirection.Next)
-                    moveControl = true
+        //fix keyboard function may break
+        val focusManager = LocalFocusManager.current
+        var moveControl by remember { mutableStateOf(false) }
+        if (!isWindowFocused && valueState.isEditing && valueState.softKeyboard) {
+            focusRequester.saveFocusedChild()
+            if (!moveControl) {
+                focusManager.moveFocus(FocusDirection.Next)
+                moveControl = true
+            }
+        }
+        if (moveControl && isWindowFocused) {
+            focusManager.clearFocus()
+            focusRequester.requestFocus()
+            focusRequester.restoreFocusedChild()
+            moveControl = false
+        }
+        //fix delete text with selection issues
+        if (textFieldState.text.selectionInChars.start != textFieldState.text.selectionInChars.end) {
+            LaunchedEffect(true) {
+                textFieldState.edit {
+                    selectCharsIn(
+                        TextRange(
+                            textFieldState.text.selectionInChars.start,
+                            textFieldState.text.selectionInChars.end - 1
+                        )
+                    )
+                }
+                textFieldState.edit {
+                    selectCharsIn(
+                        TextRange(
+                            textFieldState.text.selectionInChars.start,
+                            textFieldState.text.selectionInChars.end + 1
+                        )
+                    )
                 }
             }
-            if (moveControl && isWindowFocused) {
-                focusManager.clearFocus()
-                focusRequester.requestFocus()
-                focusRequester.restoreFocusedChild()
-                moveControl = false
+        }
+        //opt editing when back app
+        var rememberScroll by remember { mutableIntStateOf(0) }
+        var scrollIt by remember { mutableStateOf(false) }
+        if (scrollIt && judgeCondition && valueState.isEditing && rememberScroll != 0) {
+            LaunchedEffect(true) {
+                scrollState.scrollTo(rememberScroll)
             }
-            //fix delete text with selection issues
-            if (text2.text.selectionInChars.start != text2.text.selectionInChars.end) {
+            scrollIt = false
+        } else if (!valueState.isEditing) rememberScroll = 0
+        var oldChar by remember { mutableIntStateOf(0) }
+        if (textFieldState.text.selectionInChars.collapsed && valueState.softKeyboard) {
+            if (textFieldState.text.selectionInChars.start != oldChar) {
+                rememberScroll = scrollState.value
                 LaunchedEffect(true) {
-                    text2.edit { selectCharsIn(TextRange(text2.text.selectionInChars.start, text2.text.selectionInChars.end - 1)) }
-                    text2.edit { selectCharsIn(TextRange(text2.text.selectionInChars.start, text2.text.selectionInChars.end + 1)) }
+                    delay(500)
+                    oldChar = textFieldState.text.selectionInChars.start
                 }
             }
-            //opt editing when back app
-            var rememberScroll by remember { mutableIntStateOf(0) }
-            var scrollIt by remember { mutableStateOf(false) }
-            if (scrollIt && judgeCondition && valueState.isEditing && rememberScroll != 0) {
+        }
+        if (valueState.softKeyboard && rememberScroll != 0 && isWindowFocused) {
+            Handler(Looper.getMainLooper()).postDelayed(200) {
+                scrollIt = true
+            }
+            Handler(Looper.getMainLooper()).postDelayed(300) {
+                judgeCondition = false
+            }
+        }
+        //opt edit when scrollable
+        val keyboardHeight = KeyboardHeight.currentPx
+        val screenHeight = KeyboardHeight.screenHigh
+        if (valueState.softKeyboard && !valueState.editingHorizontalScreen) {
+            val button = settingState.readSegmentedButtonState("button_style", context) == 2
+            val high = if (button) {
+                screenHeight - (110 * density).toInt()
+            } else {
+                screenHeight - (58 * density).toInt()
+            }
+            LaunchedEffect(true) {
+                delay(300)
+                if (yInScreenFromClick >= high - keyboardHeight) {
+                    if (!initScroll) {
+                        yInScreenFromClick += 100
+                        initScroll = true
+                    }
+                    val scroll =
+                        scrollState.value + (yInScreenFromClick - (high - keyboardHeight))
+                    scrollState.animateScrollTo(scroll, SpringSpec(0.8F))
+                    yInScreenFromClick = 0
+                }
+            }
+        }
+        //catch text change
+        var oldText by remember { mutableIntStateOf(0) }
+        if (textFieldState.text.length != oldText) {
+            // fix a enter error
+            if (
+                (isWindowFocused && valueState.isEditing) &&
+                (textFieldState.text.selectionInChars.start == textFieldState.text.length) &&
+                (scrollState.value > scrollState.maxValue - 50)
+            ) {
                 LaunchedEffect(true) {
-                    scrollState.scrollTo(rememberScroll)
-                }
-                scrollIt = false
-            } else if (!valueState.isEditing) rememberScroll = 0
-            var oldChar by remember { mutableIntStateOf(0) }
-            if (text2.text.selectionInChars.collapsed && valueState.softKeyboard) {
-                if (text2.text.selectionInChars.start != oldChar) {
-                    rememberScroll = scrollState.value
-                    LaunchedEffect(true) {
-                        delay(500)
-                        oldChar = text2.text.selectionInChars.start
-                    }
+                    scrollState.scrollTo(scrollState.maxValue)
                 }
             }
-            if (valueState.softKeyboard && rememberScroll != 0 && isWindowFocused) {
-                Handler(Looper.getMainLooper()).postDelayed(200) {
-                    scrollIt = true
-                }
-                Handler(Looper.getMainLooper()).postDelayed(300) {
-                    judgeCondition = false
-                }
-            }
-            //opt edit when scrollable
-            val keyboardHeight = KeyboardHeight.currentPx
-            val screenHeight = KeyboardHeight.screenHigh
-            if (valueState.softKeyboard && !valueState.editingHorizontalScreen) {
-                val button = settingState.readSegmentedButtonState("button_style", context) == 2
-                val high = if (button) {
-                    screenHeight - (110 * density).toInt()
-                } else {
-                    screenHeight - (58 * density).toInt()
-                }
-                LaunchedEffect(true) {
-                    delay(300)
-                    if (yInScreenFromClick >= high - keyboardHeight) {
-                        if (!initScroll) {
-                            yInScreenFromClick += 100
-                            initScroll = true
-                        }
-                        val scroll =
-                            scrollState.value + (yInScreenFromClick - (high - keyboardHeight))
-                        scrollState.animateScrollTo(scroll, SpringSpec(0.8F))
-                        yInScreenFromClick = 0
-                    }
-                }
-            }
-            //catch text change
-            var oldText by remember { mutableIntStateOf(0) }
-            if (text2.text.length != oldText) {
-                // fix a enter error
-                if (
-                    (isWindowFocused && valueState.isEditing) &&
-                    (text2.text.selectionInChars.start == text2.text.length) &&
-                    (scrollState.value > scrollState.maxValue - 50)
-                ) {
-                    LaunchedEffect(true) {
-                        scrollState.scrollTo(scrollState.maxValue)
-                    }
-                }
-                //codes
-                autoSaveByChar++
-                oldText = text2.text.length
-            }
+            //codes
+            autoSaveByChar += 1
+            oldText = textFieldState.text.length
+        }
 
-            //text function
-            BasicTextField2(
-                state = text2,
-                scrollState = scrollState,
-                modifier = modifier
-                    .fillMaxSize()
-                    .drawVerticalScrollbar(scrollState)
-                    .padding(8.dp)
-                    .focusRequester(focusRequester)
-                    .onFocusEvent { focusState ->
-                        if (focusState.isFocused) {
-                            valueState.isEditing = true
+        //text function
+        BasicTextField2(
+            state = textFieldState,
+            scrollState = scrollState,
+            modifier = modifier
+                .fillMaxSize()
+                .drawVerticalScrollbar(scrollState)
+                .padding(8.dp)
+                .focusRequester(focusRequester)
+                .onFocusEvent { focusState ->
+                    if (focusState.isFocused) {
+                        valueState.isEditing = true
+                    }
+                }
+                .onConsumedWindowInsetsChanged {
+                    if (!isWindowFocused) {
+                        autoSave = true
+                        judgeCondition = true
+                    }
+                }
+                .pointerInput(Unit) {
+                    detectVerticalDragGestures { _, _ -> }
+                }
+                .pointerInteropFilter { motionEvent: MotionEvent ->
+                    //detect screen y coordinate when click
+                    when (motionEvent.action) {
+                        MotionEvent.ACTION_DOWN -> {
+                            val y = motionEvent.y
+                            yInScreenFromClick = y.toInt() + (48 * density).toInt()
                         }
                     }
-                    .onConsumedWindowInsetsChanged {
-                        if (!isWindowFocused) {
-                            autoSave = true
-                            judgeCondition = true
-                        }
-                    }
-                    .pointerInput(Unit) {
-                        detectVerticalDragGestures { _, _ -> }
-                    }
-                    .pointerInteropFilter { motionEvent: MotionEvent ->
-                        //detect screen y coordinate when click
-                        when (motionEvent.action) {
-                            MotionEvent.ACTION_DOWN -> {
-                                val y = motionEvent.y
-                                yInScreenFromClick = y.toInt() + (48 * density).toInt()
+                    false
+                }
+                .onKeyEvent { keyEvent ->
+                    //fix non-english keyboard delete after selected errors
+                    if (keyEvent.key == Key.Backspace) {
+                        textFieldState.edit {
+                            val end = textFieldState.text.selectionInChars.end
+                            val start = textFieldState.text.selectionInChars.start
+                            if (end < start) {
+                                delete(end, start)
+                            } else if (start < end) {
+                                delete(start, end)
                             }
                         }
+                        true
+                    } else {
                         false
                     }
-                    .onKeyEvent { keyEvent ->
-                        //fix delete after choose errors
-                        if (keyEvent.key == Key.Backspace) {
-                            text2.edit {
-                                val end = text2.text.selectionInChars.end
-                                val start = text2.text.selectionInChars.start
-                                if (end < start) {
-                                    delete(end, start)
-                                } else if (start < end) {
-                                    delete(start, end)
-                                }
-                            }
-                            true
-                        } else {
-                            false
-                        }
-                    },
-                textStyle = TextStyle.Default.copy(
-                    fontSize = fontSize,
-                    fontWeight = fontWeight,
-                    fontFamily = fontFamily,
-                    fontStyle = fontStyle,
-                    color = themeColor("textColor")
-                )
-            )
-            BasicTextField(
-                modifier = modifier
-                    .pointerInteropFilter { true },
-                value = "",
-                onValueChange = {}
-            )
-        } else {
-            BasicTextField2(
-                value = viewModel.textState.text,
-                onValueChange = { newText ->
-                    viewModel.textState = TextFieldValue(newText)
-                    autoSaveByChar++
                 },
-                scrollState = scrollState,
-                modifier = modifier
-                    .fillMaxSize()
-                    .drawVerticalScrollbar(scrollState)
-                    .padding(8.dp)
-                    .onFocusEvent { focusState ->
-                        if (focusState.isFocused) {
-                            valueState.isEditing = true
-                            autoSaveByChar++
-                        }
-                    }
-                    .onSizeChanged {
-                        autoSave = true
-                    }
-                    .pointerInput(Unit) {
-                        detectVerticalDragGestures { _, _ -> }
-                    },
-                textStyle = TextStyle.Default.copy(
-                    fontSize = fontSize,
-                    fontWeight = fontWeight,
-                    fontFamily = fontFamily,
-                    fontStyle = fontStyle,
-                    color = themeColor("textColor")
-                )
+            textStyle = TextStyle.Default.copy(
+                fontSize = fontSize,
+                fontWeight = fontWeight,
+                fontFamily = fontFamily,
+                fontStyle = fontStyle,
+                color = themeColor("textColor")
             )
-        }
+        )
+        BasicTextField(
+            modifier = modifier
+                .pointerInteropFilter { true },
+            value = "",
+            onValueChange = {}
+        )
     }
 }
