@@ -4,8 +4,6 @@ import android.content.ContentValues
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.MotionEvent
-import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -40,7 +38,6 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
@@ -59,7 +56,6 @@ import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sqz.writingboard.R
 import com.sqz.writingboard.classes.ValueState
-import com.sqz.writingboard.component.KeyboardHeight
 import com.sqz.writingboard.dataStore
 import com.sqz.writingboard.glance.WritingBoardWidget
 import com.sqz.writingboard.settingState
@@ -241,10 +237,7 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
             autoSaveByChar = 0
         }
 
-        var yInScreenFromClick by remember { mutableIntStateOf(0) }
         val isWindowFocused = LocalWindowInfo.current.isWindowFocused
-        val density = LocalDensity.current.density
-        var initScroll by remember { mutableStateOf(false) }
         var judgeCondition by remember { mutableStateOf(false) }
 
         //fix keyboard function may break
@@ -311,30 +304,6 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                 judgeCondition = false
             }
         }
-        //opt edit when scrollable
-        val keyboardHeight = KeyboardHeight.currentPx
-        val screenHeight = KeyboardHeight.screenHigh
-        if (valueState.softKeyboard && !valueState.editingHorizontalScreen) {
-            val button = settingState.readSegmentedButtonState("button_style", context) == 2
-            val high = if (button) {
-                screenHeight - (110 * density).toInt()
-            } else {
-                screenHeight - (58 * density).toInt()
-            }
-            LaunchedEffect(true) {
-                delay(300)
-                if (yInScreenFromClick >= high - keyboardHeight) {
-                    if (!initScroll) {
-                        yInScreenFromClick += 100
-                        initScroll = true
-                    }
-                    val scroll =
-                        scrollState.value + (yInScreenFromClick - (high - keyboardHeight))
-                    scrollState.animateScrollTo(scroll, SpringSpec(0.8F))
-                    yInScreenFromClick = 0
-                }
-            }
-        }
         //catch text change
         var oldText by remember { mutableIntStateOf(0) }
         if (textFieldState.text.length != oldText) {
@@ -375,16 +344,6 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                 }
                 .pointerInput(Unit) {
                     detectVerticalDragGestures { _, _ -> }
-                }
-                .pointerInteropFilter { motionEvent: MotionEvent ->
-                    //detect screen y coordinate when click
-                    when (motionEvent.action) {
-                        MotionEvent.ACTION_DOWN -> {
-                            val y = motionEvent.y
-                            yInScreenFromClick = y.toInt() + (48 * density).toInt()
-                        }
-                    }
-                    false
                 }
                 .onKeyEvent { keyEvent ->
                     //fix non-english keyboard delete after selected errors

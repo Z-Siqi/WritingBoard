@@ -31,5 +31,5 @@ class ValueState : ViewModel() {
     var onClickSetting by mutableStateOf(false)
 
     /*QSTileRequestResult value*/
-    var resultOfQST by mutableIntStateOf(0)
+    var resultOfQST by mutableIntStateOf(-5)
 }

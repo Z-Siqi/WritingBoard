@@ -19,10 +19,8 @@ class QSTileRequestResult {
         val valueState: ValueState = viewModel()
         if (valueState.resultOfQST == -1) {
             Toast.makeText(context, result(), Toast.LENGTH_SHORT).show()
-        } else if (valueState.resultOfQST <= 3) {
+        } else {
             Toast.makeText(context, result(), Toast.LENGTH_SHORT).show()
-        } else if (valueState.resultOfQST > 1000) {
-            Toast.makeText(context, "ERROR", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -38,18 +36,19 @@ class QSTileRequestResult {
     @Composable
     fun result(): String {
         val valueState: ValueState = viewModel()
-        return when (valueState.resultOfQST) {
+        return when (val resultOfQST = valueState.resultOfQST) {
+            -5 -> stringResource(R.string.TILE_ADD_REQUEST_NotDetected)
             -1 -> stringResource(R.string.TILE_ADD_REQUEST_NO_SUPPORT)
             StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_NOT_ADDED -> stringResource(R.string.TILE_ADD_REQUEST_0)
             StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ALREADY_ADDED -> stringResource(R.string.TILE_ADD_REQUEST_1)
             StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ADDED -> stringResource(R.string.TILE_ADD_REQUEST_2)
-            StatusBarManager.TILE_ADD_REQUEST_ERROR_REQUEST_IN_PROGRESS -> "TILE_ADD_REQUEST_ERROR_REQUEST_IN_PROGRESS"
+            StatusBarManager.TILE_ADD_REQUEST_ERROR_REQUEST_IN_PROGRESS -> stringResource(R.string.REQUEST_IN_PROGRESS)
             StatusBarManager.TILE_ADD_REQUEST_ERROR_MISMATCHED_PACKAGE -> "TILE_ADD_REQUEST_ERROR_MISMATCHED_PACKAGE"
             StatusBarManager.TILE_ADD_REQUEST_ERROR_APP_NOT_IN_FOREGROUND -> "TILE_ADD_REQUEST_ERROR_APP_NOT_IN_FOREGROUND"
             StatusBarManager.TILE_ADD_REQUEST_ERROR_BAD_COMPONENT -> "TILE_ADD_REQUEST_ERROR_BAD_COMPONENT"
             StatusBarManager.TILE_ADD_REQUEST_ERROR_NOT_CURRENT_USER -> "TILE_ADD_REQUEST_ERROR_NOT_CURRENT_USER"
             StatusBarManager.TILE_ADD_REQUEST_ERROR_NO_STATUS_BAR_SERVICE -> "TILE_ADD_REQUEST_ERROR_NO_STATUS_BAR_SERVICE"
-            else -> "Unknown"
+            else -> "Unknown: $resultOfQST"
         }
     }
 }

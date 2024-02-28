@@ -55,13 +55,16 @@
     <string name="disable">Disable</string>
     <string name="more">More</string>
     <string name="Add_QS_Tile">Add Quick Setting Tile \nOpen the app by click the Tile</string>
+    <string name="TILE_ADD_REQUEST_NotDetected">Not Detected, Try Click Again</string>
     <string name="TILE_ADD_REQUEST_NO_SUPPORT">Not support below Android 13!</string>
-    <string name="TILE_ADD_REQUEST_0">Not Detected or Not Added</string>
+    <string name="REQUEST_IN_PROGRESS">Request in progress</string>
+    <string name="TILE_ADD_REQUEST_0">Not Added</string>
     <string name="TILE_ADD_REQUEST_1">Already added</string>
     <string name="TILE_ADD_REQUEST_2">Tile is added</string>
     <string name="language_no_support">Language setting is not support below Android13 \nPlease try to update your system!</string>
     <string name="request_widget">Add WritingBoard Widget</string>
     <string name="text_only">Text Only</string>
-    <string name="not_support">Add QS Tile by app not allow below Android 13! \n\nPlease follow below to add: \n1, Swipe down to open the Quick Settings panel.\n2, Tap the edit button.\n3, Find the app tile.\n4, Hold down the tile and drag it to the list of active tiles.</string>
+    <string name="not_support">Not Support</string>
+    <string name="not_support_detail">Add QS Tile by app not allow below Android 13! \n\nPlease follow below to add: \n1, Swipe down to open the Quick Settings panel.\n2, Tap the edit button.\n3, Find the app tile.\n4, Hold down the tile and drag it to the list of active tiles.</string>
     <string name="dismiss">Dismiss</string>
 </resources>

@@ -69,6 +69,7 @@ import com.sqz.writingboard.classes.QSTileRequestResult
 import com.sqz.writingboard.classes.QSTileService
 import com.sqz.writingboard.classes.ValueState
 import com.sqz.writingboard.classes.WritingBoardSettingState
+import com.sqz.writingboard.component.Vibrate
 import com.sqz.writingboard.dataStore
 import com.sqz.writingboard.glance.WritingBoardTextOnlyWidgetReceiver
 import com.sqz.writingboard.glance.WritingBoardWidget
@@ -96,6 +97,12 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
     val state = rememberLazyListState()
 
     val cardColors = CardDefaults.cardColors(containerColor = themeColor("cardColor"))
+    var clickAction by remember { mutableStateOf(false) }
+    val readVibrateSettings = settingState.readSegmentedButtonState("vibrate_settings", context)
+    if (clickAction) {
+        if (readVibrateSettings == 2) Vibrate()
+        clickAction = false
+    }
 
     var allowMultipleLines by setting.rememberSwitchState("allow_multiple_lines", context)
     var cleanAllText by setting.rememberSwitchState("clean_all_text", context)
@@ -139,6 +146,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                     index
                 )
                 valueState.updateScreen = true
+                clickAction = true
             }
         }
         item {
@@ -157,6 +165,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                 onCheckedChange = {
                     alwaysVisibleText = it
                     setting.writeSwitchState("always_visible_text", context, it)
+                    clickAction = true
                 },
             ) { index ->
                 buttonStyle = index
@@ -165,6 +174,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                     context,
                     index
                 )
+                clickAction = true
             }
         }
         item {
@@ -174,6 +184,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                 onCheckedChange = {
                     editButton = it
                     setting.writeSwitchState("edit_button", context, it)
+                    clickAction = true
                 },
                 colors = cardColors
             )
@@ -185,6 +196,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                 onCheckedChange = {
                     cleanAllText = it
                     setting.writeSwitchState("clean_all_text", context, it)
+                    clickAction = true
                 },
                 colors = cardColors
             )
@@ -211,6 +223,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                     context,
                     index
                 )
+                clickAction = true
             }
         }
         item {
@@ -220,6 +233,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                 onCheckedChange = {
                     italics = it
                     setting.writeSwitchState("italics", context, it)
+                    clickAction = true
                 },
                 colors = cardColors
             )
@@ -243,6 +257,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                     context,
                     index
                 )
+                clickAction = true
                 onClick = true
             }
             if (onClick) {
@@ -270,6 +285,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                     context,
                     index
                 )
+                clickAction = true
             }
         }
         item {
@@ -288,6 +304,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                 onCheckedChange = {
                     allowMultipleLines = it
                     setting.writeSwitchState("allow_multiple_lines", context, it)
+                    clickAction = true
                 },
                 colors = cardColors
             )
@@ -299,6 +316,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                 onCheckedChange = {
                     disableAutoSave = it
                     setting.writeSwitchState("disable_auto_save", context, it)
+                    clickAction = true
                 },
                 colors = cardColors
             )
@@ -329,6 +347,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                     context,
                     index
                 )
+                clickAction = true
             }
         }
         item {
@@ -348,20 +367,27 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                     valueState.resultOfQST = -1
                     cannot = true
                 }
-                QSTileRequestResult().makeToast()
+                if (valueState.resultOfQST != -5) {
+                    QSTileRequestResult().makeToast()
+                    clickAction = true
+                } else {
+                    Handler(Looper.getMainLooper()).postDelayed(50) {
+                        onClick = true
+                    }
+                }
                 QSTileRequestResult().makeErrorLog()
                 onClick = false
             } else if (cannot) {
                 AlertDialog(
                     icon = { Icon(painterResource(id = R.drawable.warning), "") },
-                    title = { Text(text = "Not Support") },
-                    text = { Text(text = stringResource(R.string.not_support)) },
+                    title = { Text(text = stringResource(R.string.not_support)) },
+                    text = { Text(text = stringResource(R.string.not_support_detail)) },
                     dismissButton = {
                         TextButton(onClick = { cannot = false })
                         { Text(stringResource(R.string.dismiss)) }
                     },
                     onDismissRequest = { cannot = false },
-                    confirmButton = { /*TODO*/ }
+                    confirmButton = { cannot = true }
                 )
             }
         }
@@ -377,6 +403,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                 colors = cardColors
             )
             if (onClick1) {
+                clickAction = true
                 LaunchedEffect(true) {
                     GlanceAppWidgetManager(context).requestPinGlanceAppWidget(
                         WritingBoardTextOnlyWidgetReceiver::class.java
@@ -385,6 +412,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                 onClick1 = false
             }
             if (onClick2) {
+                clickAction = true
                 LaunchedEffect(true) {
                     GlanceAppWidgetManager(context).requestPinGlanceAppWidget(
                         WritingBoardWidgetReceiver::class.java
@@ -400,6 +428,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                         val intent = Intent(Settings.ACTION_APP_LOCALE_SETTINGS)
                         intent.data = Uri.fromParts("package", context.packageName, null)
                         startActivityForResult(context as Activity, intent, 0, null)
+                        clickAction = true
                     } else {
                         Toast.makeText(
                             context,
@@ -432,6 +461,7 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
                         Uri.parse("https://github.com/Z-Siqi/WritingBoard/")
                     )
                     startActivityForResult(context as Activity, intent, 0, null)
+                    clickAction = true
                 },
                 text = stringResource(R.string.about_app),
                 painter = R.drawable.github_mark,

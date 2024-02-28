@@ -54,13 +54,16 @@
     <string name="disable">禁用</string>
     <string name="more">较多</string>
     <string name="Add_QS_Tile">添加快速设置图块 \n单击磁贴打开应用程序</string>
+    <string name="TILE_ADD_REQUEST_NotDetected">未检测到，请尝试再点一次</string>
     <string name="TILE_ADD_REQUEST_NO_SUPPORT">不支持Android 13以下的系统!</string>
-    <string name="TILE_ADD_REQUEST_0">未检测到或未添加</string>
+    <string name="REQUEST_IN_PROGRESS">请求正在进行</string>
+    <string name="TILE_ADD_REQUEST_0">未添加</string>
     <string name="TILE_ADD_REQUEST_1">已添加</string>
     <string name="TILE_ADD_REQUEST_2">图块已添加</string>
     <string name="language_no_support">Android13以下不支持语言设置 \n请尝试更新您的系统!</string>
     <string name="request_widget">添加书写板小部件</string>
     <string name="text_only">仅文本</string>
-    <string name="not_support">Android 13 以下不允许通过应用程序添加 QS 磁贴! \n\n请按照以下方式添加: \n1, 向下滑动以打开“快速设置”面板。\n2, 点击编辑按钮。\n3, 找到软件图块。\n4, 按住图块并将其拖动到活动图块列表中。</string>
+    <string name="not_support">不支持</string>
+    <string name="not_support_detail">Android 13 以下不允许通过应用程序添加 QS 磁贴! \n\n请按照以下方式添加: \n1, 向下滑动以打开“快速设置”面板。\n2, 点击编辑按钮。\n3, 找到软件图块。\n4, 按住图块并将其拖动到活动图块列表中。</string>
     <string name="dismiss">Dismiss</string>
 </resources>

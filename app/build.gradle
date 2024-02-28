@@ -11,8 +11,8 @@ android {
         applicationId "com.sqz.writingboard"
         minSdk 29
         targetSdk 34
-        versionCode 53
-        versionName "0.5.5-beta3"
+        versionCode 55
+        versionName "0.5.5"
     }
 
     buildTypes {

@@ -18,7 +18,6 @@ import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
-import androidx.glance.action.action
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
@@ -32,6 +31,7 @@ import androidx.glance.layout.Column
 import androidx.glance.layout.ContentScale
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
+import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.text.FontFamily
@@ -103,7 +103,6 @@ class WritingBoardWidget : GlanceAppWidget() {
             LazyColumn(
                 modifier = GlanceModifier
                     .size(size.width - 12.dp, size.height - 8.dp)
-                    .clickable(actionStartActivity<MainActivity>())
             ) {
                 item {
                     val fontFamily =
@@ -138,17 +137,26 @@ class WritingBoardWidget : GlanceAppWidget() {
             horizontalAlignment = Alignment.End,
             modifier = GlanceModifier.fillMaxSize().padding(8.dp)
         ) {
-            Image(
-                provider = ImageProvider(R.drawable.widget_button),
-                contentDescription = "",
-                contentScale = ContentScale.FillBounds,
-                modifier = GlanceModifier.size(45.dp).clickable(action {
-                    val intent = Intent(context, MainActivity::class.java)
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    context.startActivity(intent)
-                })
-            )
+            LazyColumn {
+                item {
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        modifier = GlanceModifier.fillMaxWidth()
+                    ) {
+                        Image(
+                            provider = ImageProvider(R.drawable.widget_button),
+                            contentDescription = "",
+                            contentScale = ContentScale.FillBounds,
+                            modifier = GlanceModifier.size(45.dp).clickable {
+                                val intent = Intent(context, MainActivity::class.java)
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                context.startActivity(intent)
+                            }
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -212,26 +220,33 @@ class WritingBoardTextOnlyWidget : GlanceAppWidget() {
             LazyColumn(
                 modifier = GlanceModifier
                     .size(size.width - 12.dp, size.height - 8.dp)
-                    .clickable(action {
-                        val intent = Intent(context, MainActivity::class.java)
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        context.startActivity(intent)
-                    })
             ) {
                 item {
+                    val fontFamily =
+                        WritingBoardSettingState().readSegmentedButtonState("font_style", context)
                     Text(
                         text = savedText,
                         modifier = GlanceModifier.fillMaxSize()
-                            .clickable(action {
+                            .clickable {
                                 val intent = Intent(context, MainActivity::class.java)
                                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                 context.startActivity(intent)
-                            }),
+                            },
                         style = TextStyle(
                             color = GlanceTheme.colors.onSurfaceVariant,
-                            fontWeight = androidx.glance.text.FontWeight.Medium
+                            fontWeight = if (fontFamily != 1) {
+                                androidx.glance.text.FontWeight.Bold
+                            } else {
+                                androidx.glance.text.FontWeight.Medium
+                            },
+                            fontFamily = when (fontFamily) {
+                                0 -> FontFamily.Monospace
+                                1 -> null
+                                2 -> FontFamily.Serif
+                                3 -> FontFamily.Cursive
+                                else -> null
+                            }
                         )
                     )
                 }
