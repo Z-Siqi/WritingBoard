@@ -34,12 +34,14 @@ import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
+import androidx.glance.text.FontFamily
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.sqz.writingboard.MainActivity
 import com.sqz.writingboard.dataStore
 import com.sqz.writingboard.R
+import com.sqz.writingboard.classes.WritingBoardSettingState
 import kotlinx.coroutines.flow.map
 
 class WritingBoardWidgetReceiver : GlanceAppWidgetReceiver() {
@@ -65,8 +67,8 @@ class WritingBoardWidget : GlanceAppWidget() {
                 preferences[text] ?: ""
             }
             .collectAsState(initial = "")
-
         val size = LocalSize.current
+
         Box(
             modifier = GlanceModifier,
             contentAlignment = Alignment.Center
@@ -104,11 +106,24 @@ class WritingBoardWidget : GlanceAppWidget() {
                     .clickable(actionStartActivity<MainActivity>())
             ) {
                 item {
+                    val fontFamily =
+                        WritingBoardSettingState().readSegmentedButtonState("font_style", context)
                     Text(
                         text = savedText,
                         style = TextStyle(
                             color = GlanceTheme.colors.onSurfaceVariant,
-                            fontWeight = androidx.glance.text.FontWeight.Medium
+                            fontWeight = if (fontFamily != 1) {
+                                androidx.glance.text.FontWeight.Bold
+                            } else {
+                                androidx.glance.text.FontWeight.Medium
+                            },
+                            fontFamily = when (fontFamily) {
+                                0 -> FontFamily.Monospace
+                                1 -> null
+                                2 -> FontFamily.Serif
+                                3 -> FontFamily.Cursive
+                                else -> null
+                            }
                         ),
                         modifier = GlanceModifier.fillMaxSize()
                     )

@@ -127,7 +127,7 @@ fun ExtraButtonCardLayout(
                         onCheckedChange = onCheckedChange
                     )
                 }
-            } else { Box { /* what the fucking strange bug??? */ } }
+            } else { Box { /* fix this function will lead crash in release apk */ } }
         }
     }
 }

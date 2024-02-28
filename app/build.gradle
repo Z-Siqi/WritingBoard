@@ -12,7 +12,7 @@ android {
         minSdk 29
         targetSdk 34
         versionCode 53
-        versionName "0.5.5-beta2"
+        versionName "0.5.5-beta3"
     }
 
     buildTypes {
@@ -62,5 +62,5 @@ dependencies {
     //splashscreen
     implementation "androidx.core:core-splashscreen:1.0.1"
     //glanceWidget
-    implementation "androidx.glance:glance-appwidget:1.0.0"
+    implementation "androidx.glance:glance-appwidget:1.1.0-alpha01"
 }

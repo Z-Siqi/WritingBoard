@@ -84,7 +84,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
 
     if (valueState.editAction) {
         valueState.editButton = true
-        if (readVibrateSettings != 0) Vibrate()
+        if (readVibrateSettings != 0) for (i in 0..2) Vibrate()
         Log.d("WritingBoardTag", "Edit button is clicked")
         valueState.editAction = false
     }
@@ -100,7 +100,6 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
     }
     if (valueState.onClickSetting) {
         valueState.doneAction = true
-        if (readVibrateSettings == 2) Vibrate()
         navController.navigate("Setting")
         valueState.onClickSetting = false
     }
