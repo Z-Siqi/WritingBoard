@@ -13,7 +13,9 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -23,6 +25,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
@@ -38,13 +41,16 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -91,10 +97,13 @@ import java.io.IOException
 private val setting = WritingBoardSettingState()
 
 @Composable
-private fun SettingFunction(navController: NavController, modifier: Modifier = Modifier) {
+private fun SettingFunction(
+    state: LazyListState,
+    navController: NavController,
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current
     val valueState: ValueState = viewModel()
-    val state = rememberLazyListState()
 
     val cardColors = CardDefaults.cardColors(containerColor = themeColor("cardColor"))
     var clickAction by remember { mutableStateOf(false) }
@@ -123,6 +132,8 @@ private fun SettingFunction(navController: NavController, modifier: Modifier = M
             .drawVerticalScrollbar(state),
         state = state
     ) {
+        item { Spacer(modifier = modifier.height(1.dp)) }
+        item { Spacer(modifier = modifier.height(5.dp)) }
         item {
             Text(
                 text = stringResource(R.string.writingboard_app),
@@ -479,65 +490,105 @@ fun WritingBoardSetting(
     modifier: Modifier = Modifier
 ) {
     val valueState: ValueState = viewModel()
-    val scrollBehavior =
-        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
 
-    Scaffold(
-        modifier = modifier
-            .nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            LargeTopAppBar(
-                colors = TopAppBarDefaults.mediumTopAppBarColors(
-                    containerColor = themeColor("settingBackgroundColor"),
-                    scrolledContainerColor = themeColor("scrolledContainerColor"),
-                    titleContentColor = themeColor("titleContentColor"),
-                ),
-                title = {
-                    Text(
-                        text = stringResource(R.string.settings),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                },
-                navigationIcon = {
-                    var fixDoubleClickError by remember { mutableStateOf(true) }
-                    IconButton(onClick = {
+    val state = rememberLazyListState()
+    val appBarState = rememberTopAppBarState()
+    val firstVisibleItemIndex = remember { derivedStateOf { state.firstVisibleItemIndex } }
+    var scrolled by remember { mutableStateOf(true) }
+    val scrollBehavior =
+        TopAppBarDefaults.exitUntilCollapsedScrollBehavior(appBarState)
+    if (scrolled) {
+        if (firstVisibleItemIndex.value > 0) scrolled = false
+    } else if (firstVisibleItemIndex.value <= 1) scrolled = true
+    val shadow = if (appBarState.heightOffsetLimit == appBarState.heightOffset) {
+        modifier.shadow(2.dp)
+    } else modifier
+
+    Box {
+        Scaffold(
+            modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+            topBar = {
+                LargeTopAppBar(
+                    colors = TopAppBarDefaults.mediumTopAppBarColors(
+                        containerColor = themeColor("settingBackgroundColor"),
+                        scrolledContainerColor = themeColor("scrolledContainerColor"),
+                        titleContentColor = themeColor("titleContentColor"),
+                    ),
+                    title = {
+                        Text(
+                            text = stringResource(R.string.settings),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    },
+                    navigationIcon = {
+                        var fixDoubleClickError by remember { mutableStateOf(true) }
+                        IconButton(onClick = {
+                            if (fixDoubleClickError) {
+                                navController.popBackStack()
+                                fixDoubleClickError = false
+                            }
+                        }) {
+                            if (scrolled) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_arrow_back),
+                                    contentDescription = "Back"
+                                )
+                            }
+                        }
+                    },
+                    scrollBehavior = scrollBehavior,
+                    modifier = shadow
+                )
+            },
+            contentWindowInsets = WindowInsets.statusBars
+        ) { innerPadding ->
+            Column(
+                modifier = modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+                    .background(color = themeColor("settingBackgroundColor"))
+            ) {
+                SettingFunction(
+                    state = state,
+                    navController = navController
+                )
+            }
+            Column(
+                modifier = modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Bottom
+            ) {
+                val bottomShadow = modifier
+                    .fillMaxWidth()
+                    .height(2.dp)
+                    .shadow(10.dp)
+                Spacer(modifier = bottomShadow)
+            }
+        }
+        if (!scrolled) {
+            Column(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .height(65.dp)
+                    .pointerInput(Unit){ detectVerticalDragGestures{ _, _ -> } },
+                horizontalAlignment = Alignment.Start
+            ) {
+                var fixDoubleClickError by remember { mutableStateOf(true) }
+                IconButton(
+                    modifier = modifier.padding(top = 8.dp, start = 4.dp),
+                    onClick = {
                         if (fixDoubleClickError) {
                             navController.popBackStack()
                             fixDoubleClickError = false
                         }
                     }) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                scrollBehavior = scrollBehavior,
-            )
-        },
-        contentWindowInsets = WindowInsets.statusBars
-    ) { innerPadding ->
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .background(color = themeColor("settingBackgroundColor"))
-        ) {
-            SettingFunction(navController)
-        }
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            verticalArrangement = Arrangement.Bottom
-        ) {
-            val bottomShadow = modifier
-                .fillMaxWidth()
-                .height(2.dp)
-                .shadow(10.dp)
-            Spacer(modifier = bottomShadow)
+                    Icon(
+                        painter = painterResource(R.drawable.ic_arrow_back),
+                        contentDescription = "Back"
+                    )
+                }
+            }
         }
     }
     if (valueState.updateScreen) {

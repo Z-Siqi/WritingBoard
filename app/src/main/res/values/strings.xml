@@ -25,7 +25,7 @@
     <string name="serif">Serif</string>
     <string name="cursive">Cursive</string>
     <string name="font_style">WritingBoard font Style</string>
-    <string name="font_italics">Enable italic \nWritingBoard font style</string>
+    <string name="font_italics">Italic WritingBoard font style</string>
     <string name="writingboard_app">WritingBoard App</string>
     <string name="writingboard">The WritingBoard</string>
     <string name="keyboard_texts_action">Texts Action</string>
