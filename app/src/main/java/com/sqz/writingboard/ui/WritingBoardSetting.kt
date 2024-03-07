@@ -272,9 +272,8 @@ private fun SettingFunction(
                 onClick = true
             }
             if (onClick) {
-                UpdateWidget(context)
                 LaunchedEffect(true) {
-                    delay(500)
+                    updateWidget(context)
                     onClick = false
                 }
             }
@@ -501,7 +500,7 @@ fun WritingBoardSetting(
         if (firstVisibleItemIndex.value > 0) scrolled = false
     } else if (firstVisibleItemIndex.value <= 1) scrolled = true
     val shadow = if (appBarState.heightOffsetLimit == appBarState.heightOffset) {
-        modifier.shadow(2.dp)
+        modifier.shadow(1.dp)
     } else modifier
 
     Box {
@@ -589,7 +588,7 @@ fun WritingBoardSetting(
                     )
                 }
             }
-        }
+        } else { Column{ /* fix this function will lead crash in release apk */ } }
     }
     if (valueState.updateScreen) {
         navController.navigate("UpdateScreen")
@@ -601,34 +600,31 @@ fun WritingBoardSetting(
     }
 }
 
-@Composable
-private fun UpdateWidget(context: Context) {
-    var text by remember { mutableStateOf("") }
-    LaunchedEffect(true) {
-        val savedText: String = context.dataStore.data
-            .catch {
-                if (it is IOException) {
-                    Log.e(ContentValues.TAG, "Error reading preferences.", it)
-                    emit(emptyPreferences())
-                } else {
-                    throw it
-                }
+private suspend fun updateWidget(context: Context) {
+    var text by mutableStateOf("")
+    val savedText: String = context.dataStore.data
+        .catch {
+            if (it is IOException) {
+                Log.e(ContentValues.TAG, "Error reading preferences.", it)
+                emit(emptyPreferences())
+            } else {
+                throw it
             }
-            .map { preferences ->
-                preferences[stringPreferencesKey("saved_text")] ?: ""
-            }.first()
-        text = savedText
-        context.dataStore.edit { preferences ->
-            preferences[stringPreferencesKey("saved_text")] =
-                savedText.plus("protected-data-success_PLEASE-report")
         }
-        WritingBoardWidget().updateAll(context)
-        delay(50)
-        context.dataStore.edit { preferences ->
-            preferences[stringPreferencesKey("saved_text")] = text
-        }
-        WritingBoardWidget().updateAll(context)
+        .map { preferences ->
+            preferences[stringPreferencesKey("saved_text")] ?: ""
+        }.first()
+    text = savedText
+    context.dataStore.edit { preferences ->
+        preferences[stringPreferencesKey("saved_text")] =
+            savedText.plus("protected-data-success_PLEASE-report")
     }
+    WritingBoardWidget().updateAll(context)
+    delay(50)
+    context.dataStore.edit { preferences ->
+        preferences[stringPreferencesKey("saved_text")] = text
+    }
+    WritingBoardWidget().updateAll(context)
 }
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)

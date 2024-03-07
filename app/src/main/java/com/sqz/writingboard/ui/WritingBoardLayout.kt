@@ -226,11 +226,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 }
             }
         }
-        if (
-            (readButtonStyle == 2)
-        ) {
-            BottomStyle(context)
-        }
+        if (readButtonStyle == 2) BottomStyle(context)
         //Buttons
         if (
             (valueState.isEditing) && (readButtonStyle == 1) ||
@@ -271,11 +267,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                     }
                 }
             } else {
-                val bottom = if (screenController) {
-                    2.dp
-                } else {
-                    25.dp
-                }
+                val bottom = if (screenController) 2.dp else 25.dp
                 Column(
                     modifier = modifier
                         .fillMaxWidth()
