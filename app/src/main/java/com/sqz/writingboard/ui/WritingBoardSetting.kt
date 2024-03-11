@@ -1,8 +1,6 @@
 package com.sqz.writingboard.ui
 
 import android.app.Activity
-import android.content.ContentValues
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -62,9 +60,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat.getString
 import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.os.postDelayed
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.emptyPreferences
-import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -76,7 +71,6 @@ import com.sqz.writingboard.classes.QSTileService
 import com.sqz.writingboard.classes.ValueState
 import com.sqz.writingboard.classes.WritingBoardSettingState
 import com.sqz.writingboard.component.Vibrate
-import com.sqz.writingboard.dataStore
 import com.sqz.writingboard.glance.WritingBoardTextOnlyWidgetReceiver
 import com.sqz.writingboard.glance.WritingBoardWidget
 import com.sqz.writingboard.glance.WritingBoardWidgetReceiver
@@ -88,11 +82,6 @@ import com.sqz.writingboard.ui.component.setting.DoubleButtonCard
 import com.sqz.writingboard.ui.component.setting.ExtraButtonCardLayout
 import com.sqz.writingboard.ui.component.setting.SwitchCardLayout
 import com.sqz.writingboard.ui.theme.themeColor
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import java.io.IOException
 
 private val setting = WritingBoardSettingState()
 
@@ -273,7 +262,7 @@ private fun SettingFunction(
             }
             if (onClick) {
                 LaunchedEffect(true) {
-                    updateWidget(context)
+                    WritingBoardWidget().updateAll(context)
                     onClick = false
                 }
             }
@@ -598,33 +587,6 @@ fun WritingBoardSetting(
             valueState.updateScreen = false
         }
     }
-}
-
-private suspend fun updateWidget(context: Context) {
-    var text by mutableStateOf("")
-    val savedText: String = context.dataStore.data
-        .catch {
-            if (it is IOException) {
-                Log.e(ContentValues.TAG, "Error reading preferences.", it)
-                emit(emptyPreferences())
-            } else {
-                throw it
-            }
-        }
-        .map { preferences ->
-            preferences[stringPreferencesKey("saved_text")] ?: ""
-        }.first()
-    text = savedText
-    context.dataStore.edit { preferences ->
-        preferences[stringPreferencesKey("saved_text")] =
-            savedText.plus("protected-data-success_PLEASE-report")
-    }
-    WritingBoardWidget().updateAll(context)
-    delay(50)
-    context.dataStore.edit { preferences ->
-        preferences[stringPreferencesKey("saved_text")] = text
-    }
-    WritingBoardWidget().updateAll(context)
 }
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
