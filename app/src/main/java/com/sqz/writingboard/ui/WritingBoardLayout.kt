@@ -134,33 +134,22 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         }
         Box {
             //for bottom style
-            val boardBottom = if (
-                (!valueState.editingHorizontalScreen) &&
-                (readButtonStyle == 1) &&
-                (!valueState.isEditing) &&
-                (screenController)
-            ) {
-                modifier.padding(bottom = 60.dp)
-            } else if (
-                (valueState.isEditing) &&
-                (readButtonStyle == 2) &&
-                (!valueState.editingHorizontalScreen)
-            ) {
-                modifier.padding(bottom = 55.dp)
-            } else if (
-                (valueState.isEditing) &&
-                (screenController) &&
-                (!valueState.editingHorizontalScreen)
-            ) {
-                modifier.padding(bottom = 45.dp)
-            } else if (
-                (readButtonStyle == 2) &&
-                (!valueState.editingHorizontalScreen)
-            ) {
-                modifier.padding(bottom = 70.dp)
-            } else {
-                modifier
-            }
+            val boardBottom = if (!valueState.editingHorizontalScreen) {
+                if (valueState.isEditing) {
+                    if (readButtonStyle == 2) {
+                        modifier.padding(bottom = 55.dp)
+                    } else if (screenController) {
+                        modifier.padding(bottom = 45.dp)
+                    } else modifier
+                } else {
+                    if (readButtonStyle == 1 && screenController) {
+                        modifier.padding(bottom = 60.dp)
+                    } else if (readButtonStyle == 2) {
+                        modifier.padding(bottom = 70.dp)
+                    } else modifier
+                }
+            } else modifier
+
             //for horizontal screen
             val horizontalScreen = if (valueState.editingHorizontalScreen) {
                 modifier.padding(start = 25.dp, end = 25.dp, top = 5.dp, bottom = 4.dp)
