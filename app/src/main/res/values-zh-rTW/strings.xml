@@ -7,6 +7,8 @@
     <string name="widget_textonly_description">WritingBoard 純文字小部件</string>
     <string name="loading" tools:ignore="TypographyEllipsis">載入中...</string>
     <string name="default_string">默認</string>
+    <string name="done">完畢</string>
+    <string name="edit">編輯</string>
     <string name="settings">設置</string>
     <string name="allow_multiple_lines">允許末尾有多個換行符\n(多於一個換行符)</string>
     <string name="clean_pointer_focus">鍵盤收起時清除鍵盤指針焦點</string>
@@ -53,6 +55,7 @@
     <string name="vibrate_settings">震動回饋</string>
     <string name="disable">停用</string>
     <string name="more">更多</string>
+    <string name="qs_tile">快速設定圖塊</string>
     <string name="Add_QS_Tile">新增快速設定圖塊 \n點擊磁貼以開啟應用程式</string>
     <string name="TILE_ADD_REQUEST_NotDetected">未檢測到，請再次嘗試單擊</string>
     <string name="TILE_ADD_REQUEST_NO_SUPPORT">不支援 Android 13 以下的系統!</string>

@@ -7,6 +7,8 @@
     <string name="widget_textonly_description">书写板纯文本小部件</string>
     <string name="loading" tools:ignore="TypographyEllipsis">加载中...</string>
     <string name="default_string">默认</string>
+    <string name="done">完成</string>
+    <string name="edit">编辑</string>
     <string name="settings">设置</string>
     <string name="allow_multiple_lines">允许末尾有多个换行符\n(多于一个换行符)</string>
     <string name="clean_pointer_focus">键盘收起时清除键盘指针焦点</string>
@@ -53,6 +55,7 @@
     <string name="vibrate_settings">震动反馈</string>
     <string name="disable">禁用</string>
     <string name="more">较多</string>
+    <string name="qs_tile">快速设置图块</string>
     <string name="Add_QS_Tile">添加快速设置图块 \n单击磁贴打开应用程序</string>
     <string name="TILE_ADD_REQUEST_NotDetected">未检测到，请尝试再点一次</string>
     <string name="TILE_ADD_REQUEST_NO_SUPPORT">不支持Android 13以下的系统!</string>

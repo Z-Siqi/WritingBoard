@@ -356,7 +356,7 @@ private fun SettingFunction(
                 intent = { onClick = true },
                 text = stringResource(R.string.Add_QS_Tile),
                 painter = R.drawable.writingboard_logo,
-                contentDescription = "QS_Tile",
+                contentDescription = stringResource(R.string.qs_tile),
                 colors = cardColors
             )
             if (onClick) {
@@ -439,7 +439,7 @@ private fun SettingFunction(
                 },
                 text = stringResource(R.string.language),
                 painter = R.drawable.ic_language,
-                contentDescription = "Language",
+                contentDescription = stringResource(R.string.language),
                 colors = cardColors
             )
         }
@@ -464,7 +464,7 @@ private fun SettingFunction(
                 },
                 text = stringResource(R.string.about_app),
                 painter = R.drawable.github_mark,
-                contentDescription = "About",
+                contentDescription = stringResource(R.string.about),
                 colors = cardColors
             )
         }
@@ -521,7 +521,7 @@ fun WritingBoardSetting(
                             if (scrolled) {
                                 Icon(
                                     painter = painterResource(R.drawable.ic_arrow_back),
-                                    contentDescription = "Back"
+                                    contentDescription = stringResource(R.string.back)
                                 )
                             }
                         }
@@ -559,7 +559,7 @@ fun WritingBoardSetting(
                 modifier = modifier
                     .fillMaxWidth()
                     .height(65.dp)
-                    .pointerInput(Unit){ detectVerticalDragGestures{ _, _ -> } },
+                    .pointerInput(Unit) { detectVerticalDragGestures { _, _ -> } },
                 horizontalAlignment = Alignment.Start
             ) {
                 var fixDoubleClickError by remember { mutableStateOf(true) }
@@ -573,7 +573,7 @@ fun WritingBoardSetting(
                     }) {
                     Icon(
                         painter = painterResource(R.drawable.ic_arrow_back),
-                        contentDescription = "Back"
+                        contentDescription = stringResource(R.string.back)
                     )
                 }
             }

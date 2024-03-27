@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -117,7 +118,7 @@ class WritingBoardWidget : GlanceAppWidget() {
                     ) {
                         Image(
                             provider = ImageProvider(R.drawable.widget_button),
-                            contentDescription = "",
+                            contentDescription = stringResource(R.string.edit),
                             modifier = GlanceModifier.size(45.dp)
                                 .clickable { openAppAction(context) },
                             contentScale = ContentScale.FillBounds

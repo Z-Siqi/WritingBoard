@@ -22,8 +22,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.sqz.writingboard.R
 import com.sqz.writingboard.classes.ValueState
 import com.sqz.writingboard.settingState
 import com.sqz.writingboard.ui.theme.themeColor
@@ -79,7 +81,7 @@ fun BottomStyle(context: Context, modifier: Modifier = Modifier) {
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Settings,
-                                contentDescription = "Setting"
+                                contentDescription = stringResource(R.string.settings)
                             )
                         }
                     }
@@ -101,7 +103,7 @@ fun BottomStyle(context: Context, modifier: Modifier = Modifier) {
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Edit,
-                                contentDescription = "Edit"
+                                contentDescription = stringResource(R.string.edit)
                             )
                         }
                     }
@@ -123,7 +125,7 @@ fun BottomStyle(context: Context, modifier: Modifier = Modifier) {
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Done,
-                                contentDescription = "Done"
+                                contentDescription = stringResource(R.string.done)
                             )
                         }
                     }
@@ -142,7 +144,7 @@ fun BottomStyle(context: Context, modifier: Modifier = Modifier) {
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Delete,
-                                contentDescription = "Clean all texts"
+                                contentDescription = stringResource(R.string.clean_all_texts_button)
                             )
                         }
                     }

@@ -18,9 +18,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sqz.writingboard.R
 
 @Composable
 fun ManualLayout(
@@ -56,7 +58,10 @@ fun ManualLayout(
                         .align(Alignment.End),
                     onClick = onClick
                 ) {
-                    Icon(imageVector = Icons.Filled.Done, contentDescription = "Okay")
+                    Icon(
+                        imageVector = Icons.Filled.Done,
+                        contentDescription = stringResource(R.string.done)
+                    )
                 }
             }
         }

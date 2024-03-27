@@ -239,7 +239,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                         }) {
                             Icon(
                                 imageVector = Icons.Filled.Delete,
-                                contentDescription = "Clean all texts"
+                                contentDescription = stringResource(R.string.clean_all_texts_button)
                             )
                         }
                     }
@@ -251,7 +251,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                     }) {
                         Icon(
                             imageVector = Icons.Filled.Done,
-                            contentDescription = "Done"
+                            contentDescription = stringResource(R.string.done)
                         )
                     }
                 }
@@ -277,7 +277,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Done,
-                            contentDescription = "Done"
+                            contentDescription = stringResource(R.string.done)
                         )
                     }
                 }
@@ -299,7 +299,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Delete,
-                                contentDescription = "Clean all texts"
+                                contentDescription = stringResource(R.string.clean_all_texts_button)
                             )
                         }
                     }
@@ -326,7 +326,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 FloatingActionButton(onClick = { valueState.editAction = true }) {
                     Icon(
                         imageVector = Icons.Filled.Edit,
-                        contentDescription = "Edit"
+                        contentDescription = stringResource(R.string.edit)
                     )
                 }
             }
@@ -346,7 +346,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 FloatingActionButton(onClick = { valueState.onClickSetting = true }) {
                     Icon(
                         imageVector = Icons.Filled.Settings,
-                        contentDescription = "Setting"
+                        contentDescription = stringResource(R.string.settings)
                     )
                 }
             }
