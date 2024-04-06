@@ -12,7 +12,7 @@ android {
         minSdk 29
         targetSdk 34
         versionCode 55
-        versionName "0.5.5_build-alpha5"
+        versionName "0.5.8-beta1"
     }
 
     buildTypes {
@@ -51,8 +51,8 @@ dependencies {
     implementation 'androidx.compose.ui:ui-graphics'
     implementation 'androidx.compose.ui:ui-tooling-preview'
     implementation 'androidx.compose.material3:material3-android:1.2.1'
-    implementation 'androidx.compose.foundation:foundation-android:1.7.0-alpha03'
-    debugImplementation 'androidx.compose.ui:ui-tooling:1.6.4'
+    implementation 'androidx.compose.foundation:foundation-android:1.7.0-alpha06'
+    debugImplementation 'androidx.compose.ui:ui-tooling:1.6.5'
     //ViewModel
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0"
     //navigation
@@ -62,5 +62,5 @@ dependencies {
     //splashscreen
     implementation "androidx.core:core-splashscreen:1.0.1"
     //glanceWidget
-    implementation "androidx.glance:glance-appwidget:1.1.0-alpha01"
+    implementation "androidx.glance:glance-appwidget:1.1.0-beta01"
 }
