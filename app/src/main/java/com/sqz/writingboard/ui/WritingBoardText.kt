@@ -1,5 +1,6 @@
 package com.sqz.writingboard.ui
 
+import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.os.Handler
 import android.os.Looper
@@ -62,13 +63,10 @@ import androidx.compose.foundation.text.input.delete
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
-// import androidx.compose.ui.ExperimentalComposeUiApi
-// import androidx.compose.ui.focus.FocusDirection
-// import androidx.compose.ui.input.pointer.pointerInteropFilter
-// import androidx.compose.ui.platform.LocalFocusManager
-// import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextRange
 
-@OptIn(ExperimentalFoundationApi::class/*, ExperimentalComposeUiApi::class*/)
+@SuppressLint("NewApi")
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
 
@@ -237,94 +235,29 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
         }
 
         val isWindowFocused = LocalWindowInfo.current.isWindowFocused
-        //var judgeCondition by remember { mutableStateOf(false) }
 
-        //fix keyboard function may break
-        /*
-        val focusManager = LocalFocusManager.current
-        var moveControl by remember { mutableStateOf(false) }
-        if (!isWindowFocused && valueState.isEditing && valueState.softKeyboard) {
-            focusRequester.saveFocusedChild()
-            if (!moveControl) {
-                focusManager.moveFocus(FocusDirection.Next)
-                moveControl = true
-            }
-        }
-        if (moveControl && isWindowFocused) {
-            focusManager.clearFocus()
-            focusRequester.requestFocus()
-            focusRequester.restoreFocusedChild()
-            moveControl = false
-        }
-        */
         //fix delete text with selection issues
-        /*
-        if (textFieldState.text.selectionInChars.start != textFieldState.text.selectionInChars.end) {
+        if (textFieldState.selection.start == 0 ||
+            textFieldState.selection.end == textFieldState.text.length
+        ) {
             LaunchedEffect(true) {
                 textFieldState.edit {
-                    selectCharsIn(
-                        TextRange(
-                            textFieldState.text.selectionInChars.start,
-                            textFieldState.text.selectionInChars.end - 1
-                        )
+                    this.selection = TextRange(
+                        textFieldState.selection.start,
+                        textFieldState.selection.end - 1
                     )
                 }
                 textFieldState.edit {
-                    selectCharsIn(
-                        TextRange(
-                            textFieldState.text.selectionInChars.start,
-                            textFieldState.text.selectionInChars.end + 1
-                        )
+                    this.selection = TextRange(
+                        textFieldState.selection.start,
+                        textFieldState.selection.end + 1
                     )
                 }
             }
         }
-         */
-        //opt editing when back app
-        /*
-        var rememberScroll by remember { mutableIntStateOf(0) }
-        var scrollIt by remember { mutableStateOf(false) }
-        if (scrollIt && judgeCondition && valueState.isEditing && rememberScroll != 0) {
-            LaunchedEffect(true) {
-                scrollState.scrollTo(rememberScroll)
-            }
-            scrollIt = false
-        } else if (!valueState.isEditing) rememberScroll = 0
-        var oldChar by remember { mutableIntStateOf(0) }
-        if (textFieldState.text.selectionInChars.collapsed && valueState.softKeyboard) {
-            if (textFieldState.text.selectionInChars.start != oldChar) {
-                rememberScroll = scrollState.value
-                LaunchedEffect(true) {
-                    delay(500)
-                    oldChar = textFieldState.text.selectionInChars.start
-                }
-            }
-        }
-        if (valueState.softKeyboard && rememberScroll != 0 && isWindowFocused) {
-            Handler(Looper.getMainLooper()).postDelayed(200) {
-                scrollIt = true
-            }
-            Handler(Looper.getMainLooper()).postDelayed(300) {
-                judgeCondition = false
-            }
-        }
-        */
         //catch text change
         var oldText by remember { mutableIntStateOf(0) }
         if (textFieldState.text.length != oldText) {
-            // fix a enter error
-            /*
-            if (
-                (isWindowFocused && valueState.isEditing) &&
-                (textFieldState.text.selectionInChars.start == textFieldState.text.length) &&
-                (scrollState.value > scrollState.maxValue - 50)
-            ) {
-                LaunchedEffect(true) {
-                    scrollState.scrollTo(scrollState.maxValue)
-                }
-            }
-            */
-
             //codes
             autoSaveByChar += 1
             oldText = textFieldState.text.length
@@ -347,7 +280,6 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                 .onConsumedWindowInsetsChanged {
                     if (!isWindowFocused) {
                         autoSave = true
-                        //judgeCondition = true
                     }
                 }
                 .pointerInput(Unit) {
@@ -379,13 +311,5 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                 color = themeColor("textColor")
             )
         )
-        /*
-        BasicTextField(
-            modifier = modifier
-                .pointerInteropFilter { true },
-            value = "",
-            onValueChange = {}
-        )
-         */
     }
 }

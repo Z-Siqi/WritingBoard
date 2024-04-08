@@ -11,8 +11,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.glance.Button
-import androidx.glance.ButtonDefaults
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
@@ -20,13 +18,14 @@ import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
-import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
+import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.lazy.LazyColumn
 import androidx.glance.appwidget.provideContent
+import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
@@ -65,18 +64,18 @@ class WritingBoardWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun Content() {
+    private fun Content(modifier: GlanceModifier = GlanceModifier) {
         val context = LocalContext.current
         val size = LocalSize.current
         val fontFamily = fontStyleData(context)
         Box(
-            modifier = GlanceModifier,
+            modifier = modifier,
             contentAlignment = Alignment.Center
         ) {
-            WidgetBoard(size)
+            WidgetBoard(size = size)
 
             LazyColumn(
-                modifier = GlanceModifier.size(size.width - 12.dp, size.height - 8.dp)
+                modifier = modifier.size(size.width - 12.dp, size.height - 8.dp)
             ) {
                 item {
                     Text(
@@ -96,29 +95,29 @@ class WritingBoardWidget : GlanceAppWidget() {
                                 else -> null
                             }
                         ),
-                        modifier = GlanceModifier.fillMaxSize()
+                        modifier = modifier.fillMaxSize()
                     )
                 }
                 item {
-                    Spacer(modifier = GlanceModifier.size(size.width, 45.dp))
+                    Spacer(modifier = modifier.size(size.width, 45.dp))
                 }
             }
         }
         Column(
             verticalAlignment = Alignment.Bottom,
             horizontalAlignment = Alignment.End,
-            modifier = GlanceModifier.fillMaxSize().padding(8.dp)
+            modifier = modifier.fillMaxSize().padding(8.dp)
         ) {
             LazyColumn {
                 item {
                     Column(
                         horizontalAlignment = Alignment.End,
-                        modifier = GlanceModifier.fillMaxWidth()
+                        modifier = modifier.fillMaxWidth()
                     ) {
                         Image(
                             provider = ImageProvider(R.drawable.widget_button),
                             contentDescription = LocalContext.current.getString(R.string.edit),
-                            modifier = GlanceModifier.size(45.dp)
+                            modifier = modifier.size(45.dp)
                                 .clickable { openAppAction(context) },
                             contentScale = ContentScale.FillBounds
                         )
@@ -145,18 +144,18 @@ class WritingBoardTextOnlyWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun Content() {
+    private fun Content(modifier: GlanceModifier = GlanceModifier) {
         val context = LocalContext.current
         val size = LocalSize.current
         val fontFamily = fontStyleData(context)
         Box(
-            modifier = GlanceModifier,
+            modifier = modifier,
             contentAlignment = Alignment.Center
         ) {
             WidgetBoard(size)
 
             Column(
-                modifier = GlanceModifier
+                modifier = modifier
                     .size(size.width - 12.dp, size.height - 8.dp)
                     .clickable { openAppAction(context) }
             ) {
@@ -164,7 +163,7 @@ class WritingBoardTextOnlyWidget : GlanceAppWidget() {
                     item {
                         Text(
                             text = savedText(context),
-                            modifier = GlanceModifier.fillMaxWidth()
+                            modifier = modifier.fillMaxWidth()
                                 .clickable { openAppAction(context) },
                             style = TextStyle(
                                 color = GlanceTheme.colors.onSurfaceVariant,
@@ -191,32 +190,23 @@ class WritingBoardTextOnlyWidget : GlanceAppWidget() {
 
 /** UI function **/
 @Composable
-private fun WidgetBoard(size: DpSize) {
+private fun WidgetBoard(size: DpSize, modifier: GlanceModifier = GlanceModifier) {
+    val round = modifier.cornerRadius(15.dp)
+    val bgSize = modifier.size(size.width, size.height)
+    val contentSize = modifier.size(size.width - 5.dp, size.height - 5.dp)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        Button(
-            text = "",
-            onClick = actionStartActivity<MainActivity>(),
-            colors = ButtonDefaults.buttonColors(GlanceTheme.colors.primary),
-            modifier = GlanceModifier.size(size.width, size.height)
+        Spacer(
+            modifier = bgSize then round then modifier.background(GlanceTheme.colors.primary)
         )
-        Button(
-            text = "",
-            onClick = actionStartActivity<MainActivity>(),
-            colors = ButtonDefaults.buttonColors(GlanceTheme.colors.surfaceVariant),
-            modifier = GlanceModifier.size(size.width - 5.dp, size.height - 5.dp)
+        Spacer(
+            modifier = contentSize then round then modifier.background(GlanceTheme.colors.surfaceVariant)
         )
     } else {
-        Button(
-            text = "",
-            onClick = actionStartActivity<MainActivity>(),
-            colors = ButtonDefaults.buttonColors(ColorProvider(Color(0xFF00668B))),
-            modifier = GlanceModifier.size(size.width, size.height)
+        Spacer(
+            modifier = bgSize then round then modifier.background(ColorProvider(Color(0xFF00668B)))
         )
-        Button(
-            text = "",
-            onClick = actionStartActivity<MainActivity>(),
-            colors = ButtonDefaults.buttonColors(ColorProvider(Color(0xFFDCE3E9))),
-            modifier = GlanceModifier.size(size.width - 5.dp, size.height - 5.dp)
+        Spacer(
+            modifier = contentSize then round then modifier.background(ColorProvider(Color(0xFFDCE3E9)))
         )
     }
 }
