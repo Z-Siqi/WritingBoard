@@ -78,28 +78,28 @@ class WritingBoardWidget : GlanceAppWidget() {
                 modifier = modifier.size(size.width - 12.dp, size.height - 8.dp)
             ) {
                 item {
-                    Text(
-                        text = savedText(context),
-                        style = TextStyle(
-                            color = GlanceTheme.colors.onSurfaceVariant,
-                            fontWeight = if (fontFamily != 1) {
-                                androidx.glance.text.FontWeight.Bold
-                            } else {
-                                androidx.glance.text.FontWeight.Medium
-                            },
-                            fontFamily = when (fontFamily) {
-                                0 -> FontFamily.Monospace
-                                1 -> null
-                                2 -> FontFamily.Serif
-                                3 -> FontFamily.Cursive
-                                else -> null
-                            }
-                        ),
-                        modifier = modifier.fillMaxSize()
-                    )
-                }
-                item {
-                    Spacer(modifier = modifier.size(size.width, 45.dp))
+                    Column {
+                        Text(
+                            text = savedText(context),
+                            style = TextStyle(
+                                color = GlanceTheme.colors.onSurfaceVariant,
+                                fontWeight = if (fontFamily != 1) {
+                                    androidx.glance.text.FontWeight.Bold
+                                } else {
+                                    androidx.glance.text.FontWeight.Medium
+                                },
+                                fontFamily = when (fontFamily) {
+                                    0 -> FontFamily.Monospace
+                                    1 -> null
+                                    2 -> FontFamily.Serif
+                                    3 -> FontFamily.Cursive
+                                    else -> null
+                                }
+                            ),
+                            modifier = modifier.fillMaxSize()
+                        )
+                        Spacer(modifier = modifier.size(size.width, 45.dp))
+                    }
                 }
             }
         }
@@ -108,22 +108,13 @@ class WritingBoardWidget : GlanceAppWidget() {
             horizontalAlignment = Alignment.End,
             modifier = modifier.fillMaxSize().padding(8.dp)
         ) {
-            LazyColumn {
-                item {
-                    Column(
-                        horizontalAlignment = Alignment.End,
-                        modifier = modifier.fillMaxWidth()
-                    ) {
-                        Image(
-                            provider = ImageProvider(R.drawable.widget_button),
-                            contentDescription = LocalContext.current.getString(R.string.edit),
-                            modifier = modifier.size(45.dp)
-                                .clickable { openAppAction(context) },
-                            contentScale = ContentScale.FillBounds
-                        )
-                    }
-                }
-            }
+            Image(
+                provider = ImageProvider(R.drawable.widget_button),
+                contentDescription = LocalContext.current.getString(R.string.edit),
+                modifier = modifier.size(45.dp).cornerRadius(12.dp)
+                    .clickable { openAppAction(context) },
+                contentScale = ContentScale.FillBounds
+            )
         }
     }
 }
@@ -156,14 +147,14 @@ class WritingBoardTextOnlyWidget : GlanceAppWidget() {
 
             Column(
                 modifier = modifier
-                    .size(size.width - 12.dp, size.height - 8.dp)
+                    .size(size.width - 8.dp, size.height - 8.dp)
                     .clickable { openAppAction(context) }
             ) {
-                LazyColumn {
+                LazyColumn(modifier = modifier.cornerRadius(15.dp)) {
                     item {
                         Text(
                             text = savedText(context),
-                            modifier = modifier.fillMaxWidth()
+                            modifier = modifier.fillMaxWidth().padding(2.dp)
                                 .clickable { openAppAction(context) },
                             style = TextStyle(
                                 color = GlanceTheme.colors.onSurfaceVariant,
