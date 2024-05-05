@@ -102,9 +102,9 @@ private fun Preview() {
     DoubleButtonCard(
         title = "Test",
         buttonStartName = "Test",
-        buttonStartAction = { /*TODO*/ },
+        buttonStartAction = {},
         buttonEndName = "Test",
-        buttonEndAction = { /*TODO*/ },
+        buttonEndAction = {},
         colors = cardColors
     )
 }

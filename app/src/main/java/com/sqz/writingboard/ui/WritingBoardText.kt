@@ -1,6 +1,5 @@
 package com.sqz.writingboard.ui
 
-import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.os.Handler
 import android.os.Looper
@@ -60,12 +59,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.io.IOException
 import androidx.compose.foundation.text.input.delete
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.text.TextRange
 
-@SuppressLint("NewApi")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
@@ -303,6 +303,7 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                         false
                     }
                 },
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurfaceVariant),
             textStyle = TextStyle.Default.copy(
                 fontSize = fontSize,
                 fontWeight = fontWeight,

@@ -4,11 +4,11 @@
     android:viewportWidth="404"
     android:viewportHeight="402">
     <path
-        android:fillColor="#00668B"
+        android:fillColor="@color/WidgetSide"
         android:name="Layer 1 copy"
         android:pathData="M364.25,397.5h-324C21.33,397.5 6,382.17 6,363.25v-324C6,20.33 21.33,5 40.25,5h324c18.92,0 34.25,15.33 34.25,34.25v324C398.5,382.17 383.17,397.5 364.25,397.5z"/>
     <path
-        android:fillColor="#DCE3E9"
+        android:fillColor="@color/WidgetBackground"
         android:name="Layer 1"
         android:pathData="M355.83,389.08H48.67c-18.92,0 -34.25,-15.33 -34.25,-34.25V47.67c0,-18.92 15.33,-34.25 34.25,-34.25h307.16c18.92,0 34.25,15.33 34.25,34.25v307.16C390.08,373.75 374.75,389.08 355.83,389.08z"/>
 </vector>

@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="SplashScreenBackground">@android:color/system_accent2_100</color>
+    <color name="WidgetSide">@android:color/system_accent1_600</color>
+    <color name="WidgetBackground">@android:color/system_neutral2_100</color>
+    <color name="WidgetButtonBackground">@android:color/system_accent3_600</color>
+    <color name="WidgetButtonIcon">@android:color/system_accent2_100</color>
+    <color name="WidgetTextColor">@android:color/system_neutral2_900</color>
 </resources>

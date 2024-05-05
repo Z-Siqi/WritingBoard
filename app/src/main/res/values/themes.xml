@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.WritingBoard" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="Theme.WritingBoard" parent="android:Theme.Material.NoActionBar">
 
-     <item name="android:navigationBarColor">
-        @android:color/transparent
+        <item name="android:navigationBarColor">
+            @android:color/transparent
         </item>
         <item name="android:statusBarColor">
-            @android:color/transparent</item>
+            @android:color/transparent
+        </item>
+        <item name="android:colorBackground">
+            @color/SplashScreenBackground
+        </item>
     </style>
 
 </resources>
