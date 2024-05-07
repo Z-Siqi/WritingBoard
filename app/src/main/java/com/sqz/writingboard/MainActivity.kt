@@ -21,9 +21,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.sqz.writingboard.classes.WritingBoardSettingState
 import com.sqz.writingboard.ui.component.WritingBoardEE
-import com.sqz.writingboard.ui.WritingBoardLayout
+import com.sqz.writingboard.ui.main.WritingBoardLayout
 import com.sqz.writingboard.ui.component.WritingBoardNone
-import com.sqz.writingboard.ui.WritingBoardSetting
+import com.sqz.writingboard.ui.setting.WritingBoardSetting
 import com.sqz.writingboard.ui.component.ErrorWithSystemVersionA13
 import com.sqz.writingboard.ui.theme.WritingBoardTheme
 import com.sqz.writingboard.ui.theme.themeColor
