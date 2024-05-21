@@ -69,18 +69,17 @@ import com.sqz.writingboard.R
 import com.sqz.writingboard.classes.QSTileRequestResult
 import com.sqz.writingboard.classes.QSTileService
 import com.sqz.writingboard.classes.ValueState
-import com.sqz.writingboard.classes.WritingBoardSettingState
 import com.sqz.writingboard.component.Vibrate
 import com.sqz.writingboard.glance.WritingBoardTextOnlyWidgetReceiver
 import com.sqz.writingboard.glance.WritingBoardWidget
 import com.sqz.writingboard.glance.WritingBoardWidgetReceiver
 import com.sqz.writingboard.settingState
-import com.sqz.writingboard.ui.component.setting.ClickCardLayout
-import com.sqz.writingboard.ui.component.setting.SegmentedButtonCardLayout
+import com.sqz.writingboard.ui.setting.card.ClickCardLayout
+import com.sqz.writingboard.ui.setting.card.SegmentedButtonCardLayout
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
-import com.sqz.writingboard.ui.component.setting.DoubleButtonCard
-import com.sqz.writingboard.ui.component.setting.ExtraButtonCardLayout
-import com.sqz.writingboard.ui.component.setting.SwitchCardLayout
+import com.sqz.writingboard.ui.setting.card.DoubleButtonCard
+import com.sqz.writingboard.ui.setting.card.ExtraButtonCardLayout
+import com.sqz.writingboard.ui.setting.card.SwitchCardLayout
 import com.sqz.writingboard.ui.theme.themeColor
 
 private val setting = WritingBoardSettingState()

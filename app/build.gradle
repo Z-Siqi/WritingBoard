@@ -12,7 +12,7 @@ android {
         minSdk 29
         targetSdk 34
         versionCode 58
-        versionName "0.5.8-build_alpha2"
+        versionName "0.5.8-build_alpha2-debug01"
     }
 
     buildTypes {
@@ -44,19 +44,19 @@ android {
 dependencies {
     implementation 'androidx.core:core-ktx:1.13.1'
     implementation platform('org.jetbrains.kotlin:kotlin-bom:1.8.0')
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.0'
     implementation 'androidx.activity:activity-compose:1.9.0'
     implementation platform('androidx.compose:compose-bom:2022.10.00')
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.ui:ui-graphics'
     implementation 'androidx.compose.ui:ui-tooling-preview'
     implementation 'androidx.compose.material3:material3-android:1.2.1'
-    implementation 'androidx.compose.foundation:foundation-android:1.7.0-alpha08'
+    implementation 'androidx.compose.foundation:foundation-android:1.7.0-beta01'
     debugImplementation 'androidx.compose.ui:ui-tooling:1.6.7'
     //navigation
     implementation "androidx.navigation:navigation-compose:2.7.7"
     //datastore
     implementation "androidx.datastore:datastore-preferences:1.1.1"
     //glanceWidget
-    implementation "androidx.glance:glance-appwidget:1.1.0-beta02"
+    implementation "androidx.glance:glance-appwidget:1.1.0-rc01"
 }

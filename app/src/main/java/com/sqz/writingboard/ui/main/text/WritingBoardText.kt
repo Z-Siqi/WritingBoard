@@ -1,15 +1,12 @@
 package com.sqz.writingboard.ui.main.text
 
-import android.content.ContentValues
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.onConsumedWindowInsetsChanged
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.insert
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -36,38 +33,51 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.os.postDelayed
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.emptyPreferences
-import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sqz.writingboard.R
 import com.sqz.writingboard.classes.ValueState
-import com.sqz.writingboard.dataStore
 import com.sqz.writingboard.glance.WritingBoardWidget
 import com.sqz.writingboard.settingState
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
 import com.sqz.writingboard.ui.theme.CursiveCN
 import com.sqz.writingboard.ui.theme.themeColor
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import java.io.IOException
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.SolidColor
+import com.sqz.writingboard.ui.WritingBoardViewModel
 
 @Composable
-fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
-
-    val textFieldState = rememberTextFieldState()
-
-    val valueState: ValueState = viewModel()
-    val dataStore = LocalContext.current.dataStore
-    val coroutineScope = rememberCoroutineScope()
+fun WritingBoardText(
+    scrollState: ScrollState,
+    savableState: @Composable (
+        isSaved: Boolean,
+        (reset: Boolean) -> Unit,
+        @Composable (toSave: Boolean) -> Unit
+    ) -> Unit,
+    requestCleanText: (request: TextFieldState) -> Unit,
+    matchText: (textFieldState: TextFieldState, (text: CharSequence) -> Unit) -> Unit,
+    viewModel: WritingBoardViewModel = viewModel(),
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current
+    val textFieldState = rememberTextFieldState()
+    val coroutineScope = rememberCoroutineScope()
+
+    val valueState: ValueState = viewModel() /*TODO*/ //this need to decrease!!!
+
+    /** Load saved text **/
+    if (!viewModel.savedText.isInitialized) {
+        LaunchedEffect(true) {
+            viewModel.loadSavedText(context = context) {
+                textFieldState.clearText()
+                textFieldState.edit {
+                    viewModel.savedText.value?.let { insert(0, it) }
+                }
+            }
+        }
+    }
+
     var autoSave by remember { mutableStateOf(false) }
 
     val fontSize = when (settingState.readSegmentedButtonState("font_size", context)) {
@@ -99,43 +109,12 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
         FontStyle.Normal
     }
 
-    LaunchedEffect(true) { //to load saved texts
-        val savedText: String = context.dataStore.data
-            .catch {
-                if (it is IOException) {
-                    Log.e(ContentValues.TAG, "Error reading preferences.", it)
-                    emit(emptyPreferences())
-                } else {
-                    throw it
-                }
-            }
-            .map { preferences ->
-                preferences[stringPreferencesKey("saved_text")] ?: ""
-            }.first()
-        if (!valueState.initLayout && textFieldState.text.isEmpty()) {
-            textFieldState.edit { insert(0, savedText) }
-        }
-
-        if (!valueState.initLayout) { //to block save if text not load
-            Handler(Looper.getMainLooper()).postDelayed(88) {
-                valueState.initLayout = true
-            }
-            Log.i("WritingBoardTag", "Initializing WritingBoard Text")
-        }
-
-        Log.d("WritingBoardTag", "LaunchedEffect: val savedText")
-    }
-
     //clean all texts action
-    if (valueState.cleanAllText) {
-        textFieldState.clearText()
-        valueState.saveAction = true
-        valueState.cleanAllText = false
-    }
+    requestCleanText((textFieldState))
+
     //match action by done button
-    if (valueState.matchText) {
-        valueState.saveAction = true
-        textFieldState.text.let { newText ->
+    matchText(textFieldState) {
+        it.let { newText ->
             if (
                 (newText.endsWith("\uD83C\uDFF3️\u200D⚧️")) &&
                 (!settingState.readSwitchState("easter_eggs", context)) ||
@@ -145,60 +124,52 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                 valueState.ee = true
             }
         }
-        valueState.matchText = false
-    }
-    //save action
-    if (valueState.saveAction && valueState.initLayout) {
-        textFieldState.text.toString().let { newText ->
-            val textToSave = if (!settingState.readSwitchState(
-                    "allow_multiple_lines",
-                    context
-                ) && newText.isNotEmpty() && newText.last() == '\n'
-            ) {
-                Log.d("WritingBoardTag", "Removing line breaks and adding a new line.")
-                newText.trimEnd { it == '\n' }.plus('\n')
-            } else if (newText.isEmpty()) {
-                Log.w("WritingBoardTag", "Saved Nothing!")
-                newText
-            } else {
-                newText
-            }
-            coroutineScope.launch {
-                dataStore.edit { preferences ->
-                    preferences[stringPreferencesKey("saved_text")] = textToSave
-                }
-                Log.i("WritingBoardTag", "Save writing board texts")
-            }
-        }
-        LaunchedEffect(true) {
-            WritingBoardWidget().updateAll(context)
-        }
-        valueState.saveAction = false
     }
 
-    if (
-        (autoSave) &&
-        (valueState.initLayout) &&
-        (!settingState.readSwitchState("disable_auto_save", context))
-    ) {
-        var save by remember { mutableIntStateOf(0) }
-        save++
-        if (save == 1) {
-            valueState.saveAction = true
-        }
-        LaunchedEffect(true) {
-            delay(1500)
-            if (save > 1) {
-                save = 0
+    /** Save Action **/
+    var saved by remember { mutableStateOf(false) }
+    savableState(saved, { reset ->
+        if (reset) saved = false
+    }) { toSave ->
+        LaunchedEffect(toSave) {
+            if (toSave) coroutineScope.launch {
+                textFieldState.text.toString().let { newText ->
+                    val textToSave = if (!settingState.readSwitchState(
+                            "allow_multiple_lines",
+                            context
+                        ) && newText.isNotEmpty() && newText.last() == '\n'
+                    ) {
+                        Log.d("WritingBoardTag", "Removing line breaks and adding a new line.")
+                        newText.trimEnd { it == '\n' }.plus('\n')
+                    } else if (newText.isEmpty()) {
+                        Log.w("WritingBoardTag", "Saved Nothing!")
+                        newText
+                    } else {
+                        newText
+                    }
+                    viewModel.saveText(textToSave, context)
+                }
+                WritingBoardWidget().updateAll(context)
+                saved = true
             }
-            autoSave = false
         }
+    }
+
+    if (autoSave &&
+        !settingState.readSwitchState("disable_auto_save", context)
+    ) LaunchedEffect(true) {
+        valueState.saveAction = true
+        autoSave = false
+    }
+    // auto save when not WindowFocused
+    val isWindowFocused = LocalWindowInfo.current.isWindowFocused
+    if (!isWindowFocused && textFieldState.text.isNotEmpty()) LaunchedEffect(true) {
+        autoSave = true
     }
 
     if (
         (settingState.readSwitchState("edit_button", context)) &&
         (!valueState.editButton) ||
-        (!valueState.initLayout) ||
         (valueState.readOnlyText)
     ) {
         BasicText(
@@ -225,8 +196,6 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
             autoSave = true
             autoSaveByChar = 0
         }
-
-        val isWindowFocused = LocalWindowInfo.current.isWindowFocused
         //catch text change
         var oldText by remember { mutableIntStateOf(0) }
         if (textFieldState.text.length != oldText) {
@@ -242,6 +211,8 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
         BasicTextField2(
             state = textFieldState,
             scrollState = scrollState,
+            verticalScrollWhenCursorUnderKeyboard = true,
+            extraScrollValue = high,
             modifier = modifier
                 .fillMaxSize()
                 .drawVerticalScrollbar(scrollState)
@@ -250,11 +221,6 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                 .onFocusEvent { focusState ->
                     if (focusState.isFocused) {
                         valueState.isEditing = true
-                    }
-                }
-                .onConsumedWindowInsetsChanged {
-                    if (!isWindowFocused) {
-                        autoSave = true
                     }
                 }
                 .pointerInput(Unit) {
@@ -267,9 +233,7 @@ fun WritingBoardText(scrollState: ScrollState, modifier: Modifier = Modifier) {
                 fontFamily = fontFamily,
                 fontStyle = fontStyle,
                 color = themeColor("textColor")
-            ),
-            verticalScrollWhenCursorUnderKeyboard = true,
-            extraScrollValue = high
+            )
         )
     }
 }

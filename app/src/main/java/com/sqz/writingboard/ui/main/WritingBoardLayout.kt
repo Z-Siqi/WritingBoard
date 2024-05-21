@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.input.clearText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
@@ -90,7 +91,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         Log.d("WritingBoardTag", "Edit button is clicked")
         valueState.editAction = false
     }
-    if (valueState.doneAction && valueState.initLayout) {
+    if (valueState.doneAction) { // && valueState.initLayout
         keyboardController?.hide()
         focusManager.clearFocus()
         valueState.saveAction = true
@@ -216,7 +217,31 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                             .fillMaxSize()
                             .padding(8.dp)
                     ) {
-                        WritingBoardText(scrollState)
+                        WritingBoardText(
+                            scrollState = scrollState,
+                            savableState = { isSaved, reset, toSave ->
+                                if (isSaved) {
+                                    valueState.saveAction = false
+                                    reset(true)
+                                } else {
+                                    toSave(valueState.saveAction)
+                                }
+                            },
+                            requestCleanText = {
+                                if (valueState.cleanAllText) {
+                                    it.clearText()
+                                    valueState.saveAction
+                                    valueState.cleanAllText = false
+                                }
+                            },
+                            matchText = { state, text ->
+                                if (valueState.matchText) {
+                                    valueState.saveAction = true
+                                    state.text.let(text)
+                                    valueState.matchText = false
+                                }
+                            }
+                        )
                     }
                 }
             }
@@ -224,43 +249,16 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
         if (readButtonStyle == 2) BottomStyle(context)
         //Buttons
         if (
-            (valueState.isEditing) && (readButtonStyle == 1) ||
+            (valueState.isEditing) && (readButtonStyle == 1) ||   //---------
             (readButtonStyle == 0) && (valueState.editButton) ||
-            (readButtonStyle == 0) && (valueState.isEditing) ||
+            (readButtonStyle == 0) && (valueState.isEditing) || //------------
             (readButtonStyle == 2) &&
-            (valueState.editingHorizontalScreen) && (valueState.isEditing)
-        ) {
+            (valueState.editingHorizontalScreen) && (valueState.isEditing) //----------
+        ) { /*TODO*/
             if (!readAlwaysVisibleText) {
-                Column(
-                    modifier = modifier
-                        .fillMaxSize()
-                        .padding(36.dp),
-                    verticalArrangement = Arrangement.Bottom,
-                    horizontalAlignment = Alignment.End
-                ) {
-                    //clean all text button
-                    if (readCleanAllText) {
-                        FloatingActionButton(onClick = {
-                            valueState.cleanAllText = true
-                        }) {
-                            Icon(
-                                imageVector = Icons.Filled.Delete,
-                                contentDescription = stringResource(R.string.clean_all_texts_button)
-                            )
-                        }
-                    }
-                    //done button
-                    Spacer(modifier = modifier.height(10.dp))
-                    FloatingActionButton(onClick = {
-                        valueState.matchText = true
-                        valueState.doneAction = true
-                    }) {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = stringResource(R.string.done)
-                        )
-                    }
-                }
+
+                DefaultButtonStyle(valueState, readCleanAllText)
+
             } else {
                 val bottom = if (screenController) 2.dp else 25.dp
                 Column(
@@ -269,7 +267,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                         .height(30.dp),
                     horizontalAlignment = Alignment.End,
                     verticalArrangement = Arrangement.Bottom
-                ) {
+                ) { /*TODO*/
                     ExtendedFloatingActionButton(
                         modifier = modifier
                             .padding(10.dp)
@@ -294,7 +292,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                             .height(30.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Bottom
-                    ) {
+                    ) { /*TODO*/
                         FloatingActionButton(
                             modifier = modifier
                                 .padding(10.dp)
