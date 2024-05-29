@@ -73,16 +73,14 @@ import com.sqz.writingboard.component.Vibrate
 import com.sqz.writingboard.glance.WritingBoardTextOnlyWidgetReceiver
 import com.sqz.writingboard.glance.WritingBoardWidget
 import com.sqz.writingboard.glance.WritingBoardWidgetReceiver
-import com.sqz.writingboard.settingState
 import com.sqz.writingboard.ui.setting.card.ClickCardLayout
 import com.sqz.writingboard.ui.setting.card.SegmentedButtonCardLayout
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
 import com.sqz.writingboard.ui.setting.card.DoubleButtonCard
 import com.sqz.writingboard.ui.setting.card.ExtraButtonCardLayout
 import com.sqz.writingboard.ui.setting.card.SwitchCardLayout
+import com.sqz.writingboard.ui.theme.ThemeColor
 import com.sqz.writingboard.ui.theme.themeColor
-
-private val setting = WritingBoardSettingState()
 
 @Composable
 private fun SettingFunction(
@@ -92,27 +90,14 @@ private fun SettingFunction(
 ) {
     val context = LocalContext.current
     val valueState: ValueState = viewModel()
+    val set = SettingOption(context)
 
-    val cardColors = CardDefaults.cardColors(containerColor = themeColor("cardColor"))
+    val cardColors = CardDefaults.cardColors(containerColor = themeColor(ThemeColor.CardColor))
     var clickAction by remember { mutableStateOf(false) }
-    val readVibrateSettings = settingState.readSegmentedButtonState("vibrate_settings", context)
     if (clickAction) {
-        if (readVibrateSettings == 2) Vibrate()
+        if (set.vibrate() == 2) Vibrate()
         clickAction = false
     }
-
-    var allowMultipleLines by setting.rememberSwitchState("allow_multiple_lines", context)
-    var cleanAllText by setting.rememberSwitchState("clean_all_text", context)
-    var editButton by setting.rememberSwitchState("edit_button", context)
-    var theme by setting.rememberSegmentedButtonState("theme", context)
-    var fontSize by setting.rememberSegmentedButtonState("font_size", context)
-    var italics by setting.rememberSwitchState("italics", context)
-    var fontStyle by setting.rememberSegmentedButtonState("font_style", context)
-    var buttonStyle by setting.rememberSegmentedButtonState("button_style", context)
-    var fontWeight by setting.rememberSegmentedButtonState("font_weight", context)
-    var disableAutoSave by setting.rememberSwitchState("disable_auto_save", context)
-    var alwaysVisibleText by setting.rememberSwitchState("always_visible_text", context)
-    var vibrate by setting.rememberSegmentedButtonState("vibrate_settings", context)
 
     LazyColumn(
         modifier = modifier
@@ -135,15 +120,10 @@ private fun SettingFunction(
             SegmentedButtonCardLayout(
                 title = stringResource(R.string.choose_theme),
                 options = listOf(R.string.light_color, R.string.default_string, R.string.distinct),
-                selectedOption = theme,
+                selectedOption = set.theme(),
                 colors = cardColors
             ) { index ->
-                theme = index
-                setting.writeSegmentedButtonState(
-                    "theme",
-                    context,
-                    index
-                )
+                set.theme(index)
                 valueState.updateScreen = true
                 clickAction = true
             }
@@ -156,33 +136,26 @@ private fun SettingFunction(
                     R.string.default_string,
                     R.string.button_bottom_bar
                 ),
-                selectedOption = buttonStyle,
+                selectedOption = set.buttonStyle(),
                 colors = cardColors,
-                expanded = (settingState.readSegmentedButtonState("button_style", context) <= 1),
+                expanded = (set.buttonStyle() <= 1),
                 switchText = stringResource(R.string.always_visible_text),
-                checked = alwaysVisibleText,
+                checked = set.alwaysVisibleText(),
                 onCheckedChange = {
-                    alwaysVisibleText = it
-                    setting.writeSwitchState("always_visible_text", context, it)
+                    set.alwaysVisibleText(it)
                     clickAction = true
                 },
             ) { index ->
-                buttonStyle = index
-                setting.writeSegmentedButtonState(
-                    "button_style",
-                    context,
-                    index
-                )
+                set.buttonStyle(index)
                 clickAction = true
             }
         }
         item {
             SwitchCardLayout(
                 text = stringResource(R.string.edit_writingboard_button),
-                checked = editButton,
+                checked = set.editButton(),
                 onCheckedChange = {
-                    editButton = it
-                    setting.writeSwitchState("edit_button", context, it)
+                    set.editButton(it)
                     clickAction = true
                 },
                 colors = cardColors
@@ -191,10 +164,9 @@ private fun SettingFunction(
         item {
             SwitchCardLayout(
                 text = stringResource(R.string.clean_all_texts_button),
-                checked = cleanAllText,
+                checked = set.cleanAllText(),
                 onCheckedChange = {
-                    cleanAllText = it
-                    setting.writeSwitchState("clean_all_text", context, it)
+                    set.cleanAllText(it)
                     clickAction = true
                 },
                 colors = cardColors
@@ -213,25 +185,19 @@ private fun SettingFunction(
             SegmentedButtonCardLayout(
                 title = stringResource(R.string.font_size),
                 options = listOf(R.string.small, R.string.medium, R.string.large),
-                selectedOption = fontSize,
+                selectedOption = set.fontSize(),
                 colors = cardColors
             ) { index ->
-                fontSize = index
-                setting.writeSegmentedButtonState(
-                    "font_size",
-                    context,
-                    index
-                )
+                set.fontSize(index)
                 clickAction = true
             }
         }
         item {
             SwitchCardLayout(
                 text = stringResource(R.string.font_italics),
-                checked = italics,
+                checked = set.italics(),
                 onCheckedChange = {
-                    italics = it
-                    setting.writeSwitchState("italics", context, it)
+                    set.italics(it)
                     clickAction = true
                 },
                 colors = cardColors
@@ -247,15 +213,10 @@ private fun SettingFunction(
                     R.string.serif,
                     R.string.cursive,
                 ),
-                selectedOption = fontStyle,
+                selectedOption = set.fontStyle(),
                 colors = cardColors
             ) { index ->
-                fontStyle = index
-                setting.writeSegmentedButtonState(
-                    "font_style",
-                    context,
-                    index
-                )
+                set.fontStyle(index)
                 clickAction = true
                 onClick = true
             }
@@ -274,15 +235,10 @@ private fun SettingFunction(
                     R.string.normal,
                     R.string.thick,
                 ),
-                selectedOption = fontWeight,
+                selectedOption = set.fontWeight(),
                 colors = cardColors
             ) { index ->
-                fontWeight = index
-                setting.writeSegmentedButtonState(
-                    "font_weight",
-                    context,
-                    index
-                )
+                set.fontWeight(index)
                 clickAction = true
             }
         }
@@ -298,10 +254,9 @@ private fun SettingFunction(
         item {
             SwitchCardLayout(
                 text = stringResource(R.string.allow_multiple_lines),
-                checked = allowMultipleLines,
+                checked = set.allowMultipleLines(),
                 onCheckedChange = {
-                    allowMultipleLines = it
-                    setting.writeSwitchState("allow_multiple_lines", context, it)
+                    set.allowMultipleLines(it)
                     clickAction = true
                 },
                 colors = cardColors
@@ -310,10 +265,9 @@ private fun SettingFunction(
         item {
             SwitchCardLayout(
                 text = stringResource(R.string.disable_auto_save),
-                checked = disableAutoSave,
+                checked = set.disableAutoSave(),
                 onCheckedChange = {
-                    disableAutoSave = it
-                    setting.writeSwitchState("disable_auto_save", context, it)
+                    set.disableAutoSave(it)
                     clickAction = true
                 },
                 colors = cardColors
@@ -336,15 +290,10 @@ private fun SettingFunction(
                     R.string.default_string,
                     R.string.more
                 ),
-                selectedOption = vibrate,
+                selectedOption = set.vibrate(),
                 colors = cardColors
             ) { index ->
-                vibrate = index
-                setting.writeSegmentedButtonState(
-                    "vibrate_settings",
-                    context,
-                    index
-                )
+                set.vibrate(index)
                 clickAction = true
             }
         }
@@ -497,9 +446,9 @@ fun WritingBoardSetting(
             topBar = {
                 LargeTopAppBar(
                     colors = TopAppBarDefaults.mediumTopAppBarColors(
-                        containerColor = themeColor("settingBackgroundColor"),
-                        scrolledContainerColor = themeColor("scrolledContainerColor"),
-                        titleContentColor = themeColor("titleContentColor"),
+                        containerColor = themeColor(ThemeColor.SettingBackgroundColor),
+                        scrolledContainerColor = themeColor(ThemeColor.ScrolledContainerColor),
+                        titleContentColor = themeColor(ThemeColor.TitleContentColor),
                     ),
                     title = {
                         Text(
@@ -535,7 +484,7 @@ fun WritingBoardSetting(
                 modifier = modifier
                     .padding(innerPadding)
                     .fillMaxSize()
-                    .background(color = themeColor("settingBackgroundColor"))
+                    .background(color = themeColor(ThemeColor.SettingBackgroundColor))
             ) {
                 SettingFunction(
                     state = state,

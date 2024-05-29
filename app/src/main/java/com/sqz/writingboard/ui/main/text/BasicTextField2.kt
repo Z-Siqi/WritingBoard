@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -47,8 +48,6 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Density
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -76,7 +75,6 @@ fun BasicTextField2(
     verticalScrollWhenCursorUnderKeyboard: Boolean = false,
     extraScrollValue: Int = 1
 ) {
-
     //opt edit when scrollable
     val isWindowFocused = LocalWindowInfo.current.isWindowFocused
     var yInScreenFromClick by remember { mutableIntStateOf(0) }
@@ -118,38 +116,44 @@ fun BasicTextField2(
         }
         if (!isEditing) rememberScroll = 0
     }
+
     val coroutineScope = rememberCoroutineScope()
+    var runFix by remember { mutableStateOf(false) }
 
     BasicTextField(
         state = state,
         modifier = modifier
             .onKeyEvent { keyEvent ->
-                if (keyEvent.nativeKeyEvent.keyCode == 59) {
-                    //fix delete text with selection issues
-                    if (enableFixSelection) {
-                        val isSelected = state.selection.end != state.selection.start
-                        if (state.selection.start == 0 && isSelected ||
-                            state.selection.end == state.text.length && isSelected
-                        ) {
-                            coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
-                                state.edit {
-                                    this.selection = TextRange(
-                                        state.selection.start,
-                                        state.selection.end - 1
-                                    )
-                                }
-                                state.edit {
-                                    this.selection = TextRange(
-                                        state.selection.start,
-                                        state.selection.end + 1
-                                    )
-                                }
-                                coroutineScope.cancel()
+                //fix delete text with selection issues
+                val isSelected = state.selection.end != state.selection.start
+                if (keyEvent.nativeKeyEvent.keyCode == 59 && isSelected && enableFixSelection) {
+                    if (state.selection.start == 0 ||
+                        state.selection.end == state.text.length
+                    ) {
+                        if (runFix) coroutineScope.launch {
+                            state.edit {
+                                this.selection = TextRange(
+                                    state.selection.start,
+                                    state.selection.end - 1
+                                )
                             }
+                            state.edit {
+                                this.selection = TextRange(
+                                    state.selection.start,
+                                    state.selection.end + 1
+                                )
+                            }
+                            runFix = false
                         }
                     }
                     true
-                } else if (keyEvent.key == Key.Backspace) {
+                } else {
+                    runFix = true
+                    false
+                }
+            }
+            .onPreviewKeyEvent { keyEvent ->
+                if (keyEvent.key == Key.Backspace) {
                     //fix non-english keyboard delete after selected errors
                     if (enableFixNonEnglishKeyboard) {
                         state.edit {

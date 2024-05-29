@@ -42,7 +42,7 @@ import androidx.glance.unit.ColorProvider
 import com.sqz.writingboard.MainActivity
 import com.sqz.writingboard.dataStore
 import com.sqz.writingboard.R
-import com.sqz.writingboard.ui.setting.WritingBoardSettingState
+import com.sqz.writingboard.ui.setting.SettingOption
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -238,8 +238,7 @@ private fun openAppAction(context: Context) {
 private fun fontStyleData(context: Context): Int {
     val sharedPreferences =
         context.getSharedPreferences("WritingBoardSetting", Context.MODE_PRIVATE)
-    val defaultFontFamily =
-        WritingBoardSettingState().readSegmentedButtonState("font_style", context)
+    val defaultFontFamily = SettingOption(context).fontStyle()
     return sharedPreferences.intFlow(
         key = "font_style", defaultFontFamily
     ).collectAsState(initial = defaultFontFamily).value

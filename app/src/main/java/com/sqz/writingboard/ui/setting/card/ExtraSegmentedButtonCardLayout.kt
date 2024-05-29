@@ -32,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sqz.writingboard.R
+import com.sqz.writingboard.ui.theme.ThemeColor
 import com.sqz.writingboard.ui.theme.themeColor
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -135,7 +136,7 @@ fun ExtraButtonCardLayout(
 @Preview
 @Composable
 private fun Preview() {
-    val cardColors = CardDefaults.cardColors(containerColor = themeColor("cardColor"))
+    val cardColors = CardDefaults.cardColors(containerColor = themeColor(ThemeColor.CardColor))
     var theme = 0
     SegmentedButtonCardLayout(
         title = "test",

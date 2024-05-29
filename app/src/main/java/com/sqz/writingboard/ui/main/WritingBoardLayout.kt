@@ -3,10 +3,7 @@ package com.sqz.writingboard.ui.main
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -18,18 +15,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.clearText
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -60,11 +48,13 @@ import com.sqz.writingboard.classes.ValueState
 import com.sqz.writingboard.component.Vibrate
 import com.sqz.writingboard.glance.WritingBoardTextOnlyWidget
 import com.sqz.writingboard.glance.WritingBoardWidget
-import com.sqz.writingboard.settingState
-import com.sqz.writingboard.ui.component.layout.BottomStyle
-import com.sqz.writingboard.ui.component.layout.HideStyle
-import com.sqz.writingboard.ui.component.layout.ManualLayout
+import com.sqz.writingboard.ui.main.control.NavBarStyle
+import com.sqz.writingboard.ui.main.control.HideStyle
+import com.sqz.writingboard.ui.component.ManualLayout
+import com.sqz.writingboard.ui.main.control.LayoutButton
 import com.sqz.writingboard.ui.main.text.WritingBoardText
+import com.sqz.writingboard.ui.setting.SettingOption
+import com.sqz.writingboard.ui.theme.ThemeColor
 import com.sqz.writingboard.ui.theme.themeColor
 import kotlinx.coroutines.delay
 
@@ -79,25 +69,21 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
     var isKeyboardVisible by remember { mutableStateOf(false) }
     var screenController by remember { mutableStateOf(false) }
 
-    val readButtonStyle = settingState.readSegmentedButtonState("button_style", context)
-    val readEditButton = settingState.readSwitchState("edit_button", context)
-    val readCleanAllText = settingState.readSwitchState("clean_all_text", context)
-    val readAlwaysVisibleText = settingState.readSwitchState("always_visible_text", context)
-    val readVibrateSettings = settingState.readSegmentedButtonState("vibrate_settings", context)
+    val set = SettingOption(context = context)
 
     if (valueState.editAction) {
         valueState.editButton = true
-        if (readVibrateSettings != 0) for (i in 0..2) Vibrate()
+        if (set.vibrate() != 0) for (i in 0..2) Vibrate()
         Log.d("WritingBoardTag", "Edit button is clicked")
         valueState.editAction = false
     }
-    if (valueState.doneAction) { // && valueState.initLayout
+    if (valueState.doneAction) {
         keyboardController?.hide()
         focusManager.clearFocus()
         valueState.saveAction = true
         valueState.isEditing = false
         valueState.editButton = false
-        if (readVibrateSettings == 2) Vibrate()
+        if (set.vibrate() == 2) Vibrate()
         Log.d("WritingBoardTag", "Done action is triggered")
         valueState.doneAction = false
     }
@@ -127,27 +113,28 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                     valueState.doneAction = true
                 }
             },
-        color = themeColor("backgroundColor")
+        color = themeColor(ThemeColor.BackgroundColor)
     ) {
-        if (
-            (!valueState.softKeyboard) &&
-            (readButtonStyle == 0)
-        ) {
-            HideStyle(context)
-        }
+        if (!valueState.softKeyboard && set.buttonStyle() == 0) HideStyle(
+            onClickSetting = { valueState.onClickSetting = true },
+            onClickEdit = { valueState.editAction = true },
+            editButton = set.editButton(),
+            readIsOffEditButtonManual = set.offEditButtonManual(),
+            readIsOffButtonManual = set.offButtonManual()
+        )
         Box {
             //for bottom style
             val boardBottom = if (!valueState.editingHorizontalScreen) {
                 if (valueState.isEditing) {
-                    if (readButtonStyle == 2) {
+                    if (set.buttonStyle() == 2) {
                         55.dp
                     } else if (screenController) {
                         45.dp
                     } else 0.dp
                 } else {
-                    if (readButtonStyle == 1 && screenController) {
+                    if (set.buttonStyle() == 1 && screenController) {
                         60.dp
-                    } else if (readButtonStyle == 2) {
+                    } else if (set.buttonStyle() == 2) {
                         70.dp
                     } else 0.dp
                 }
@@ -156,7 +143,6 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                 targetValue = boardBottom,
                 label = "BoardBottom"
             )
-
             //for horizontal screen
             val horizontalScreen = if (valueState.editingHorizontalScreen) {
                 modifier.padding(start = 25.dp, end = 25.dp, top = 5.dp, bottom = 4.dp)
@@ -165,7 +151,8 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             }
             //for calculate always visible text
             val highValue = (77 * LocalDensity.current.density).toInt()
-            if (screenController && readEditButton && !valueState.isEditing) {
+            //temporary solve scroll interrupted (by over scroll) when size change with alwaysVisibleText
+            if (screenController && set.editButton() && !valueState.isEditing) {
                 LaunchedEffect(true) {
                     valueState.readOnlyTextScroll = false
                     delay(100)
@@ -173,42 +160,48 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                     valueState.readOnlyTextScroll = true
                 }
             }
-            if (readAlwaysVisibleText && readButtonStyle != 2) {
+            //alwaysVisibleText actions
+            if (set.alwaysVisibleText() && set.buttonStyle() != 2) {
+                var onEditing by remember { mutableStateOf(false) }
                 if (
                     (scrollState.value == scrollState.maxValue) &&
                     (scrollState.canScrollBackward)
                 ) {
                     LaunchedEffect(true) {
                         delay(50)
-                        if (scrollState.value == scrollState.maxValue) {
+                        if (scrollState.value == scrollState.maxValue && !screenController) {
                             delay(50)
                             screenController = true
                             Log.i("WritingBoardTag", "screenController is true")
                         }
                     }
                 } else if (scrollState.value < scrollState.maxValue - highValue) {
-                    screenController = false
+                    if (valueState.isEditing && !onEditing) LaunchedEffect(true) {
+                        //solve size change will cover text when edit bottom text
+                        screenController = false
+                        onEditing = true
+                    } else screenController = false
+                }
+                if (!valueState.isEditing) onEditing = false
+                //solve size change will cover text when edit bottom text
+                if (valueState.softKeyboard && screenController && onEditing) LaunchedEffect(true) {
+                    delay(200)
+                    scrollState.scrollTo(scrollState.maxValue)
                 }
             }
             //writing board
             Column(
-                modifier = modifier.animateContentSize(
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioLowBouncy,
-                        stiffness = Spring.StiffnessMediumLow
-                    )
-                ) then modifier.padding(bottom = animateBoardBottom) then horizontalScreen
+                modifier = modifier.padding(bottom = animateBoardBottom) then horizontalScreen
                     .shadow(5.dp, RoundedCornerShape(26.dp))
                     .border(
-                        4.dp,
-                        color = themeColor("shapeColor"),
+                        4.dp, color = themeColor(ThemeColor.ShapeColor),
                         RoundedCornerShape(26.dp)
                     ),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Surface(
-                    color = themeColor("boardColor"),
+                    color = themeColor(ThemeColor.BoardColor),
                     modifier = modifier.fillMaxSize(),
                     shape = RoundedCornerShape(26.dp)
                 ) {
@@ -217,6 +210,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                             .fillMaxSize()
                             .padding(8.dp)
                     ) {
+                        val high = if (set.buttonStyle() == 2) 110 else 58
                         WritingBoardText(
                             scrollState = scrollState,
                             savableState = { isSaved, reset, toSave ->
@@ -240,124 +234,64 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
                                     state.text.let(text)
                                     valueState.matchText = false
                                 }
-                            }
+                            },
+                            isEditing = { valueState.isEditing = true },
+                            readOnly = valueState.readOnlyText,
+                            editButton = valueState.editButton,
+                            requestSave = { valueState.saveAction },
+                            bottomHigh = high + if (screenController) 70 else 0
                         )
                     }
                 }
             }
         }
-        if (readButtonStyle == 2) BottomStyle(context)
-        //Buttons
-        if (
-            (valueState.isEditing) && (readButtonStyle == 1) ||   //---------
-            (readButtonStyle == 0) && (valueState.editButton) ||
-            (readButtonStyle == 0) && (valueState.isEditing) || //------------
-            (readButtonStyle == 2) &&
-            (valueState.editingHorizontalScreen) && (valueState.isEditing) //----------
-        ) { /*TODO*/
-            if (!readAlwaysVisibleText) {
 
-                DefaultButtonStyle(valueState, readCleanAllText)
+        // The default control style and editing buttons
+        LayoutButton(
+            screenController = screenController,
+            isEditing = when (set.buttonStyle()) {
+                0 -> valueState.editButton || valueState.isEditing
+                1 -> valueState.isEditing
+                2 -> valueState.editingHorizontalScreen && valueState.isEditing
+                else -> valueState.isEditing
+            },
+            onClickDone = {
+                valueState.matchText = true
+                valueState.doneAction = true
+            },
+            onClickClean = { valueState.cleanAllText = true },
+            readCleanAllText = set.cleanAllText(),
+            defaultStyle = set.buttonStyle() == 1,
+            onClickSetting = { valueState.onClickSetting = true },
+            editButton = set.editButton() && !valueState.editButton,
+            onClickEdit = { valueState.editAction = true },
+            readAlwaysVisibleText = set.alwaysVisibleText()
+        )
 
-            } else {
-                val bottom = if (screenController) 2.dp else 25.dp
-                Column(
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .height(30.dp),
-                    horizontalAlignment = Alignment.End,
-                    verticalArrangement = Arrangement.Bottom
-                ) { /*TODO*/
-                    ExtendedFloatingActionButton(
-                        modifier = modifier
-                            .padding(10.dp)
-                            .padding(end = 26.dp, bottom = bottom)
-                            .size(80.dp, 45.dp),
-                        onClick = {
-                            valueState.matchText = true
-                            valueState.doneAction = true
-                        },
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Done,
-                            contentDescription = stringResource(R.string.done)
-                        )
-                    }
-                }
-                if (readCleanAllText) {
-                    Column(
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .height(30.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Bottom
-                    ) { /*TODO*/
-                        FloatingActionButton(
-                            modifier = modifier
-                                .padding(10.dp)
-                                .padding(start = 50.dp, bottom = bottom)
-                                .size(45.dp, 45.dp),
-                            onClick = { valueState.cleanAllText = true },
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Delete,
-                                contentDescription = stringResource(R.string.clean_all_texts_button)
-                            )
-                        }
-                    }
-                }
-            }
-        }
-        //edit button
-        if (
-            (!valueState.isEditing) &&
-            (readEditButton) &&
-            (!valueState.editButton) &&
-            (readButtonStyle == 1)
-        ) {
-            val padding = if (screenController) {
-                modifier.padding(end = 36.dp, bottom = 16.dp)
-            } else {
-                modifier.padding(36.dp)
-            }
-            Column(
-                modifier = modifier.fillMaxSize() then padding,
-                verticalArrangement = Arrangement.Bottom,
-                horizontalAlignment = Alignment.End
-            ) {
-                FloatingActionButton(onClick = { valueState.editAction = true }) {
-                    Icon(
-                        imageVector = Icons.Filled.Edit,
-                        contentDescription = stringResource(R.string.edit)
-                    )
-                }
-            }
-        }
-        //setting button
-        if ((!valueState.isEditing) && (readButtonStyle == 1)) {
-            val padding = if (screenController) {
-                modifier.padding(start = 36.dp, bottom = 16.dp)
-            } else {
-                modifier.padding(36.dp)
-            }
-            Column(
-                modifier = modifier.fillMaxSize() then padding,
-                verticalArrangement = Arrangement.Bottom,
-                horizontalAlignment = Alignment.Start
-            ) {
-                FloatingActionButton(onClick = { valueState.onClickSetting = true }) {
-                    Icon(
-                        imageVector = Icons.Filled.Settings,
-                        contentDescription = stringResource(R.string.settings)
-                    )
-                }
-            }
-        }
+        // NavBar control style
+        if (set.buttonStyle() == 2) NavBarStyle(
+            isEditing = valueState.isEditing,
+            onClickSetting = { valueState.onClickSetting = true },
+            onClickEdit = { valueState.editAction = true },
+            onClickDone = {
+                valueState.matchText = true
+                valueState.doneAction = true
+            },
+            onClickClean = { valueState.cleanAllText = true },
+            editButton = valueState.editButton,
+            editingHorizontalScreen = valueState.editingHorizontalScreen,
+            readEditButton = set.editButton(),
+            readCleanAllText = set.cleanAllText()
+        )
+
         //manual of button style
-        if (readButtonStyle == 0) {
-            Manual(navController)
+        if (set.buttonStyle() == 0) {
+            Manual(
+                navController = navController,
+                readEditButton = set.editButton(),
+                readIsOffButtonManual = set.offButtonManual(),
+                readIsOffEditButtonManual = set.offEditButtonManual(),
+            )
         }
         if (valueState.ee) {
             navController.navigate("EE")
@@ -370,7 +304,7 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
             modifier = modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Bottom
         ) {
-            val bottomShadow = if (readButtonStyle != 2) {
+            val bottomShadow = if (set.buttonStyle() != 2) {
                 modifier
                     .fillMaxWidth()
                     .height(2.dp)
@@ -399,22 +333,22 @@ fun WritingBoardLayout(navController: NavController, modifier: Modifier = Modifi
 }
 
 @Composable
-private fun Manual(navController: NavController, modifier: Modifier = Modifier) {
+private fun Manual(
+    navController: NavController,
+    readEditButton: Boolean,
+    readIsOffButtonManual: Boolean,
+    readIsOffEditButtonManual: Boolean,
+    modifier: Modifier = Modifier
+) {
     val valueState: ValueState = viewModel()
     val context = LocalContext.current
-    val readEditButton = settingState.readSwitchState("edit_button", context)
-    if (
-        (!settingState.readSwitchState("off_button_manual", context))
-    ) {
+    if (!readIsOffButtonManual) {
         valueState.readOnlyText = true
         ManualLayout(
             modifierPadding = modifier.padding(bottom = 380.dp, end = 58.dp),
             onClick = {
-                settingState.writeSwitchState(
-                    "off_button_manual",
-                    context,
-                    true
-                )
+                SettingOption(context).offButtonManual(true)
+
                 valueState.readOnlyText = false
                 navController.navigate("UpdateScreen")
                 Handler(Looper.getMainLooper()).postDelayed(50) {
@@ -426,19 +360,13 @@ private fun Manual(navController: NavController, modifier: Modifier = Modifier) 
         )
     }
     //manual of edit button
-    if (
-        (!settingState.readSwitchState("off_editButton_manual", context)) &&
-        (readEditButton)
-    ) {
+    if (!readIsOffEditButtonManual && readEditButton) {
         valueState.readOnlyText = true
         ManualLayout(
             modifierPadding = modifier.padding(top = 300.dp, end = 50.dp),
             onClick = {
-                settingState.writeSwitchState(
-                    "off_editButton_manual",
-                    context,
-                    true
-                )
+                SettingOption(context).offEditButtonManual(true)
+
                 valueState.readOnlyText = false
                 navController.navigate("UpdateScreen")
                 Handler(Looper.getMainLooper()).postDelayed(50) {

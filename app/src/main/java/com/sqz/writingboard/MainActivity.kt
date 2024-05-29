@@ -19,16 +19,15 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.sqz.writingboard.ui.setting.WritingBoardSettingState
 import com.sqz.writingboard.ui.component.WritingBoardEE
 import com.sqz.writingboard.ui.main.WritingBoardLayout
 import com.sqz.writingboard.ui.component.WritingBoardNone
 import com.sqz.writingboard.ui.setting.WritingBoardSetting
 import com.sqz.writingboard.ui.component.ErrorWithSystemVersionA13
+import com.sqz.writingboard.ui.theme.ThemeColor
 import com.sqz.writingboard.ui.theme.WritingBoardTheme
 import com.sqz.writingboard.ui.theme.themeColor
 
-val settingState = WritingBoardSettingState()
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "WritingBoard")
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,8 +36,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             val window: Window = this.window
             WritingBoardTheme {
-                window.statusBarColor = themeColor("statusBarColor").toArgb()
-                window.navigationBarColor = themeColor("navigationBarColor").toArgb()
+                window.statusBarColor = themeColor(ThemeColor.StatusBarColor).toArgb()
+                window.navigationBarColor = themeColor(ThemeColor.NavigationBarColor).toArgb()
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
@@ -60,8 +59,8 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("UpdateScreen") {
                             WritingBoardNone()
-                            window.statusBarColor = themeColor("statusBarColor").toArgb()
-                            window.navigationBarColor = themeColor("navigationBarColor").toArgb()
+                            window.statusBarColor = themeColor(ThemeColor.StatusBarColor).toArgb()
+                            window.navigationBarColor = themeColor(ThemeColor.NavigationBarColor).toArgb()
                             Log.d("WritingBoardTag", "NavHost: Screen is WritingBoardNone.")
                         }
                         composable("EE") {

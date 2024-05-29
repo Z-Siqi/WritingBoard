@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import com.sqz.writingboard.settingState
+import com.sqz.writingboard.ui.setting.SettingOption
 
 private val darkColorScheme = darkColorScheme(
     primary = theme_dark_primary,
@@ -109,13 +109,18 @@ fun WritingBoardTheme(
     )
 }
 
+enum class ThemeColor {
+    StatusBarColor, NavigationBarColor, BackgroundColor, ShapeColor, BoardColor,
+    CardColor, ScrolledContainerColor, TitleContentColor, SettingBackgroundColor,
+    TextColor, BarColor,
+}
+
 @Composable
-fun themeColor(themeColor: String): Color {
-    val context = LocalContext.current
-    val readTheme = settingState.readSegmentedButtonState("theme", context)
+fun themeColor(themeColor: ThemeColor): Color {
+    val readTheme = SettingOption(LocalContext.current).theme()
     when (themeColor) {
         //App Bars
-        "statusBarColor" -> {
+        ThemeColor.StatusBarColor -> {
             return when (readTheme) {
                 0 -> MaterialTheme.colorScheme.outline
                 1 -> MaterialTheme.colorScheme.secondary
@@ -124,7 +129,7 @@ fun themeColor(themeColor: String): Color {
             }
         }
 
-        "navigationBarColor" -> {
+        ThemeColor.NavigationBarColor -> {
             return when (readTheme) {
                 0 -> MaterialTheme.colorScheme.surfaceVariant
                 1 -> MaterialTheme.colorScheme.secondaryContainer
@@ -134,7 +139,7 @@ fun themeColor(themeColor: String): Color {
         }
 
         //WritingBoard screen
-        "backgroundColor" -> {
+        ThemeColor.BackgroundColor -> {
             return when (readTheme) {
                 0 -> MaterialTheme.colorScheme.surfaceContainerLowest
                 1 -> MaterialTheme.colorScheme.surfaceVariant
@@ -143,7 +148,7 @@ fun themeColor(themeColor: String): Color {
             }
         }
 
-        "shapeColor" -> {
+        ThemeColor.ShapeColor -> {
             return when (readTheme) {
                 0 -> MaterialTheme.colorScheme.tertiary
                 1 -> MaterialTheme.colorScheme.primary
@@ -152,7 +157,7 @@ fun themeColor(themeColor: String): Color {
             }
         }
 
-        "boardColor" -> {
+        ThemeColor.BoardColor -> {
             return when (readTheme) {
                 0 -> MaterialTheme.colorScheme.surfaceBright
                 1 -> MaterialTheme.colorScheme.surfaceContainerLow
@@ -161,8 +166,8 @@ fun themeColor(themeColor: String): Color {
             }
         }
         //Setting screen
-        "cardColor" -> {
-            return when (settingState.readSegmentedButtonState("theme", context)) {
+        ThemeColor.CardColor -> {
+            return when (readTheme) {
                 0 -> MaterialTheme.colorScheme.surfaceContainerHighest
                 1 -> MaterialTheme.colorScheme.primaryContainer
                 2 -> MaterialTheme.colorScheme.secondaryContainer
@@ -170,7 +175,7 @@ fun themeColor(themeColor: String): Color {
             }
         }
 
-        "scrolledContainerColor" -> {
+        ThemeColor.ScrolledContainerColor -> {
             return when (readTheme) {
                 0 -> MaterialTheme.colorScheme.surfaceDim
                 1 -> MaterialTheme.colorScheme.secondaryContainer
@@ -179,7 +184,7 @@ fun themeColor(themeColor: String): Color {
             }
         }
 
-        "titleContentColor" -> {
+        ThemeColor.TitleContentColor-> {
             return when (readTheme) {
                 0 -> MaterialTheme.colorScheme.secondary
                 1 -> MaterialTheme.colorScheme.primary
@@ -188,7 +193,7 @@ fun themeColor(themeColor: String): Color {
             }
         }
 
-        "settingBackgroundColor" -> {
+        ThemeColor.SettingBackgroundColor -> {
             return when (readTheme) {
                 0 -> MaterialTheme.colorScheme.surfaceBright
                 1 -> MaterialTheme.colorScheme.surfaceVariant
@@ -197,7 +202,7 @@ fun themeColor(themeColor: String): Color {
             }
         }
         //WritingBoard text
-        "textColor" -> {
+        ThemeColor.TextColor -> {
             return when (readTheme) {
                 1 -> MaterialTheme.colorScheme.secondary
                 2 -> MaterialTheme.colorScheme.tertiary
@@ -205,7 +210,7 @@ fun themeColor(themeColor: String): Color {
             }
         }
         //Scroll bar color
-        "barColor" -> {
+        ThemeColor.BarColor -> {
             return when (readTheme) {
                 0 -> MaterialTheme.colorScheme.secondary
                 1 -> MaterialTheme.colorScheme.surfaceTint

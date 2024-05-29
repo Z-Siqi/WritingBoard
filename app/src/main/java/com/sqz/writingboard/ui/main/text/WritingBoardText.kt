@@ -38,7 +38,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sqz.writingboard.R
 import com.sqz.writingboard.classes.ValueState
 import com.sqz.writingboard.glance.WritingBoardWidget
-import com.sqz.writingboard.settingState
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
 import com.sqz.writingboard.ui.theme.CursiveCN
 import com.sqz.writingboard.ui.theme.themeColor
@@ -46,7 +45,12 @@ import kotlinx.coroutines.launch
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.SolidColor
 import com.sqz.writingboard.ui.WritingBoardViewModel
+import com.sqz.writingboard.ui.setting.SettingOption
+import com.sqz.writingboard.ui.theme.ThemeColor
 
+/**
+ * Process text-related such as typing and font.
+ **/
 @Composable
 fun WritingBoardText(
     scrollState: ScrollState,
@@ -57,14 +61,20 @@ fun WritingBoardText(
     ) -> Unit,
     requestCleanText: (request: TextFieldState) -> Unit,
     matchText: (textFieldState: TextFieldState, (text: CharSequence) -> Unit) -> Unit,
+    isEditing: () -> Unit,
+    readOnly: Boolean,
+    editButton: Boolean,
+    requestSave: () -> Unit,
+    bottomHigh: Int,
     viewModel: WritingBoardViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val set = SettingOption(context)
     val textFieldState = rememberTextFieldState()
     val coroutineScope = rememberCoroutineScope()
 
-    val valueState: ValueState = viewModel() /*TODO*/ //this need to decrease!!!
+    val valueState: ValueState = viewModel()
 
     /** Load saved text **/
     if (!viewModel.savedText.isInitialized) {
@@ -80,7 +90,7 @@ fun WritingBoardText(
 
     var autoSave by remember { mutableStateOf(false) }
 
-    val fontSize = when (settingState.readSegmentedButtonState("font_size", context)) {
+    val fontSize = when (set.fontSize()) {
         0 -> 18.sp
         1 -> 23.sp
         2 -> 33.sp
@@ -90,20 +100,20 @@ fun WritingBoardText(
         (stringResource(R.string.used_language) == "CN") ||
         (stringResource(R.string.used_language) == "TW")
     ) CursiveCN else FontFamily.Cursive
-    val fontFamily = when (settingState.readSegmentedButtonState("font_style", context)) {
+    val fontFamily = when (set.fontStyle()) {
         0 -> FontFamily.Monospace
         1 -> FontFamily.Default
         2 -> FontFamily.Serif
         3 -> fontLanguage
         else -> FontFamily.Default
     }
-    val fontWeight = when (settingState.readSegmentedButtonState("font_weight", context)) {
+    val fontWeight = when (set.fontWeight()) {
         0 -> FontWeight.Normal
         1 -> FontWeight.SemiBold
         2 -> FontWeight.W900
         else -> FontWeight.Normal
     }
-    val fontStyle = if (settingState.readSwitchState("italics", context)) {
+    val fontStyle = if (set.italics()) {
         FontStyle.Italic
     } else {
         FontStyle.Normal
@@ -117,10 +127,10 @@ fun WritingBoardText(
         it.let { newText ->
             if (
                 (newText.endsWith("\uD83C\uDFF3️\u200D⚧️")) &&
-                (!settingState.readSwitchState("easter_eggs", context)) ||
+                (!set.easterEgg()) ||
                 (newText.endsWith("_-OPEN_IT"))
             ) {
-                settingState.writeSwitchState("easter_eggs", context, true)
+                set.easterEgg(true)
                 valueState.ee = true
             }
         }
@@ -134,10 +144,8 @@ fun WritingBoardText(
         LaunchedEffect(toSave) {
             if (toSave) coroutineScope.launch {
                 textFieldState.text.toString().let { newText ->
-                    val textToSave = if (!settingState.readSwitchState(
-                            "allow_multiple_lines",
-                            context
-                        ) && newText.isNotEmpty() && newText.last() == '\n'
+                    val textToSave = if (!set.allowMultipleLines() &&
+                        newText.isNotEmpty() && newText.last() == '\n'
                     ) {
                         Log.d("WritingBoardTag", "Removing line breaks and adding a new line.")
                         newText.trimEnd { it == '\n' }.plus('\n')
@@ -155,10 +163,9 @@ fun WritingBoardText(
         }
     }
 
-    if (autoSave &&
-        !settingState.readSwitchState("disable_auto_save", context)
-    ) LaunchedEffect(true) {
-        valueState.saveAction = true
+    if (autoSave && set.disableAutoSave()) LaunchedEffect(true) {
+        //valueState.saveAction = true
+        requestSave()
         autoSave = false
     }
     // auto save when not WindowFocused
@@ -167,11 +174,7 @@ fun WritingBoardText(
         autoSave = true
     }
 
-    if (
-        (settingState.readSwitchState("edit_button", context)) &&
-        (!valueState.editButton) ||
-        (valueState.readOnlyText)
-    ) {
+    if (set.editButton() && !editButton || readOnly) {
         BasicText(
             text = textFieldState.text.toString(),
             modifier = modifier
@@ -184,7 +187,7 @@ fun WritingBoardText(
                 fontWeight = fontWeight,
                 fontFamily = fontFamily,
                 fontStyle = fontStyle,
-                color = themeColor("textColor")
+                color = themeColor(ThemeColor.TextColor)
             )
         )
         Log.d("WritingBoardTag", "Read-only text")
@@ -204,15 +207,12 @@ fun WritingBoardText(
             oldText = textFieldState.text.length
         }
 
-        val button = settingState.readSegmentedButtonState("button_style", context) == 2
-        val high = if (button) 110 else 58
-
         //text function
         BasicTextField2(
             state = textFieldState,
             scrollState = scrollState,
             verticalScrollWhenCursorUnderKeyboard = true,
-            extraScrollValue = high,
+            extraScrollValue = bottomHigh,
             modifier = modifier
                 .fillMaxSize()
                 .drawVerticalScrollbar(scrollState)
@@ -220,7 +220,7 @@ fun WritingBoardText(
                 .focusRequester(focusRequester)
                 .onFocusEvent { focusState ->
                     if (focusState.isFocused) {
-                        valueState.isEditing = true
+                        isEditing()
                     }
                 }
                 .pointerInput(Unit) {
@@ -232,7 +232,7 @@ fun WritingBoardText(
                 fontWeight = fontWeight,
                 fontFamily = fontFamily,
                 fontStyle = fontStyle,
-                color = themeColor("textColor")
+                color = themeColor(ThemeColor.TextColor)
             )
         )
     }

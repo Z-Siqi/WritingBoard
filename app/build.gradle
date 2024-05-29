@@ -12,7 +12,7 @@ android {
         minSdk 29
         targetSdk 34
         versionCode 58
-        versionName "0.5.8-build_alpha2-debug01"
+        versionName "0.5.8-build_alpha3"
     }
 
     buildTypes {
