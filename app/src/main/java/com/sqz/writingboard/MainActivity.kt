@@ -2,6 +2,8 @@ package com.sqz.writingboard
 
 import android.content.Context
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.Window
 import androidx.activity.ComponentActivity
@@ -10,12 +12,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.os.postDelayed
 import androidx.core.view.WindowCompat
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -29,12 +36,18 @@ import com.sqz.writingboard.ui.theme.WritingBoardTheme
 import com.sqz.writingboard.ui.theme.themeColor
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "WritingBoard")
+
+enum class NavRoute {
+    WritingBoard, Setting, UpdateScreen, EE, ErrorWithSystemVersionA13
+}
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             val window: Window = this.window
+            val navController = rememberNavController()
             WritingBoardTheme {
                 window.statusBarColor = themeColor(ThemeColor.StatusBarColor).toArgb()
                 window.navigationBarColor = themeColor(ThemeColor.NavigationBarColor).toArgb()
@@ -44,35 +57,61 @@ class MainActivity : ComponentActivity() {
                         .systemBarsPadding(),
                     color = MaterialTheme.colorScheme.surfaceVariant
                 ) {
-                    val navController = rememberNavController()
                     NavHost(
                         navController = navController,
-                        startDestination = "WritingBoard"
+                        startDestination = NavRoute.WritingBoard.name
                     ) {
-                        composable("WritingBoard") {
+                        composable(NavRoute.WritingBoard.name) {
                             WritingBoardLayout(navController)
                             Log.d("WritingBoardTag", "NavHost: Screen is WritingBoardLayout.")
                         }
-                        composable("Setting") {
+                        composable(NavRoute.Setting.name) {
                             WritingBoardSetting(navController)
                             Log.d("WritingBoardTag", "NavHost: Screen is WritingBoardSetting.")
                         }
-                        composable("UpdateScreen") {
+                        composable(NavRoute.UpdateScreen.name) {
                             WritingBoardNone()
                             window.statusBarColor = themeColor(ThemeColor.StatusBarColor).toArgb()
                             window.navigationBarColor = themeColor(ThemeColor.NavigationBarColor).toArgb()
                             Log.d("WritingBoardTag", "NavHost: Screen is WritingBoardNone.")
                         }
-                        composable("EE") {
+                        composable(NavRoute.EE.name) {
                             WritingBoardEE()
                         }
-                        composable("ErrorWithSystemVersionA13") {
+                        composable(NavRoute.ErrorWithSystemVersionA13.name) {
                             ErrorWithSystemVersionA13(navController)
                             Log.d("WritingBoardTag", "NavHost: Screen is ErrorWithSystemVersionA13.")
                         }
                     }
                 }
             }
+            NavScreen.screenUpdate(navController)
+        }
+    }
+}
+
+object NavScreen {
+    private var _updateScreen by mutableStateOf(false)
+    private var _ee by mutableStateOf(false)
+
+    fun updateScreen(ee: Boolean = false) = if (!ee) {
+        _updateScreen = true
+    } else _ee = true
+
+    fun screenUpdate(navController: NavHostController) {
+        if (_updateScreen) {
+            navController.navigate("UpdateScreen")
+            Handler(Looper.getMainLooper()).postDelayed(50) {
+                navController.popBackStack()
+            }
+            _updateScreen = false
+        }
+        if (_ee) {
+            navController.navigate("EE")
+            Handler(Looper.getMainLooper()).postDelayed(80000) {
+                navController.popBackStack()
+            }
+            _ee = false
         }
     }
 }

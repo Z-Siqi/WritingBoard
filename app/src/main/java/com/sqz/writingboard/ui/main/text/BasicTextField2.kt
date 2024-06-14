@@ -167,10 +167,8 @@ fun BasicTextField2(
                             }
                         }
                     }
-                    true
-                } else {
-                    false
                 }
+                false
             }
             .pointerInteropFilter { motionEvent: MotionEvent ->
                 //detect screen y coordinate when click

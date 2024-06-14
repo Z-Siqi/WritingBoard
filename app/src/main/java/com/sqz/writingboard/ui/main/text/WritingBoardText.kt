@@ -9,7 +9,6 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.insert
-import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,7 +35,6 @@ import androidx.compose.ui.unit.sp
 import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sqz.writingboard.R
-import com.sqz.writingboard.classes.ValueState
 import com.sqz.writingboard.glance.WritingBoardWidget
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
 import com.sqz.writingboard.ui.theme.CursiveCN
@@ -44,7 +42,9 @@ import com.sqz.writingboard.ui.theme.themeColor
 import kotlinx.coroutines.launch
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.SolidColor
+import com.sqz.writingboard.NavScreen
 import com.sqz.writingboard.ui.WritingBoardViewModel
+import com.sqz.writingboard.ui.main.WritingBoardObject
 import com.sqz.writingboard.ui.setting.SettingOption
 import com.sqz.writingboard.ui.theme.ThemeColor
 
@@ -59,7 +59,6 @@ fun WritingBoardText(
         (reset: Boolean) -> Unit,
         @Composable (toSave: Boolean) -> Unit
     ) -> Unit,
-    requestCleanText: (request: TextFieldState) -> Unit,
     matchText: (textFieldState: TextFieldState, (text: CharSequence) -> Unit) -> Unit,
     isEditing: () -> Unit,
     readOnly: Boolean,
@@ -71,10 +70,8 @@ fun WritingBoardText(
 ) {
     val context = LocalContext.current
     val set = SettingOption(context)
-    val textFieldState = rememberTextFieldState()
+    val textFieldState = viewModel.textFieldState
     val coroutineScope = rememberCoroutineScope()
-
-    val valueState: ValueState = viewModel()
 
     /** Load saved text **/
     if (!viewModel.savedText.isInitialized) {
@@ -119,9 +116,6 @@ fun WritingBoardText(
         FontStyle.Normal
     }
 
-    //clean all texts action
-    requestCleanText((textFieldState))
-
     //match action by done button
     matchText(textFieldState) {
         it.let { newText ->
@@ -131,7 +125,7 @@ fun WritingBoardText(
                 (newText.endsWith("_-OPEN_IT"))
             ) {
                 set.easterEgg(true)
-                valueState.ee = true
+                NavScreen.updateScreen(ee = true)
             }
         }
     }
@@ -155,16 +149,16 @@ fun WritingBoardText(
                     } else {
                         newText
                     }
-                    viewModel.saveText(textToSave, context)
+                    viewModel.saveText(textToSave, context).let {
+                        if (it) saved = true
+                    }
                 }
                 WritingBoardWidget().updateAll(context)
-                saved = true
             }
         }
     }
 
-    if (autoSave && set.disableAutoSave()) LaunchedEffect(true) {
-        //valueState.saveAction = true
+    if (autoSave && !set.disableAutoSave()) LaunchedEffect(true) {
         requestSave()
         autoSave = false
     }
@@ -180,7 +174,7 @@ fun WritingBoardText(
             modifier = modifier
                 .fillMaxSize()
                 .drawVerticalScrollbar(scrollState)
-                .verticalScroll(scrollState, valueState.readOnlyTextScroll)
+                .verticalScroll(scrollState, WritingBoardObject.readOnlyTextScroll)
                 .padding(8.dp),
             style = TextStyle.Default.copy(
                 fontSize = fontSize,

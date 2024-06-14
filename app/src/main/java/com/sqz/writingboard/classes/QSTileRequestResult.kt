@@ -9,15 +9,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sqz.writingboard.R
+import com.sqz.writingboard.ui.WritingBoardViewModel
 
 class QSTileRequestResult {
 
     @SuppressLint("ComposableNaming")
     @Composable
-    fun makeToast() {
+    fun makeToast(viewModel: WritingBoardViewModel = viewModel()) {
         val context = LocalContext.current
-        val valueState: ValueState = viewModel()
-        if (valueState.resultOfQST == -1) {
+        if (viewModel.resultOfQST == -1) {
             Toast.makeText(context, result(), Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(context, result(), Toast.LENGTH_SHORT).show()
@@ -26,17 +26,15 @@ class QSTileRequestResult {
 
     @SuppressLint("ComposableNaming")
     @Composable
-    fun makeErrorLog() {
-        val valueState: ValueState = viewModel()
-        if (valueState.resultOfQST >= 1000) {
+    fun makeErrorLog(viewModel: WritingBoardViewModel = viewModel()) {
+        if (viewModel.resultOfQST >= 1000) {
             Log.e("WritingBoardTag", result())
         }
     }
 
     @Composable
-    fun result(): String {
-        val valueState: ValueState = viewModel()
-        return when (val resultOfQST = valueState.resultOfQST) {
+    fun result(viewModel: WritingBoardViewModel = viewModel()): String {
+        return when (val resultOfQST = viewModel.resultOfQST) {
             -5 -> stringResource(R.string.TILE_ADD_REQUEST_NotDetected)
             -1 -> stringResource(R.string.TILE_ADD_REQUEST_NO_SUPPORT)
             StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_NOT_ADDED -> stringResource(R.string.TILE_ADD_REQUEST_0)

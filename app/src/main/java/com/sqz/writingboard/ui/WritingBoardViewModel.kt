@@ -3,7 +3,9 @@ package com.sqz.writingboard.ui
 import android.content.ContentValues
 import android.content.Context
 import android.util.Log
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.datastore.core.IOException
@@ -24,6 +26,9 @@ import kotlinx.coroutines.launch
 class WritingBoardViewModel : ViewModel() {
     private val _savedText = MutableLiveData<String>()
     private var _isLoad by mutableStateOf(false)
+
+    val textFieldState = TextFieldState()
+
     val savedText: LiveData<String> get() = _savedText
 
     suspend fun loadSavedText(context: Context, then: () -> Unit = {}) {
@@ -47,16 +52,20 @@ class WritingBoardViewModel : ViewModel() {
         }
     }
 
-    suspend fun saveText(toSave: String, context: Context){
-        if (_isLoad) {
+    suspend fun saveText(toSave: String, context: Context): Boolean {
+        return if (_isLoad) {
             viewModelScope.launch {
                 context.dataStore.edit { preferences ->
                     preferences[stringPreferencesKey("saved_text")] = toSave
                 }
                 Log.i("WritingBoardTag", "Text is saved")
             }
+            true
         } else {
             Log.e("WritingBoardTag", "Failed to save! Due to data not load yet!")
+            false
         }
     }
+
+    var resultOfQST by mutableIntStateOf(-5)
 }

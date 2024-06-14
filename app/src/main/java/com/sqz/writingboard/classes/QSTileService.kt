@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sqz.writingboard.MainActivity
 import com.sqz.writingboard.R
+import com.sqz.writingboard.ui.WritingBoardViewModel
 import java.util.concurrent.Executors
 import java.util.function.Consumer
 
@@ -58,13 +59,12 @@ class QSTileService : TileService() {
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @Composable
-    fun RequestAdd() {
+    fun RequestAdd(viewModel: WritingBoardViewModel = viewModel()) {
         val context = LocalContext.current
-        val valueState: ValueState = viewModel()
         val statusBarManager = ContextCompat.getSystemService(
             context, StatusBarManager::class.java
         ) as StatusBarManager
-        val callback = Consumer<Int> { result -> valueState.resultOfQST = result }
+        val callback = Consumer<Int> { result -> viewModel.resultOfQST = result }
         statusBarManager.requestAddTileService(
             ComponentName(context, "com.sqz.writingboard.classes.QSTileService"),
             ActivityCompat.getString(context, R.string.app_name),

@@ -7,7 +7,6 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.util.Log
 import androidx.annotation.RequiresApi
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -65,14 +64,16 @@ import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.sqz.writingboard.NavRoute
+import com.sqz.writingboard.NavScreen
 import com.sqz.writingboard.R
 import com.sqz.writingboard.classes.QSTileRequestResult
 import com.sqz.writingboard.classes.QSTileService
-import com.sqz.writingboard.classes.ValueState
 import com.sqz.writingboard.component.Vibrate
 import com.sqz.writingboard.glance.WritingBoardTextOnlyWidgetReceiver
 import com.sqz.writingboard.glance.WritingBoardWidget
 import com.sqz.writingboard.glance.WritingBoardWidgetReceiver
+import com.sqz.writingboard.ui.WritingBoardViewModel
 import com.sqz.writingboard.ui.setting.card.ClickCardLayout
 import com.sqz.writingboard.ui.setting.card.SegmentedButtonCardLayout
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
@@ -86,16 +87,16 @@ import com.sqz.writingboard.ui.theme.themeColor
 private fun SettingFunction(
     state: LazyListState,
     navController: NavController,
+    viewModel: WritingBoardViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val valueState: ValueState = viewModel()
     val set = SettingOption(context)
 
     val cardColors = CardDefaults.cardColors(containerColor = themeColor(ThemeColor.CardColor))
     var clickAction by remember { mutableStateOf(false) }
     if (clickAction) {
-        if (set.vibrate() == 2) Vibrate()
+        if (set.vibrate() == 2) Vibrate(context).createOneTick()
         clickAction = false
     }
 
@@ -124,7 +125,7 @@ private fun SettingFunction(
                 colors = cardColors
             ) { index ->
                 set.theme(index)
-                valueState.updateScreen = true
+                NavScreen.updateScreen()
                 clickAction = true
             }
         }
@@ -311,10 +312,10 @@ private fun SettingFunction(
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     QSTileService().RequestAdd()
                 } else {
-                    valueState.resultOfQST = -1
+                    viewModel.resultOfQST = -1
                     cannot = true
                 }
-                if (valueState.resultOfQST != -5) {
+                if (viewModel.resultOfQST != -5) {
                     QSTileRequestResult().makeToast()
                     clickAction = true
                 } else {
@@ -382,7 +383,7 @@ private fun SettingFunction(
                             getString(context, R.string.language_no_support),
                             Toast.LENGTH_SHORT
                         ).show()
-                        navController.navigate("ErrorWithSystemVersionA13")
+                        navController.navigate(NavRoute.ErrorWithSystemVersionA13.name)
                     }
                 },
                 text = stringResource(R.string.language),
@@ -425,8 +426,6 @@ fun WritingBoardSetting(
     navController: NavController,
     modifier: Modifier = Modifier
 ) {
-    val valueState: ValueState = viewModel()
-
     val state = rememberLazyListState()
     val appBarState = rememberTopAppBarState()
     val firstVisibleItemIndex = remember { derivedStateOf { state.firstVisibleItemIndex } }
@@ -526,14 +525,6 @@ fun WritingBoardSetting(
                 }
             }
         } else { Column{ /* fix this function will lead crash in release apk */ } }
-    }
-    if (valueState.updateScreen) {
-        navController.navigate("UpdateScreen")
-        Handler(Looper.getMainLooper()).postDelayed(50) {
-            navController.popBackStack()
-            Log.i("WritingBoardTag", "Re-Opening WritingBoard Text")
-            valueState.updateScreen = false
-        }
     }
 }
 
