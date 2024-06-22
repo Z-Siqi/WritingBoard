@@ -67,8 +67,8 @@ import androidx.navigation.compose.rememberNavController
 import com.sqz.writingboard.NavRoute
 import com.sqz.writingboard.NavScreen
 import com.sqz.writingboard.R
-import com.sqz.writingboard.classes.QSTileRequestResult
-import com.sqz.writingboard.classes.QSTileService
+import com.sqz.writingboard.tile.QSTileRequestResult
+import com.sqz.writingboard.tile.QSTileService
 import com.sqz.writingboard.component.Vibrate
 import com.sqz.writingboard.glance.WritingBoardTextOnlyWidgetReceiver
 import com.sqz.writingboard.glance.WritingBoardWidget

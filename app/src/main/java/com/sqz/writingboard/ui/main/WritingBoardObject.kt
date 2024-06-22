@@ -17,30 +17,44 @@ object WritingBoardObject {
 
     var isEditing by mutableStateOf(false)
     var saveAction by mutableStateOf(false)
+    var matchText by mutableStateOf(false)
 
     var softKeyboard: Boolean = false
     var editButton: Boolean = false
     var readOnlyText: Boolean = false
     var readOnlyTextScroll: Boolean = true
 
-    var matchText by mutableStateOf(false)
-    var onClickSetting by mutableStateOf(false)
+    private var _doneAction by mutableStateOf(false)
+    private var _doneWithMatch by mutableStateOf(false)
 
-    fun doneAction(
-        keyboard: SoftwareKeyboardController?,
-        focus: FocusManager,
-        set: SettingOption,
+    fun doneAction(matchText: Boolean = false) {
+        _doneAction = true
+        if (matchText) _doneWithMatch = true
+    }
+
+    fun doneRequest(
+        softwareKeyboardController: SoftwareKeyboardController?,
+        focusManager: FocusManager,
+        settingOption: SettingOption,
         context: Context,
-        matchText: Boolean = false
     ) {
-        if (matchText) this.matchText = true
-        keyboard?.hide()
-        focus.clearFocus()
-        if (set.vibrate() == 2) Vibrate(context).createOneTick()
-        this.saveAction = true
-        this.isEditing = false
-        this.editButton = false
-        Log.d("WritingBoardTag", "Done action is triggered")
+        if (_doneAction) {
+            if (_doneWithMatch) this.matchText = true
+            softwareKeyboardController?.hide()
+            focusManager.clearFocus()
+            if (settingOption.vibrate() == 2) Vibrate(context).createOneTick()
+            this.saveAction = true
+            this.isEditing = false
+            this.editButton = false
+            Log.d("WritingBoardTag", "Done action is triggered")
+            _doneAction = false
+            _doneWithMatch = false
+        }
+    }
+
+    fun onClickSetting(navAction: () -> Unit) {
+        this.doneAction()
+        navAction()
     }
 
     fun editAction(set: SettingOption, vibrate: Vibrate) {

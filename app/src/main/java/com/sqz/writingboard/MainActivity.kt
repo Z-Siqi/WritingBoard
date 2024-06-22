@@ -14,6 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
@@ -57,17 +58,21 @@ class MainActivity : ComponentActivity() {
                         .systemBarsPadding(),
                     color = MaterialTheme.colorScheme.surfaceVariant
                 ) {
+                    var screen by rememberSaveable { mutableStateOf("") }
                     NavHost(
                         navController = navController,
                         startDestination = NavRoute.WritingBoard.name
                     ) {
                         composable(NavRoute.WritingBoard.name) {
-                            WritingBoardLayout(navController)
-                            Log.d("WritingBoardTag", "NavHost: Screen is WritingBoardLayout.")
+                            WritingBoardLayout(
+                                navToSetting = { navController.navigate(NavRoute.Setting.name) },
+                                context = applicationContext
+                            )
+                            screen = "WritingBoardLayout"
                         }
                         composable(NavRoute.Setting.name) {
                             WritingBoardSetting(navController)
-                            Log.d("WritingBoardTag", "NavHost: Screen is WritingBoardSetting.")
+                            screen = "WritingBoardSetting"
                         }
                         composable(NavRoute.UpdateScreen.name) {
                             WritingBoardNone()
@@ -82,6 +87,11 @@ class MainActivity : ComponentActivity() {
                             ErrorWithSystemVersionA13(navController)
                             Log.d("WritingBoardTag", "NavHost: Screen is ErrorWithSystemVersionA13.")
                         }
+                    }
+                    var it by rememberSaveable { mutableStateOf("") }
+                    if (screen != it) {
+                        Log.d("WritingBoardTag", "NavHost: Screen is $screen")
+                        it = screen
                     }
                 }
             }

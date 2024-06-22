@@ -50,7 +50,7 @@
         </receiver>
 
         <service
-            android:name=".classes.QSTileService"
+            android:name=".tile.QSTileService"
             android:exported="true"
             android:icon="@drawable/writingboard_logo"
             android:label="@string/app_name"

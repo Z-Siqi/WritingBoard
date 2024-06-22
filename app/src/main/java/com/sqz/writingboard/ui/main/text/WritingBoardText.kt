@@ -60,7 +60,8 @@ fun WritingBoardText(
         @Composable (toSave: Boolean) -> Unit
     ) -> Unit,
     matchText: (textFieldState: TextFieldState, (text: CharSequence) -> Unit) -> Unit,
-    isEditing: () -> Unit,
+    editState: () -> Unit, // tell isEditing
+    isEditing: Boolean,
     readOnly: Boolean,
     editButton: Boolean,
     requestSave: () -> Unit,
@@ -164,7 +165,8 @@ fun WritingBoardText(
     }
     // auto save when not WindowFocused
     val isWindowFocused = LocalWindowInfo.current.isWindowFocused
-    if (!isWindowFocused && textFieldState.text.isNotEmpty()) LaunchedEffect(true) {
+    val textNotEmpty = textFieldState.text.isNotEmpty()
+    if (!isWindowFocused && textNotEmpty && isEditing) LaunchedEffect(true) {
         autoSave = true
     }
 
@@ -214,7 +216,7 @@ fun WritingBoardText(
                 .focusRequester(focusRequester)
                 .onFocusEvent { focusState ->
                     if (focusState.isFocused) {
-                        isEditing()
+                        editState()
                     }
                 }
                 .pointerInput(Unit) {

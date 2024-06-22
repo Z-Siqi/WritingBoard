@@ -1,5 +1,6 @@
 package com.sqz.writingboard.ui.main
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.border
@@ -31,14 +32,11 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.glance.appwidget.updateAll
-import com.sqz.writingboard.NavRoute
 import com.sqz.writingboard.NavScreen
 import com.sqz.writingboard.component.KeyboardVisibilityObserver
 import com.sqz.writingboard.R
@@ -58,27 +56,24 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun WritingBoardLayout(
-    navController: NavController,
+    navToSetting: () -> Unit,
+    context: Context,
     modifier: Modifier = Modifier,
     viewModel: WritingBoardViewModel = viewModel(),
 ) {
-    val keyboard = LocalSoftwareKeyboardController.current
-    val focus = LocalFocusManager.current
     val config = LocalConfiguration.current
-    val context = LocalContext.current
     val scrollState = rememberScrollState()
     var isKeyboardVisible by remember { mutableStateOf(false) }
     var screenController by remember { mutableStateOf(false) }
 
-    val valueObject = WritingBoardObject
-
     val set = SettingOption(context = context)
-
-    if (valueObject.onClickSetting) {
-        valueObject.doneAction(keyboard, focus, set, context)
-        navController.navigate(NavRoute.Setting.name)
-        valueObject.onClickSetting = false
-    }
+    val valueObject = WritingBoardObject
+    valueObject.doneRequest(
+        softwareKeyboardController = LocalSoftwareKeyboardController.current,
+        focusManager = LocalFocusManager.current,
+        settingOption = set,
+        context = context
+    )
 
     //Layout
     Surface(
@@ -87,13 +82,13 @@ fun WritingBoardLayout(
             .fillMaxSize()
             .pointerInput(Unit) {
                 detectTapGestures { _ ->
-                    valueObject.doneAction(keyboard, focus, set, context)
+                    valueObject.doneAction()
                 }
             },
         color = themeColor(ThemeColor.BackgroundColor)
     ) {
         if (!valueObject.softKeyboard && set.buttonStyle() == 0) HideStyle(
-            onClickSetting = { valueObject.onClickSetting = true },
+            onClickSetting = { valueObject.onClickSetting(navToSetting) },
             onClickEdit = { valueObject.editAction(set, Vibrate(context)) },
             editButton = set.editButton(),
             readIsOffEditButtonManual = set.offEditButtonManual(),
@@ -205,8 +200,8 @@ fun WritingBoardLayout(
                                     valueObject.matchText = false
                                 }
                             },
-                            isEditing = { valueObject.isEditing = true },
-                            readOnly = valueObject.readOnlyText,
+                            editState = { valueObject.isEditing = true },
+                            isEditing = valueObject.isEditing, readOnly = valueObject.readOnlyText,
                             editButton = valueObject.editButton,
                             requestSave = { valueObject.saveAction = true },
                             bottomHigh = high + if (screenController) 70 else 0
@@ -225,11 +220,11 @@ fun WritingBoardLayout(
                 2 -> valueObject.editingHorizontalScreen(config) && valueObject.isEditing
                 else -> valueObject.isEditing
             },
-            onClickDone = { valueObject.doneAction(keyboard, focus, set, context, true) },
+            onClickDone = { valueObject.doneAction(true) },
             onClickClean = { valueObject.cleanAllText(viewModel.textFieldState) },
             readCleanAllText = set.cleanAllText(),
             defaultStyle = set.buttonStyle() == 1,
-            onClickSetting = { valueObject.onClickSetting = true },
+            onClickSetting = { valueObject.onClickSetting(navToSetting) },
             editButton = set.editButton() && !valueObject.editButton,
             onClickEdit = { valueObject.editAction(set, Vibrate(context)) },
             readAlwaysVisibleText = set.alwaysVisibleText()
@@ -238,9 +233,9 @@ fun WritingBoardLayout(
         // NavBar control style
         if (set.buttonStyle() == 2) NavBarStyle(
             isEditing = valueObject.isEditing,
-            onClickSetting = { valueObject.onClickSetting = true },
+            onClickSetting = { valueObject.onClickSetting(navToSetting) },
             onClickEdit = { valueObject.editAction(set, Vibrate(context)) },
-            onClickDone = { valueObject.doneAction(keyboard, focus, set, context, true) },
+            onClickDone = { valueObject.doneAction(true) },
             onClickClean = { valueObject.cleanAllText(viewModel.textFieldState) },
             editButton = valueObject.editButton,
             editingHorizontalScreen = valueObject.editingHorizontalScreen(config),
@@ -329,6 +324,5 @@ private fun Manual(
 @Preview(showBackground = true)
 @Composable
 private fun WritingBoardPreview() {
-    val navController = rememberNavController()
-    WritingBoardLayout(navController)
+    WritingBoardLayout({}, LocalContext.current)
 }

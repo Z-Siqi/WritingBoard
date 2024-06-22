@@ -7,5 +7,5 @@
     <color name="WidgetBackground">#FFDCE3E9</color>
     <color name="WidgetButtonBackground">#FF605A7C</color>
     <color name="WidgetButtonIcon">#FFD1E5F4</color>
-    <color name="WidgetTextColor">#FF161C20</color>
+    <color name="WidgetTextColor">#49555D</color>
 </resources>
