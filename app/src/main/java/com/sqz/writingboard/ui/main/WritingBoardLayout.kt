@@ -2,7 +2,9 @@ package com.sqz.writingboard.ui.main
 
 import android.content.Context
 import android.util.Log
+import android.view.MotionEvent
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -12,14 +14,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -33,20 +39,26 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
 import androidx.glance.appwidget.updateAll
 import com.sqz.writingboard.NavScreen
 import com.sqz.writingboard.component.KeyboardVisibilityObserver
 import com.sqz.writingboard.R
-import com.sqz.writingboard.component.Vibrate
+import com.sqz.writingboard.component.Feedback
 import com.sqz.writingboard.glance.WritingBoardTextOnlyWidget
 import com.sqz.writingboard.glance.WritingBoardWidget
 import com.sqz.writingboard.ui.WritingBoardViewModel
 import com.sqz.writingboard.ui.main.control.NavBarStyle
 import com.sqz.writingboard.ui.main.control.HideStyle
 import com.sqz.writingboard.ui.component.ManualLayout
+import com.sqz.writingboard.ui.component.drawVerticalScrollbar
 import com.sqz.writingboard.ui.main.control.LayoutButton
 import com.sqz.writingboard.ui.main.text.WritingBoardText
 import com.sqz.writingboard.ui.setting.SettingOption
@@ -54,6 +66,7 @@ import com.sqz.writingboard.ui.theme.ThemeColor
 import com.sqz.writingboard.ui.theme.themeColor
 import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun WritingBoardLayout(
     navToSetting: () -> Unit,
@@ -62,7 +75,9 @@ fun WritingBoardLayout(
     viewModel: WritingBoardViewModel = viewModel(),
 ) {
     val config = LocalConfiguration.current
-    val scrollState = rememberScrollState()
+    val view = LocalView.current
+    val scrollState = rememberLazyListState()
+
     var isKeyboardVisible by remember { mutableStateOf(false) }
     var screenController by remember { mutableStateOf(false) }
 
@@ -72,7 +87,8 @@ fun WritingBoardLayout(
         softwareKeyboardController = LocalSoftwareKeyboardController.current,
         focusManager = LocalFocusManager.current,
         settingOption = set,
-        context = context
+        context = context,
+        view = view
     )
 
     //Layout
@@ -87,9 +103,10 @@ fun WritingBoardLayout(
             },
         color = themeColor(ThemeColor.BackgroundColor)
     ) {
+        // HideStyle for WritingBoard
         if (!valueObject.softKeyboard && set.buttonStyle() == 0) HideStyle(
             onClickSetting = { valueObject.onClickSetting(navToSetting) },
-            onClickEdit = { valueObject.editAction(set, Vibrate(context)) },
+            onClickEdit = { valueObject.editAction(set, Feedback(context, view)) },
             editButton = set.editButton(),
             readIsOffEditButtonManual = set.offEditButtonManual(),
             readIsOffButtonManual = set.offButtonManual()
@@ -123,42 +140,26 @@ fun WritingBoardLayout(
             }
             //for calculate always visible text
             val highValue = (77 * LocalDensity.current.density).toInt()
-            //temporary solve scroll interrupted (by over scroll) when size change with alwaysVisibleText
-            if (screenController && set.editButton() && !valueObject.isEditing) {
-                LaunchedEffect(true) {
-                    valueObject.readOnlyTextScroll = false
-                    delay(100)
-                    scrollState.scrollTo(scrollState.maxValue)
-                    valueObject.readOnlyTextScroll = true
-                }
-            }
             //alwaysVisibleText actions
             if (set.alwaysVisibleText() && set.buttonStyle() != 2) {
-                var onEditing by remember { mutableStateOf(false) }
-                if (
-                    (scrollState.value == scrollState.maxValue) &&
-                    (scrollState.canScrollBackward)
+                var maxValue by remember { mutableIntStateOf(-1) }
+                val offset by remember { derivedStateOf { scrollState.firstVisibleItemScrollOffset } }
+                if (!scrollState.canScrollForward && valueObject.editButton ||
+                    !scrollState.canScrollForward && !set.editButton()
                 ) {
                     LaunchedEffect(true) {
+                        if (scrollState.firstVisibleItemScrollOffset != 0) {
+                            maxValue = scrollState.firstVisibleItemScrollOffset
+                        }
                         delay(50)
-                        if (scrollState.value == scrollState.maxValue && !screenController) {
+                        if (scrollState.firstVisibleItemScrollOffset == maxValue && !screenController) {
                             delay(50)
                             screenController = true
                             Log.i("WritingBoardTag", "screenController is true")
                         }
                     }
-                } else if (scrollState.value < scrollState.maxValue - highValue) {
-                    if (valueObject.isEditing && !onEditing) LaunchedEffect(true) {
-                        //solve size change will cover text when edit bottom text
-                        screenController = false
-                        onEditing = true
-                    } else screenController = false
-                }
-                if (!valueObject.isEditing) onEditing = false
-                //solve size change will cover text when edit bottom text
-                if (valueObject.softKeyboard && screenController && onEditing) LaunchedEffect(true) {
-                    delay(200)
-                    scrollState.scrollTo(scrollState.maxValue)
+                } else if (offset < maxValue - highValue) {
+                    screenController = false
                 }
             }
             //writing board
@@ -177,35 +178,84 @@ fun WritingBoardLayout(
                     modifier = modifier.fillMaxSize(),
                     shape = RoundedCornerShape(26.dp)
                 ) {
-                    Column(
+                    var yInScreenFromClick by remember { mutableIntStateOf(0) }
+                    val density = LocalDensity.current.density
+                    if (valueObject.softKeyboard) LaunchedEffect(true) {
+                        yInScreenFromClick = 0
+                    }
+                    val layoutHeight by remember { derivedStateOf { scrollState.layoutInfo.viewportSize.height } }
+                    LazyColumn(
                         modifier = modifier
                             .fillMaxSize()
                             .padding(8.dp)
+                            .drawVerticalScrollbar(scrollState)
+                            .pointerInteropFilter { motionEvent: MotionEvent ->
+                                //detect screen y coordinate when click
+                                when (motionEvent.action) {
+                                    MotionEvent.ACTION_DOWN -> {
+                                        val y = motionEvent.y
+                                        yInScreenFromClick = y.toInt() + (48 * density).toInt()
+                                    }
+                                }
+                                false
+                            },
+                        state = scrollState
                     ) {
                         val high = if (set.buttonStyle() == 2) 110 else 58
-                        WritingBoardText(
-                            scrollState = scrollState,
-                            savableState = { isSaved, reset, toSave ->
-                                if (isSaved) {
-                                    valueObject.saveAction = false
-                                    reset(true)
-                                } else {
-                                    toSave(valueObject.saveAction)
-                                }
-                            },
-                            matchText = { state, text ->
-                                if (valueObject.matchText) {
-                                    valueObject.saveAction = true
-                                    state.text.let(text)
-                                    valueObject.matchText = false
-                                }
-                            },
-                            editState = { valueObject.isEditing = true },
-                            isEditing = valueObject.isEditing, readOnly = valueObject.readOnlyText,
-                            editButton = valueObject.editButton,
-                            requestSave = { valueObject.saveAction = true },
-                            bottomHigh = high + if (screenController) 70 else 0
-                        )
+                        val addSpacer = set.buttonStyle() == 1 && !valueObject.editButton &&
+                                set.editButton() || set.buttonStyle() == 1 && !set.alwaysVisibleText()
+                        val textAreaHeight = if (addSpacer) 64 else 0
+                        item {
+                            WritingBoardText(
+                                state = scrollState,
+                                savableState = { isSaved, reset, toSave ->
+                                    if (isSaved) {
+                                        valueObject.saveAction = false
+                                        reset(true)
+                                    } else {
+                                        toSave(valueObject.saveAction)
+                                    }
+                                },
+                                matchText = { state, text ->
+                                    if (valueObject.matchText) {
+                                        valueObject.saveAction = true
+                                        state.text.let(text)
+                                        valueObject.matchText = false
+                                    }
+                                },
+                                editState = { valueObject.isEditing = true },
+                                isEditing = valueObject.isEditing,
+                                readOnly = valueObject.readOnlyText,
+                                editButton = valueObject.editButton,
+                                requestSave = { valueObject.saveAction = true },
+                                bottomHigh = high + if (screenController) 70 else 0,
+                                modifier = modifier
+                                    .heightIn(min = ((layoutHeight - 5) / density - textAreaHeight).dp),
+                                yInScreenFromClickAsLazyList = if (
+                                    !scrollState.canScrollForward &&
+                                    !set.alwaysVisibleText() && set.buttonStyle() == 1
+                                ) {
+                                    yInScreenFromClick += 28
+                                    yInScreenFromClick
+                                } else yInScreenFromClick,
+                            )
+                            if (addSpacer) {
+                                Spacer(modifier = modifier
+                                    .height(64.dp)
+                                    .fillMaxWidth()
+                                    .background(Color.Unspecified)
+                                    .semantics(mergeDescendants = true) {}
+                                    .pointerInput(Unit) {
+                                        if (!set.editButton()) detectTapGestures { _ ->
+                                            valueObject.focusRequest()
+                                        } else detectTapGestures { _ -> }
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    if (valueObject.isEditing) LaunchedEffect(true) {
+                        Feedback(view = view).createClickSound()
                     }
                 }
             }
@@ -226,7 +276,7 @@ fun WritingBoardLayout(
             defaultStyle = set.buttonStyle() == 1,
             onClickSetting = { valueObject.onClickSetting(navToSetting) },
             editButton = set.editButton() && !valueObject.editButton,
-            onClickEdit = { valueObject.editAction(set, Vibrate(context)) },
+            onClickEdit = { valueObject.editAction(set, Feedback(context, view)) },
             readAlwaysVisibleText = set.alwaysVisibleText()
         )
 
@@ -234,7 +284,7 @@ fun WritingBoardLayout(
         if (set.buttonStyle() == 2) NavBarStyle(
             isEditing = valueObject.isEditing,
             onClickSetting = { valueObject.onClickSetting(navToSetting) },
-            onClickEdit = { valueObject.editAction(set, Vibrate(context)) },
+            onClickEdit = { valueObject.editAction(set, Feedback(context, view)) },
             onClickDone = { valueObject.doneAction(true) },
             onClickClean = { valueObject.cleanAllText(viewModel.textFieldState) },
             editButton = valueObject.editButton,

@@ -25,6 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sqz.writingboard.R
+import com.sqz.writingboard.ui.component.TextTooltipBox
 import com.sqz.writingboard.ui.theme.ThemeColor
 import com.sqz.writingboard.ui.theme.themeColor
 
@@ -75,17 +76,19 @@ fun NavBarStyle(
                         modifier = modifier.fillMaxWidth(),
                         horizontalAlignment = settingButtonLocation
                     ) {
-                        OutlinedButton(
-                            modifier = modifier
-                                .padding(10.dp)
-                                    then padding,
-                            onClick = onClickSetting,
-                            shape = RoundedCornerShape(5.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Settings,
-                                contentDescription = stringResource(R.string.settings)
-                            )
+                        TextTooltipBox(tooltipText = stringResource(R.string.settings)) {
+                            OutlinedButton(
+                                modifier = modifier
+                                    .padding(10.dp)
+                                        then padding,
+                                onClick = onClickSetting,
+                                shape = RoundedCornerShape(5.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Settings,
+                                    contentDescription = stringResource(R.string.settings)
+                                )
+                            }
                         }
                     }
                 }
@@ -95,17 +98,19 @@ fun NavBarStyle(
                         modifier = modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.End
                     ) {
-                        OutlinedButton(
-                            modifier = modifier
-                                .padding(10.dp)
-                                    then modifier.padding(end = 16.dp),
-                            onClick = onClickEdit,
-                            shape = RoundedCornerShape(5.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Edit,
-                                contentDescription = stringResource(R.string.edit)
-                            )
+                        TextTooltipBox(tooltipText = stringResource(R.string.edit)) {
+                            OutlinedButton(
+                                modifier = modifier
+                                    .padding(10.dp)
+                                        then modifier.padding(end = 16.dp),
+                                onClick = onClickEdit,
+                                shape = RoundedCornerShape(5.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Edit,
+                                    contentDescription = stringResource(R.string.edit)
+                                )
+                            }
                         }
                     }
                 }
@@ -115,17 +120,19 @@ fun NavBarStyle(
                         modifier = modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.End
                     ) {
-                        OutlinedButton(
-                            modifier = modifier
-                                .padding(10.dp)
-                                    then modifier.padding(end = 16.dp),
-                            onClick = onClickDone,
-                            shape = RoundedCornerShape(5.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Done,
-                                contentDescription = stringResource(R.string.done)
-                            )
+                        TextTooltipBox(tooltipText = stringResource(id = R.string.done)) {
+                            OutlinedButton(
+                                modifier = modifier
+                                    .padding(10.dp)
+                                        then modifier.padding(end = 16.dp),
+                                onClick = onClickDone,
+                                shape = RoundedCornerShape(5.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Done,
+                                    contentDescription = stringResource(R.string.done)
+                                )
+                            }
                         }
                     }
                 }
@@ -134,17 +141,19 @@ fun NavBarStyle(
                         modifier = modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        OutlinedButton(
-                            modifier = modifier
-                                .padding(10.dp)
-                                    then modifier.padding(end = 16.dp),
-                            onClick = onClickClean,
-                            shape = RoundedCornerShape(5.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Delete,
-                                contentDescription = stringResource(R.string.clean_all_texts_button)
-                            )
+                        TextTooltipBox(stringResource(R.string.clean_all_texts_button)) {
+                            OutlinedButton(
+                                modifier = modifier
+                                    .padding(10.dp)
+                                        then modifier.padding(end = 16.dp),
+                                onClick = onClickClean,
+                                shape = RoundedCornerShape(5.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = stringResource(R.string.clean_all_texts_button)
+                                )
+                            }
                         }
                     }
                 }

@@ -25,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sqz.writingboard.R
+import com.sqz.writingboard.ui.component.TextTooltipBox
 
 /**
  * The default control style and editing buttons.
@@ -77,8 +78,8 @@ private fun DefaultButtonStyle(
     onClickSetting: () -> Unit,
     onClickEdit: () -> Unit,
     editButton: Boolean,
-    padding: Modifier,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    padding: Modifier
 ) {
     //setting button
     Column(
@@ -86,11 +87,13 @@ private fun DefaultButtonStyle(
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.Start
     ) {
-        FloatingActionButton(onClick = onClickSetting) {
-            Icon(
-                imageVector = Icons.Filled.Settings,
-                contentDescription = stringResource(R.string.settings)
-            )
+        TextTooltipBox(tooltipText = stringResource(R.string.settings)) {
+            FloatingActionButton(onClick = onClickSetting) {
+                Icon(
+                    imageVector = Icons.Filled.Settings,
+                    contentDescription = stringResource(R.string.settings)
+                )
+            }
         }
     }
     //edit button
@@ -100,11 +103,13 @@ private fun DefaultButtonStyle(
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.End
         ) {
-            FloatingActionButton(onClick = onClickEdit) {
-                Icon(
-                    imageVector = Icons.Filled.Edit,
-                    contentDescription = stringResource(R.string.edit)
-                )
+            TextTooltipBox(tooltipText = stringResource(R.string.edit)) {
+                FloatingActionButton(onClick = onClickEdit) {
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = stringResource(R.string.edit)
+                    )
+                }
             }
         }
     }
@@ -113,7 +118,7 @@ private fun DefaultButtonStyle(
 @Preview(showBackground = true)
 @Composable
 private fun DefaultButtonStylePreview() {
-    DefaultButtonStyle({}, {}, true, Modifier)
+    DefaultButtonStyle({}, {}, true, Modifier, Modifier)
 }
 
 @Composable
@@ -132,20 +137,24 @@ private fun DefaultEditingButtonStyle(
     ) {
         //clean all text button
         if (readCleanAllText) {
-            FloatingActionButton(onClick = onClickClean) {
-                Icon(
-                    imageVector = Icons.Filled.Delete,
-                    contentDescription = stringResource(R.string.clean_all_texts_button)
-                )
+            TextTooltipBox(tooltipText = stringResource(R.string.clean_all_texts_button)) {
+                FloatingActionButton(onClick = onClickClean) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = stringResource(R.string.clean_all_texts_button)
+                    )
+                }
             }
         }
         //done button
         Spacer(modifier = modifier.height(10.dp))
-        FloatingActionButton(onClick = onClick) {
-            Icon(
-                imageVector = Icons.Filled.Done,
-                contentDescription = stringResource(R.string.done)
-            )
+        TextTooltipBox(tooltipText = stringResource(id = R.string.done)) {
+            FloatingActionButton(onClick = onClick) {
+                Icon(
+                    imageVector = Icons.Filled.Done,
+                    contentDescription = stringResource(R.string.done)
+                )
+            }
         }
     }
 }
@@ -172,18 +181,20 @@ private fun EditingButtonWithOpt(
         verticalArrangement = Arrangement.Bottom
     ) {
         //done button
-        ExtendedFloatingActionButton(
-            modifier = modifier
-                .padding(10.dp)
-                .padding(end = 26.dp, bottom = bottom)
-                .size(80.dp, 45.dp),
-            onClick = onClick,
-            shape = RoundedCornerShape(8.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Done,
-                contentDescription = stringResource(R.string.done)
-            )
+        TextTooltipBox(tooltipText = stringResource(id = R.string.done)) {
+            ExtendedFloatingActionButton(
+                modifier = modifier
+                    .padding(10.dp)
+                    .padding(end = 26.dp, bottom = bottom)
+                    .size(80.dp, 45.dp),
+                onClick = onClick,
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Done,
+                    contentDescription = stringResource(R.string.done)
+                )
+            }
         }
     }
     //clean all text button
@@ -195,18 +206,20 @@ private fun EditingButtonWithOpt(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Bottom
         ) {
-            FloatingActionButton(
-                modifier = modifier
-                    .padding(10.dp)
-                    .padding(start = 50.dp, bottom = bottom)
-                    .size(45.dp, 45.dp),
-                onClick = onClickClean,
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Delete,
-                    contentDescription = stringResource(R.string.clean_all_texts_button)
-                )
+            TextTooltipBox(tooltipText = stringResource(R.string.clean_all_texts_button)) {
+                FloatingActionButton(
+                    modifier = modifier
+                        .padding(10.dp)
+                        .padding(start = 50.dp, bottom = bottom)
+                        .size(45.dp, 45.dp),
+                    onClick = onClickClean,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = stringResource(R.string.clean_all_texts_button)
+                    )
+                }
             }
         }
     }

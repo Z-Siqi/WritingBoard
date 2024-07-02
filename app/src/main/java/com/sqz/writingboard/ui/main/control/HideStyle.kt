@@ -10,7 +10,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.sqz.writingboard.R
+import com.sqz.writingboard.ui.component.TextTooltipBox
 import com.sqz.writingboard.ui.theme.PurpleForManual
 import com.sqz.writingboard.ui.theme.RedForManual
 
@@ -29,18 +32,20 @@ fun HideStyle(
         val area = modifier
             .fillMaxWidth()
             .height(80.dp)
-        Spacer(
-            modifier = if (readIsOffButtonManual) {
-                modifier
-                    .pointerInput(Unit) {
-                        detectTapGestures { _ ->
-                            onClickSetting()
-                        }
-                    } then area
-            } else {
-                modifier.background(color = RedForManual) then area
-            }
-        )
+        TextTooltipBox(tooltipText = stringResource(R.string.settings)) {
+            Spacer(
+                modifier = if (readIsOffButtonManual) {
+                    modifier
+                        .pointerInput(Unit) {
+                            detectTapGestures { _ ->
+                                onClickSetting()
+                            }
+                        } then area
+                } else {
+                    modifier.background(color = RedForManual) then area
+                }
+            )
+        }
     }
     Column(
         verticalArrangement = Arrangement.Bottom
@@ -48,17 +53,19 @@ fun HideStyle(
         val area = modifier
             .fillMaxWidth()
             .height(120.dp)
-        Spacer(
-            modifier = if (readIsOffEditButtonManual && editButton) {
-                modifier
-                    .pointerInput(Unit) {
-                        detectTapGestures { _ ->
-                            onClickEdit()
-                        }
-                    } then area
-            } else if (!readIsOffEditButtonManual && editButton) {
-                modifier.background(color = PurpleForManual) then area
-            } else modifier
-        )
+        TextTooltipBox(tooltipText = stringResource(R.string.edit)) {
+            Spacer(
+                modifier = if (readIsOffEditButtonManual && editButton) {
+                    modifier
+                        .pointerInput(Unit) {
+                            detectTapGestures { _ ->
+                                onClickEdit()
+                            }
+                        } then area
+                } else if (!readIsOffEditButtonManual && editButton) {
+                    modifier.background(color = PurpleForManual) then area
+                } else modifier
+            )
+        }
     }
 }

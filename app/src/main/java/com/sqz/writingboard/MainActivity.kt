@@ -71,7 +71,10 @@ class MainActivity : ComponentActivity() {
                             screen = "WritingBoardLayout"
                         }
                         composable(NavRoute.Setting.name) {
-                            WritingBoardSetting(navController)
+                            WritingBoardSetting(
+                                navController = navController,
+                                context = applicationContext
+                            )
                             screen = "WritingBoardSetting"
                         }
                         composable(NavRoute.UpdateScreen.name) {

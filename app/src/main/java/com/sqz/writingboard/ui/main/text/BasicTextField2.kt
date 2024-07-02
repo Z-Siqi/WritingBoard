@@ -7,7 +7,10 @@ import android.view.ViewTreeObserver
 import android.view.inputmethod.InputMethodManager
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -22,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -73,6 +77,8 @@ fun BasicTextField2(
     enableFixSelection: Boolean = true,
     enableFixNonEnglishKeyboard: Boolean = true,
     verticalScrollWhenCursorUnderKeyboard: Boolean = false,
+    lazyListState: LazyListState = rememberLazyListState(),
+    yInScreenFromClickAsLazyList: Int = 0, // Please give the value of yInScreenFromClick if is LazyListState
     extraScrollValue: Int = 1
 ) {
     //opt edit when scrollable
@@ -88,7 +94,8 @@ fun BasicTextField2(
         if (isKeyboardVisible() && !isLandscape()) {
             val high = screenHeight - (extraScrollValue * density).toInt()
 
-            LaunchedEffect(true) {
+            val isLazyList by remember { derivedStateOf { lazyListState.layoutInfo.totalItemsCount != 0 } }
+            if (!isLazyList) LaunchedEffect(true) {
                 delay(300)
                 if (yInScreenFromClick >= high - keyboardHeight) {
                     if (!initScroll) {
@@ -98,6 +105,12 @@ fun BasicTextField2(
                     val scroll = scrollState.value + (yInScreenFromClick - (high - keyboardHeight))
                     scrollState.animateScrollTo(scroll.toInt(), SpringSpec(0.8F))
                     yInScreenFromClick = 0
+                }
+            } else LaunchedEffect(true) {
+                delay(300)
+                if (yInScreenFromClickAsLazyList >= high - keyboardHeight) {
+                    val scroll = yInScreenFromClickAsLazyList - (high - keyboardHeight)
+                    lazyListState.animateScrollBy(scroll, SpringSpec(0.8F))
                 }
             }
         }
@@ -170,6 +183,10 @@ fun BasicTextField2(
                 }
                 false
             }
+            // If the scroll is a LazyListState,
+            // please add this pointerInteropFilter to top of the function!
+            // (Such as add this to LazyColumn modifier)
+            // And the value of yInScreenFromClick should be the value of yInScreenFromClickAsLazyList
             .pointerInteropFilter { motionEvent: MotionEvent ->
                 //detect screen y coordinate when click
                 when (motionEvent.action) {

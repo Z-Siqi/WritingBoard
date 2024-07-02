@@ -58,12 +58,14 @@ internal fun WidgetBoard(size: DpSize, modifier: GlanceModifier = GlanceModifier
             )
         )
     } else {
-        Button(text = "", onClick = {},
+        Button(
+            text = "", onClick = {},
             modifier = bgSize then modifier.background(
                 ColorProvider(Color(0xFF00668B))
             )
         )
-        Button(text = "", onClick = {},
+        Button(
+            text = "", onClick = {},
             modifier = contentSize then modifier.background(
                 ColorProvider(Color(0xFFDCE3E9))
             ),
@@ -84,14 +86,13 @@ private fun SharedPreferences.intFlow(key: String, defaultValue: Int): Flow<Int>
 }
 
 /** Load savedText **/
+@Suppress("FlowOperatorInvokedInComposition")
 @Composable
-internal fun savedText(context: Context): String {
+fun savedText(context: Context): String {
     val text = stringPreferencesKey("saved_text")
-    val savedText by context.dataStore.data
-        .map { preferences ->
-            preferences[text] ?: ""
-        }
-        .collectAsState(initial = "")
+    val savedText by context.dataStore.data.map { preferences ->
+        preferences[text] ?: ""
+    }.collectAsState(initial = "")
     return savedText
 }
 

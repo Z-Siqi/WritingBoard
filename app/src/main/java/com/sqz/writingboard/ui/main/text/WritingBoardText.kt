@@ -1,15 +1,14 @@
 package com.sqz.writingboard.ui.main.text
 
 import android.util.Log
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.insert
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,7 +35,6 @@ import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sqz.writingboard.R
 import com.sqz.writingboard.glance.WritingBoardWidget
-import com.sqz.writingboard.ui.component.drawVerticalScrollbar
 import com.sqz.writingboard.ui.theme.CursiveCN
 import com.sqz.writingboard.ui.theme.themeColor
 import kotlinx.coroutines.launch
@@ -53,7 +51,7 @@ import com.sqz.writingboard.ui.theme.ThemeColor
  **/
 @Composable
 fun WritingBoardText(
-    scrollState: ScrollState,
+    state: LazyListState,
     savableState: @Composable (
         isSaved: Boolean,
         (reset: Boolean) -> Unit,
@@ -66,13 +64,20 @@ fun WritingBoardText(
     editButton: Boolean,
     requestSave: () -> Unit,
     bottomHigh: Int,
+    yInScreenFromClickAsLazyList: Int,
+    modifier: Modifier = Modifier,
     viewModel: WritingBoardViewModel = viewModel(),
-    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val set = SettingOption(context)
     val textFieldState = viewModel.textFieldState
     val coroutineScope = rememberCoroutineScope()
+
+    val focusRequester = remember { FocusRequester() }
+    WritingBoardObject.focusRequest(
+        focusRequester = focusRequester,
+        textFieldState = textFieldState
+    )
 
     /** Load saved text **/
     if (!viewModel.savedText.isInitialized) {
@@ -175,8 +180,6 @@ fun WritingBoardText(
             text = textFieldState.text.toString(),
             modifier = modifier
                 .fillMaxSize()
-                .drawVerticalScrollbar(scrollState)
-                .verticalScroll(scrollState, WritingBoardObject.readOnlyTextScroll)
                 .padding(8.dp),
             style = TextStyle.Default.copy(
                 fontSize = fontSize,
@@ -188,7 +191,6 @@ fun WritingBoardText(
         )
         Log.d("WritingBoardTag", "Read-only text")
     } else {
-        val focusRequester = remember { FocusRequester() }
         //auto save by char
         var autoSaveByChar by remember { mutableIntStateOf(0) }
         if (autoSaveByChar == 20) {
@@ -206,12 +208,11 @@ fun WritingBoardText(
         //text function
         BasicTextField2(
             state = textFieldState,
-            scrollState = scrollState,
+            lazyListState = state,
             verticalScrollWhenCursorUnderKeyboard = true,
             extraScrollValue = bottomHigh,
             modifier = modifier
                 .fillMaxSize()
-                .drawVerticalScrollbar(scrollState)
                 .padding(8.dp)
                 .focusRequester(focusRequester)
                 .onFocusEvent { focusState ->
@@ -229,7 +230,8 @@ fun WritingBoardText(
                 fontFamily = fontFamily,
                 fontStyle = fontStyle,
                 color = themeColor(ThemeColor.TextColor)
-            )
+            ),
+            yInScreenFromClickAsLazyList = yInScreenFromClickAsLazyList
         )
     }
 }

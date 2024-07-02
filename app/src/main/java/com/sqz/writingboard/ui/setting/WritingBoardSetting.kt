@@ -1,6 +1,7 @@
 package com.sqz.writingboard.ui.setting
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -49,6 +50,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -69,7 +71,7 @@ import com.sqz.writingboard.NavScreen
 import com.sqz.writingboard.R
 import com.sqz.writingboard.tile.QSTileRequestResult
 import com.sqz.writingboard.tile.QSTileService
-import com.sqz.writingboard.component.Vibrate
+import com.sqz.writingboard.component.Feedback
 import com.sqz.writingboard.glance.WritingBoardTextOnlyWidgetReceiver
 import com.sqz.writingboard.glance.WritingBoardWidget
 import com.sqz.writingboard.glance.WritingBoardWidgetReceiver
@@ -87,16 +89,19 @@ import com.sqz.writingboard.ui.theme.themeColor
 private fun SettingFunction(
     state: LazyListState,
     navController: NavController,
-    viewModel: WritingBoardViewModel = viewModel(),
-    modifier: Modifier = Modifier
+    context: Context,
+    modifier: Modifier = Modifier,
+    viewModel: WritingBoardViewModel = viewModel()
 ) {
-    val context = LocalContext.current
+    val view = LocalView.current
     val set = SettingOption(context)
 
     val cardColors = CardDefaults.cardColors(containerColor = themeColor(ThemeColor.CardColor))
     var clickAction by remember { mutableStateOf(false) }
     if (clickAction) {
-        if (set.vibrate() == 2) Vibrate(context).createOneTick()
+        if (set.vibrate() == 2) Feedback(context).createOneTick() else {
+            Feedback(view = view).createClickSound()
+        }
         clickAction = false
     }
 
@@ -424,6 +429,7 @@ private fun SettingFunction(
 @Composable
 fun WritingBoardSetting(
     navController: NavController,
+    context: Context,
     modifier: Modifier = Modifier
 ) {
     val state = rememberLazyListState()
@@ -487,7 +493,8 @@ fun WritingBoardSetting(
             ) {
                 SettingFunction(
                     state = state,
-                    navController = navController
+                    navController = navController,
+                    context = context
                 )
             }
             Column(
@@ -524,7 +531,9 @@ fun WritingBoardSetting(
                     )
                 }
             }
-        } else { Column{ /* fix this function will lead crash in release apk */ } }
+        } else {
+            Column { /* fix this function will lead crash in release apk */ }
+        }
     }
 }
 
@@ -533,5 +542,5 @@ fun WritingBoardSetting(
 @Composable
 private fun WritingBoardSettingPreview() {
     val navController = rememberNavController()
-    WritingBoardSetting(navController)
+    WritingBoardSetting(navController, LocalContext.current)
 }
