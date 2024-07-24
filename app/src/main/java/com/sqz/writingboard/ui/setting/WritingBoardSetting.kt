@@ -413,7 +413,9 @@ private fun SettingFunction(
                         Intent.ACTION_VIEW,
                         Uri.parse("https://github.com/Z-Siqi/WritingBoard/")
                     )
-                    startActivityForResult(context as Activity, intent, 0, null)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    //startActivityForResult(context as Activity, intent, 0, null)
+                    context.startActivity(intent)
                     clickAction = true
                 },
                 text = stringResource(R.string.about_app),
