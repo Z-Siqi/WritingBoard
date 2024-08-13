@@ -43,7 +43,7 @@ import androidx.compose.ui.graphics.SolidColor
 import com.sqz.writingboard.NavScreen
 import com.sqz.writingboard.ui.WritingBoardViewModel
 import com.sqz.writingboard.ui.main.WritingBoardObject
-import com.sqz.writingboard.ui.setting.SettingOption
+import com.sqz.writingboard.ui.setting.data.SettingOption
 import com.sqz.writingboard.ui.theme.ThemeColor
 
 /**

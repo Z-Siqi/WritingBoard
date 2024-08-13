@@ -14,7 +14,7 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import com.sqz.writingboard.component.Feedback
-import com.sqz.writingboard.ui.setting.SettingOption
+import com.sqz.writingboard.ui.setting.data.SettingOption
 
 object WritingBoardObject {
 

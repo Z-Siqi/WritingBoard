@@ -2,6 +2,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="used_language">CN</string> <!-- DO NOT TRANSLATE IT -->
     <string name="app_name">书写板</string>
+    <string name="confirm">确认</string>
+    <string name="cancel">取消</string>
     <string name="widget_textonly">书写板 - 纯文本</string>
     <string name="widget_description">书写板小部件</string>
     <string name="widget_textonly_description">书写板纯文本小部件</string>
@@ -68,5 +70,9 @@
     <string name="text_only">仅文本</string>
     <string name="not_support">不支持</string>
     <string name="not_support_detail">Android 13 以下不允许通过应用程序添加 QS 磁贴! \n\n请按照以下方式添加: \n1, 向下滑动以打开“快速设置”面板。\n2, 点击编辑按钮。\n3, 找到软件图块。\n4, 按住图块并将其拖动到活动图块列表中。</string>
-    <string name="dismiss">Dismiss</string>
+    <string name="dismiss">关闭</string>
+    <string name="export_file">导出为文件</string>
+    <string name="share_text">分享文本</string>
+    <string name="export_writingboard_text">导出书写板文本</string>
+    <string name="quick_function">快捷功能</string>
 </resources>

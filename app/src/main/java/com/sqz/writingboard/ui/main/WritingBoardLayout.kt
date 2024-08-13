@@ -61,7 +61,7 @@ import com.sqz.writingboard.ui.component.ManualLayout
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
 import com.sqz.writingboard.ui.main.control.LayoutButton
 import com.sqz.writingboard.ui.main.text.WritingBoardText
-import com.sqz.writingboard.ui.setting.SettingOption
+import com.sqz.writingboard.ui.setting.data.SettingOption
 import com.sqz.writingboard.ui.theme.ThemeColor
 import com.sqz.writingboard.ui.theme.themeColor
 import kotlinx.coroutines.delay
@@ -238,6 +238,7 @@ fun WritingBoardLayout(
                                     yInScreenFromClick += 28
                                     yInScreenFromClick
                                 } else yInScreenFromClick,
+                                viewModel = viewModel
                             )
                             if (addSpacer) {
                                 Spacer(modifier = modifier

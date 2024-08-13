@@ -23,10 +23,12 @@ import androidx.core.view.WindowCompat
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.sqz.writingboard.ui.WritingBoardViewModel
 import com.sqz.writingboard.ui.component.WritingBoardEE
 import com.sqz.writingboard.ui.main.WritingBoardLayout
 import com.sqz.writingboard.ui.component.WritingBoardNone
@@ -47,6 +49,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
+            val viewModel: WritingBoardViewModel = viewModel()
             val window: Window = this.window
             val navController = rememberNavController()
             WritingBoardTheme {
@@ -66,14 +69,17 @@ class MainActivity : ComponentActivity() {
                         composable(NavRoute.WritingBoard.name) {
                             WritingBoardLayout(
                                 navToSetting = { navController.navigate(NavRoute.Setting.name) },
-                                context = applicationContext
+                                context = applicationContext,
+                                viewModel = viewModel
                             )
                             screen = "WritingBoardLayout"
                         }
                         composable(NavRoute.Setting.name) {
                             WritingBoardSetting(
                                 navController = navController,
-                                context = applicationContext
+                                context = applicationContext,
+                                view = window.decorView,
+                                viewModel = viewModel
                             )
                             screen = "WritingBoardSetting"
                         }

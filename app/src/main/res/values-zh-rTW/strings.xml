@@ -2,6 +2,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="used_language">TW</string> <!-- DO NOT TRANSLATE IT -->
     <string name="app_name">寫字板</string>
+    <string name="confirm">確認</string>
+    <string name="cancel">取消</string>
     <string name="widget_textonly">寫字板 - 純文字</string>
     <string name="widget_description">寫字板小部件</string>
     <string name="widget_textonly_description">WritingBoard 純文字小部件</string>
@@ -66,7 +68,11 @@
     <string name="language_no_support">Android13以下不支援語言設定 \n請嘗試更新您的系統!</string>
     <string name="request_widget">添加書寫板小工具</string>
     <string name="text_only">仅文本</string>
-    <string name="not_support">關閉</string>
+    <string name="not_support">不支援</string>
     <string name="not_support_detail">Android 13 以下不允許透過應用程式新增 QS 磁貼! \n\n請按照以下方式添加: \n1, 向下滑動以開啟“快速設定”面板。\n2, 點選編輯按鈕。\n3, 找到應用程式圖塊。\n4, 按住圖塊並將其拖曳到活動圖塊清單中。</string>
-    <string name="dismiss">Dismiss</string>
+    <string name="dismiss">關閉</string>
+    <string name="export_file">匯出到文件</string>
+    <string name="share_text">分享文本</string>
+    <string name="export_writingboard_text">導出書寫板文本</string>
+    <string name="quick_function">快速功能</string>
 </resources>

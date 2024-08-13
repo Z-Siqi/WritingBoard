@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import com.sqz.writingboard.ui.setting.SettingOption
+import com.sqz.writingboard.ui.setting.data.SettingOption
 
 private val darkColorScheme = darkColorScheme(
     primary = theme_dark_primary,

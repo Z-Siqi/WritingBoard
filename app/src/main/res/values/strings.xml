@@ -3,6 +3,8 @@
     <string name="used_language">EN</string> <!-- DO NOT TRANSLATE IT -->
     <!-- DO NOT TRANSLATE "used_language" -->
     <string name="app_name">WritingBoard</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
     <string name="widget_textonly">WritingBoard - Text Only</string>
     <string name="widget_description">WritingBoard widget</string>
     <string name="widget_textonly_description">WritingBoard text only widget</string>
@@ -70,4 +72,8 @@
     <string name="not_support">Not Support</string>
     <string name="not_support_detail">Add QS Tile by app not allow below Android 13! \n\nPlease follow below to add: \n1, Swipe down to open the Quick Settings panel.\n2, Tap the edit button.\n3, Find the app tile.\n4, Hold down the tile and drag it to the list of active tiles.</string>
     <string name="dismiss">Dismiss</string>
+    <string name="export_file">Export to file</string>
+    <string name="share_text">Share text</string>
+    <string name="export_writingboard_text">Export WritingBoard text</string>
+    <string name="quick_function">Quick Function</string>
 </resources>
