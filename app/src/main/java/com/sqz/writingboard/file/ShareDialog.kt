@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sqz.writingboard.R
+import com.sqz.writingboard.component.Feedback
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -40,6 +41,7 @@ fun ShareDialog(
     onDismissRequest: () -> Unit,
     shareText: String,
     context: Context,
+    feedback: Feedback,
     modifier: Modifier = Modifier,
     textFile: TextFile = TextFile(context)
 ) {
@@ -49,7 +51,7 @@ fun ShareDialog(
     )
     var mode by rememberSaveable { mutableIntStateOf(0) }
     val errorToast = Toast.makeText(
-        context, "Error: Failed! Please catch log and report!",
+        context, "Error: Failed! Please catch log to identify reason!",
         Toast.LENGTH_SHORT
     )
     // Export
@@ -78,12 +80,16 @@ fun ShareDialog(
                         Toast.makeText(context, "Error: Invalid mode", Toast.LENGTH_SHORT).show()
                     }
                 }
+                feedback.createClickSound()
             }) {
                 Text(text = stringResource(R.string.confirm))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismissRequest) {
+            TextButton(onClick = {
+                onDismissRequest()
+                feedback.createClickSound()
+            }) {
                 Text(text = stringResource(R.string.cancel))
             }
         },
@@ -99,7 +105,10 @@ fun ShareDialog(
                     list.forEach { index ->
                         SegmentedButton(
                             selected = index.index == mode,
-                            onClick = { mode = index.index },
+                            onClick = {
+                                mode = index.index
+                                feedback.createClickSound()
+                            },
                             shape = SegmentedButtonDefaults.itemShape(
                                 index = index.index,
                                 count = list.size
@@ -121,5 +130,5 @@ private data class ListData(
 @Preview
 @Composable
 private fun Preview() {
-    ShareDialog({}, "", LocalContext.current)
+    ShareDialog({}, "", LocalContext.current, Feedback())
 }

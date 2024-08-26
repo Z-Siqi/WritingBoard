@@ -108,7 +108,16 @@ fun SettingFunctionList(
                 intent = { dialogType(DialogType.Export) },
                 text = stringResource(R.string.export_writingboard_text),
                 painter = R.drawable.output,
-                contentDescription = stringResource(R.string.about),
+                contentDescription = stringResource(R.string.export_writingboard_text),
+                colors = cardColors
+            )
+        }
+        item {
+            ClickCardLayout(
+                intent = { dialogType(DialogType.Import) },
+                text = stringResource(R.string.import_text_to_writingboard),
+                painter = R.drawable.input,
+                contentDescription = stringResource(R.string.import_text_to_writingboard),
                 colors = cardColors
             )
         }

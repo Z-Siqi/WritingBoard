@@ -76,4 +76,10 @@
     <string name="share_text">Share text</string>
     <string name="export_writingboard_text">Export WritingBoard text</string>
     <string name="quick_function">Quick Function</string>
+    <string name="import_text_to_writingboard">Import text to WritingBoard</string>
+    <string name="waring_to_import_text">Waring: The imported text will overwrite ALL old text in the WritingBoard!</string>
+    <string name="preview">Preview</string>
+    <string name="select_a_text_file">Click here to select a text file</string>
+    <string name="select_text_file_first">Please select a text file before confirming</string>
+    <string name="success">Success!</string>
 </resources>

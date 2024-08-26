@@ -10,6 +10,18 @@ class TextFile(
 ) {
     private val _context = context
 
+    fun export(shareText: String, uri: Uri): Int {
+        try {
+            _context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                outputStream.write(shareText.toByteArray())
+            }
+        } catch (e: Exception) {
+            Log.e("WritingBoardTag", "ERROR: $e")
+            return 1
+        }
+        return 0
+    }
+
     fun share(shareText: String): Int {
         val intent: Intent = Intent().apply {
             action = Intent.ACTION_SEND
@@ -28,10 +40,10 @@ class TextFile(
         return 0
     }
 
-    fun export(shareText: String, uri: Uri): Int {
+    fun import(uri: Uri, output: (text: String) -> Unit): Int {
         try {
-            _context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-                outputStream.write(shareText.toByteArray())
+            _context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                output(inputStream.bufferedReader().readText())
             }
         } catch (e: Exception) {
             Log.e("WritingBoardTag", "ERROR: $e")

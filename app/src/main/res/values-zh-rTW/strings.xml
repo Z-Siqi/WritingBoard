@@ -75,4 +75,10 @@
     <string name="share_text">分享文本</string>
     <string name="export_writingboard_text">導出書寫板文本</string>
     <string name="quick_function">快速功能</string>
+    <string name="import_text_to_writingboard">將文字匯入至書寫板</string>
+    <string name="waring_to_import_text">警告：導入的文本將覆蓋書寫板中的所有舊文本!</string>
+    <string name="preview">預覽</string>
+    <string name="select_a_text_file">按下此處選擇文字文件</string>
+    <string name="select_text_file_first">確認前請選擇一個文字文件</string>
+    <string name="success">成功!</string>
 </resources>

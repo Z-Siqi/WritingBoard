@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.insert
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,6 +32,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -49,10 +52,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.sqz.writingboard.R
+import com.sqz.writingboard.component.Feedback
+import com.sqz.writingboard.file.ImportDialog
 import com.sqz.writingboard.file.ShareDialog
 import com.sqz.writingboard.ui.WritingBoardViewModel
 import com.sqz.writingboard.ui.theme.ThemeColor
 import com.sqz.writingboard.ui.theme.themeColor
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,6 +69,7 @@ fun WritingBoardSetting(
     modifier: Modifier = Modifier,
     viewModel: WritingBoardViewModel = viewModel()
 ) {
+    val feedback = Feedback(context, view)
     val state = rememberLazyListState()
     val appBarState = rememberTopAppBarState()
     val firstVisibleItemIndex = remember { derivedStateOf { state.firstVisibleItemIndex } }
@@ -116,6 +123,7 @@ fun WritingBoardSetting(
             },
             contentWindowInsets = WindowInsets.statusBars
         ) { innerPadding ->
+            val coroutineScope = rememberCoroutineScope()
             Column(
                 modifier = modifier
                     .padding(innerPadding)
@@ -123,6 +131,7 @@ fun WritingBoardSetting(
                     .background(color = themeColor(ThemeColor.SettingBackgroundColor))
             ) {
                 var exportDialog by rememberSaveable { mutableStateOf(false) }
+                var importDialog by rememberSaveable { mutableStateOf(false) }
                 SettingFunctionList(
                     state = state,
                     navController = navController,
@@ -131,14 +140,35 @@ fun WritingBoardSetting(
                     dialogType = {
                         when (it) {
                             DialogType.Export -> exportDialog = true
+                            DialogType.Import -> importDialog = true
                         }
                     }
                 )
                 if (exportDialog) {
+                    feedback.createClickSound()
                     ShareDialog(
                         onDismissRequest = { exportDialog = false },
                         shareText = viewModel.textFieldState.text.toString(),
-                        context = context
+                        context = context,
+                        feedback = feedback
+                    )
+                }
+                if (importDialog) {
+                    feedback.createClickSound()
+                    ImportDialog(
+                        onDismissRequest = { importDialog = false },
+                        onConfirm = {
+                            coroutineScope.launch {
+                                viewModel.textFieldState.clearText()
+                                viewModel.textFieldState.edit { insert(0, it) }
+                                viewModel.saveText(
+                                    viewModel.textFieldState.text.toString(),
+                                    context
+                                )
+                            }
+                        },
+                        context = context,
+                        feedback = feedback
                     )
                 }
             }
@@ -183,7 +213,7 @@ fun WritingBoardSetting(
 }
 
 enum class DialogType {
-    Export
+    Export, Import
 }
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
