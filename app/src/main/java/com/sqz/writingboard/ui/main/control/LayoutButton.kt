@@ -27,6 +27,10 @@ import androidx.compose.ui.unit.dp
 import com.sqz.writingboard.R
 import com.sqz.writingboard.ui.component.TextTooltipBox
 
+enum class ButtonClickType {
+    Done, Clean, Setting, Edit
+}
+
 /**
  * The default control style and editing buttons.
  * AlwaysVisibleText; ButtonStyle is 0 & 1
@@ -35,27 +39,24 @@ import com.sqz.writingboard.ui.component.TextTooltipBox
 fun LayoutButton(
     screenController: Boolean,
     isEditing: Boolean,
-    onClickDone: () -> Unit,
-    onClickClean: () -> Unit,
+    onClickType: (ButtonClickType) -> Unit,
     readCleanAllText: Boolean,
     defaultStyle: Boolean,
-    onClickSetting: () -> Unit,
     editButton: Boolean,
-    onClickEdit: () -> Unit,
     readAlwaysVisibleText: Boolean,
     modifier: Modifier = Modifier
 ) = if (isEditing) {
     if (readAlwaysVisibleText) {
         val bottom = if (screenController) 2.dp else 25.dp
         EditingButtonWithOpt(
-            bottom = bottom, onClick = onClickDone,
-            onClickClean = onClickClean,
+            bottom = bottom, onClick = { onClickType(ButtonClickType.Done) },
+            onClickClean = { onClickType(ButtonClickType.Clean) },
             readCleanAllText = readCleanAllText
         )
     } else {
         DefaultEditingButtonStyle(
-            onClick = onClickDone,
-            onClickClean = onClickClean,
+            onClick = { onClickType(ButtonClickType.Done) },
+            onClickClean = { onClickType(ButtonClickType.Clean) },
             readCleanAllText = readCleanAllText
         )
     }
@@ -65,8 +66,8 @@ fun LayoutButton(
             modifier.padding(end = 36.dp, start = 36.dp, bottom = 16.dp)
         } else modifier.padding(36.dp)
         DefaultButtonStyle(
-            onClickSetting = onClickSetting,
-            onClickEdit = onClickEdit,
+            onClickSetting = { onClickType(ButtonClickType.Setting) },
+            onClickEdit = { onClickType(ButtonClickType.Edit) },
             editButton = editButton,
             padding = padding
         )

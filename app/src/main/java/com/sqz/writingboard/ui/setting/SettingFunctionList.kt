@@ -80,7 +80,7 @@ fun SettingFunctionList(
     val cardColors = CardDefaults.cardColors(containerColor = themeColor(ThemeColor.CardColor))
     var clickAction by remember { mutableStateOf(false) }
     if (clickAction) {
-        if (set.vibrate() == 2) Feedback(context).createOneTick() else {
+        if (set.vibrate() == 2) Feedback(view).createOneTick() else {
             Feedback(view = view).createClickSound()
         }
         clickAction = false

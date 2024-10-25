@@ -69,7 +69,7 @@ fun WritingBoardSetting(
     modifier: Modifier = Modifier,
     viewModel: WritingBoardViewModel = viewModel()
 ) {
-    val feedback = Feedback(context, view)
+    val feedback = Feedback(view)
     val state = rememberLazyListState()
     val appBarState = rememberTopAppBarState()
     val firstVisibleItemIndex = remember { derivedStateOf { state.firstVisibleItemIndex } }

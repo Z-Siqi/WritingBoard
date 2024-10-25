@@ -8,7 +8,7 @@ import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import com.sqz.writingboard.component.Feedback
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -22,9 +22,9 @@ fun TextTooltipBox(
         tooltip = {
             PlainTooltip {
                 Text(tooltipText)
-                val context = LocalContext.current
+                val view = LocalView.current
                 LaunchedEffect(true) {
-                    Feedback(context).createOneTick()
+                    Feedback(view).createOneTick()
                 }
             }
         },
