@@ -136,6 +136,7 @@ fun WritingBoardText(
             text = textFieldState.text.toString(),
             modifier = modifier
                 .fillMaxSize()
+                .background(themeColor(ThemeColor.BoardColor))
                 .padding(8.dp),
             style = TextStyle.Default.copy(
                 fontSize = fontSize,

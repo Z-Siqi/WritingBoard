@@ -69,7 +69,7 @@ class MainActivity : ComponentActivity() {
                         composable(NavRoute.WritingBoard.name) {
                             WritingBoardLayout(
                                 navToSetting = { navController.navigate(NavRoute.Setting.name) },
-                                context = applicationContext,
+                                view = window.decorView,
                                 viewModel = viewModel
                             )
                             screen = "WritingBoardLayout"

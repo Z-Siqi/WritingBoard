@@ -1,9 +1,8 @@
 package com.sqz.writingboard.ui.main
 
-import android.content.Context
-import android.content.res.Configuration
 import android.util.Log
 import android.view.MotionEvent
+import android.view.View
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -36,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -57,13 +55,15 @@ import com.sqz.writingboard.glance.WritingBoardWidget
 import com.sqz.writingboard.ui.WritingBoardViewModel
 import com.sqz.writingboard.ui.component.ManualLayout
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
-import com.sqz.writingboard.ui.main.control.ButtonClickType
-import com.sqz.writingboard.ui.main.control.HideStyle
-import com.sqz.writingboard.ui.main.control.LayoutButton
-import com.sqz.writingboard.ui.main.control.NavBarStyle
+import com.sqz.writingboard.ui.main.nav.ButtonClickType
+import com.sqz.writingboard.ui.main.nav.HideStyle
+import com.sqz.writingboard.ui.main.nav.LayoutButton
+import com.sqz.writingboard.ui.main.nav.NavBarStyle
 import com.sqz.writingboard.ui.main.text.WritingBoardText
 import com.sqz.writingboard.ui.setting.data.SettingOption
 import com.sqz.writingboard.ui.theme.ThemeColor
+import com.sqz.writingboard.ui.theme.isLandscape
+import com.sqz.writingboard.ui.theme.navBarHeightDp
 import com.sqz.writingboard.ui.theme.themeColor
 import kotlinx.coroutines.delay
 
@@ -71,17 +71,15 @@ import kotlinx.coroutines.delay
 @Composable
 fun WritingBoardLayout(
     navToSetting: () -> Unit,
-    context: Context,
+    view: View,
     modifier: Modifier = Modifier,
     viewModel: WritingBoardViewModel = viewModel(),
 ) {
-    val config = LocalConfiguration.current
-    val view = LocalView.current
     val scrollState = rememberLazyListState()
-
     var screenController by remember { mutableStateOf(false) }
 
-    val set = SettingOption(context = context)
+    val set = SettingOption(context = view.context)
+    val textState = viewModel.textState.collectAsState().value
 
     val softwareKeyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -100,9 +98,8 @@ fun WritingBoardLayout(
             },
         color = themeColor(ThemeColor.BackgroundColor)
     ) {
-        val textState = viewModel.textState.collectAsState().value
         val editingHorizontalScreen = editingHorizontalScreen(
-            textState.isEditing, viewModel.softKeyboardState(), config
+            textState.isEditing, viewModel.softKeyboardState(), isLandscape
         )
         // HideStyle for WritingBoard
         if (!viewModel.softKeyboardState() && set.buttonStyle() == 0) HideStyle(
@@ -114,24 +111,21 @@ fun WritingBoardLayout(
         )
         //for bottom style
         val boardBottom = if (!editingHorizontalScreen) {
-            if (textState.isEditing) {
-                if (set.buttonStyle() == 2) {
-                    55.dp
-                } else if (screenController) {
-                    45.dp
-                } else 0.dp
-            } else {
-                if (set.buttonStyle() == 1 && screenController) {
-                    60.dp
-                } else if (set.buttonStyle() == 2) {
-                    70.dp
-                } else 0.dp
+            if (textState.isEditing) when {
+                set.buttonStyle() == 2 -> 0.dp
+                screenController -> 45.dp
+                else -> 0.dp
+            } else when {
+                set.buttonStyle() == 1 && screenController -> 60.dp
+                set.buttonStyle() == 2 && !isLandscape -> navBarHeightDp.dp
+                else -> 0.dp
             }
         } else 0.dp
         val animateBoardBottom by animateDpAsState( // animate
             targetValue = boardBottom,
             label = "BoardBottom"
         )
+        val boardEnd = if (set.buttonStyle() == 2 && isLandscape) 88.dp else 0.dp
         //for horizontal screen
         val horizontalScreen =
             if (editingHorizontalScreen) {
@@ -165,7 +159,7 @@ fun WritingBoardLayout(
         }
         //writing board
         Column(
-            modifier = modifier.padding(bottom = animateBoardBottom) then horizontalScreen
+            modifier = modifier.padding(bottom = animateBoardBottom, end = boardEnd) then horizontalScreen
                 .shadow(5.dp, RoundedCornerShape(26.dp))
                 .border(
                     4.dp, color = themeColor(ThemeColor.ShapeColor),
@@ -242,6 +236,16 @@ fun WritingBoardLayout(
             }
         }
 
+        // The action of ButtonClickType
+        val onClickType: (ButtonClickType) -> Unit = { type ->
+            when (type) {
+                ButtonClickType.Done -> doneAction(true)
+                ButtonClickType.Clean -> viewModel.cleanAllText()
+                ButtonClickType.Setting -> onClickSetting()
+                ButtonClickType.Edit -> viewModel.editAction(set, Feedback(view))
+            }
+        }
+
         // The default control style and editing buttons
         LayoutButton(
             screenController = screenController,
@@ -251,14 +255,7 @@ fun WritingBoardLayout(
                 2 -> editingHorizontalScreen && textState.isEditing
                 else -> textState.isEditing
             },
-            onClickType = { type ->
-                when (type) {
-                    ButtonClickType.Done -> doneAction(true)
-                    ButtonClickType.Clean -> viewModel.cleanAllText()
-                    ButtonClickType.Setting -> onClickSetting()
-                    ButtonClickType.Edit -> viewModel.editAction(set, Feedback(view))
-                }
-            },
+            onClickType = onClickType,
             readCleanAllText = set.cleanAllText(),
             defaultStyle = set.buttonStyle() == 1,
             editButton = set.editButton() && !textState.editButtonState,
@@ -268,14 +265,10 @@ fun WritingBoardLayout(
         // NavBar control style
         if (set.buttonStyle() == 2) NavBarStyle(
             isEditing = textState.isEditing,
-            onClickSetting = onClickSetting,
-            onClickEdit = { viewModel.editAction(set, Feedback(view)) },
-            onClickDone = { doneAction(true) },
-            onClickClean = { viewModel.cleanAllText() },
+            onClickType = onClickType,
+            readCleanAllText = set.cleanAllText(),
             editButton = textState.editButtonState,
-            editingHorizontalScreen = editingHorizontalScreen,
-            readEditButton = set.editButton(),
-            readCleanAllText = set.cleanAllText()
+            readEditButton = set.editButton()
         )
 
         //manual of button style
@@ -309,22 +302,19 @@ fun WritingBoardLayout(
         }
     }
     LaunchedEffect(true) {
-        WritingBoardWidget().updateAll(context)
-        WritingBoardTextOnlyWidget().updateAll(context)
+        WritingBoardWidget().updateAll(view.context)
+        WritingBoardTextOnlyWidget().updateAll(view.context)
     }
 }
 
 private fun editingHorizontalScreen(
-    isEditing: Boolean,
-    softKeyboard: Boolean,
-    config: Configuration,
+    isEditing: Boolean, softKeyboard: Boolean, isLandscape: Boolean,
     withoutSoftKeyboard: Boolean = false
 ): Boolean {
-    val isHorizontal = config.screenWidthDp > (config.screenHeightDp * 1.1)
-    return if (isHorizontal && softKeyboard && isEditing) {
+    return if (isLandscape && softKeyboard && isEditing) {
         Log.d("WritingBoardTag", "editingHorizontalScreen is true")
         true
-    } else isHorizontal && isEditing && withoutSoftKeyboard
+    } else isLandscape && isEditing && withoutSoftKeyboard
 }
 
 @Composable
@@ -364,5 +354,5 @@ private fun Manual(
 @Preview(showBackground = true)
 @Composable
 private fun WritingBoardPreview() {
-    WritingBoardLayout({}, LocalContext.current)
+    WritingBoardLayout({}, LocalView.current)
 }
