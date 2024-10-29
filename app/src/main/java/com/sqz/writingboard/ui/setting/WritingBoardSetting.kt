@@ -11,11 +11,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.insert
@@ -57,6 +59,7 @@ import com.sqz.writingboard.file.ImportDialog
 import com.sqz.writingboard.file.ShareDialog
 import com.sqz.writingboard.ui.WritingBoardViewModel
 import com.sqz.writingboard.ui.theme.ThemeColor
+import com.sqz.writingboard.ui.theme.isAndroid15OrAbove
 import com.sqz.writingboard.ui.theme.themeColor
 import kotlinx.coroutines.launch
 
@@ -99,16 +102,24 @@ fun WritingBoardSetting(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             fontWeight = FontWeight.SemiBold,
+                            modifier = if (isAndroid15OrAbove) modifier.windowInsetsPadding(
+                                WindowInsets.displayCutout
+                            ) else modifier
                         )
                     },
                     navigationIcon = {
                         var fixDoubleClickError by remember { mutableStateOf(true) }
-                        IconButton(onClick = {
-                            if (fixDoubleClickError) {
-                                navController.popBackStack()
-                                fixDoubleClickError = false
-                            }
-                        }) {
+                        IconButton(
+                            onClick = {
+                                if (fixDoubleClickError) {
+                                    navController.popBackStack()
+                                    fixDoubleClickError = false
+                                }
+                            },
+                            modifier = if (isAndroid15OrAbove) modifier.windowInsetsPadding(
+                                WindowInsets.displayCutout
+                            ) else modifier
+                        ) {
                             if (scrolled) {
                                 Icon(
                                     painter = painterResource(R.drawable.ic_arrow_back),
@@ -142,7 +153,8 @@ fun WritingBoardSetting(
                             DialogType.Export -> exportDialog = true
                             DialogType.Import -> importDialog = true
                         }
-                    }
+                    },
+                    modifier = if (isAndroid15OrAbove) modifier.windowInsetsPadding(WindowInsets.displayCutout) else modifier
                 )
                 if (exportDialog) {
                     feedback.createClickSound()
@@ -193,7 +205,10 @@ fun WritingBoardSetting(
             ) {
                 var fixDoubleClickError by remember { mutableStateOf(true) }
                 IconButton(
-                    modifier = modifier.padding(top = 8.dp, start = 4.dp),
+                    modifier = modifier.padding(
+                        top = 8.dp,
+                        start = 4.dp
+                    ) then if (isAndroid15OrAbove) modifier.windowInsetsPadding(WindowInsets.displayCutout) else modifier,
                     onClick = {
                         if (fixDoubleClickError) {
                             navController.popBackStack()
@@ -206,9 +221,7 @@ fun WritingBoardSetting(
                     )
                 }
             }
-        } else {
-            Column { /* fix this function will lead crash in release apk */ }
-        }
+        } else Spacer(modifier = modifier)
     }
 }
 

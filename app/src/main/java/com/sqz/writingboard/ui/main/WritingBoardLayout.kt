@@ -130,6 +130,7 @@ fun WritingBoardLayout(
         val boardEnd = when {
             set.buttonStyle() == 2 && isLandscape -> 88.dp
             editingHorizontalScreen -> 100.dp
+            textState.isEditing && isLandscape -> 80.dp
             else -> 0.dp
         }
         val animateBoardEnd by animateDpAsState(targetValue = boardEnd, label = "BoardEnd")
@@ -191,6 +192,7 @@ fun WritingBoardLayout(
                 var yInScreenFromClick by remember { mutableIntStateOf(0) }
                 val density = LocalDensity.current.density
                 if (viewModel.softKeyboardState()) LaunchedEffect(true) {
+                    delay(520)
                     yInScreenFromClick = 0
                 }
                 val layoutHeight by remember { derivedStateOf { scrollState.layoutInfo.viewportSize.height } }
@@ -211,8 +213,9 @@ fun WritingBoardLayout(
                     state = scrollState
                 ) {
                     val high = if (set.buttonStyle() == 2) 110 else 58
-                    val addSpacer = set.buttonStyle() == 1 && !textState.editButtonState &&
-                            set.editButton() || set.buttonStyle() == 1 && !set.alwaysVisibleText()
+                    val getButtonStyle = set.buttonStyle() == 1 || set.buttonStyle() == 0
+                    val addSpacer = getButtonStyle && !textState.editButtonState &&
+                            set.editButton() || getButtonStyle && !set.alwaysVisibleText()
                     val textAreaHeight = if (addSpacer) 64 else 0
                     item {
                         WritingBoardText(
@@ -275,7 +278,8 @@ fun WritingBoardLayout(
             defaultStyle = set.buttonStyle() == 1,
             editButton = set.editButton() && !textState.editButtonState,
             readAlwaysVisibleText = set.alwaysVisibleText() && set.buttonStyle() != 2,
-            modifier = windowInsetsPadding
+            modifier = windowInsetsPadding,
+            enable = set.buttonStyle() != 2
         )
 
         // NavBar control style

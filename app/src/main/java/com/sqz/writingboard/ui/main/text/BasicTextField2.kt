@@ -9,6 +9,9 @@ import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -55,7 +58,7 @@ import androidx.compose.ui.unit.Density
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalLayoutApi::class)
 @Composable
 fun BasicTextField2(
     state: TextFieldState,
@@ -91,7 +94,7 @@ fun BasicTextField2(
         val keyboardHeight = currentKeyboardHeightInPx()
         val screenHeight = LocalConfiguration.current.screenHeightDp * LocalDensity.current.density
 
-        if (isKeyboardVisible() && !isLandscape()) {
+        if (WindowInsets.isImeVisible && !isLandscape()) {
             val high = screenHeight - (extraScrollValue * density).toInt()
 
             val isLazyList by remember { derivedStateOf { lazyListState.layoutInfo.totalItemsCount != 0 } }
@@ -220,11 +223,6 @@ fun BasicTextField2(
 private fun isLandscape(): Boolean {
     val config = LocalConfiguration.current
     return config.screenWidthDp > (config.screenHeightDp * 1.1)
-}
-
-@Composable
-private fun isKeyboardVisible(): Boolean {
-    return currentKeyboardHeightInPx() != 0
 }
 
 @Composable

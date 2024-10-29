@@ -43,8 +43,9 @@ fun LayoutButton(
     defaultStyle: Boolean,
     editButton: Boolean,
     readAlwaysVisibleText: Boolean,
-    modifier: Modifier = Modifier
-) = if (isEditing && defaultStyle) {
+    modifier: Modifier = Modifier,
+    enable: Boolean = true
+) = if (isEditing && enable) {
     if (readAlwaysVisibleText) {
         EditingButtonWithOpt(
             alwaysVisibleMode = screenController,
@@ -151,16 +152,16 @@ private fun DefaultEditingButtonStyle(
             }
         }
     }
-    val layoutModifier = modifier
-        .fillMaxSize()
-        .padding(36.dp)
+    val layoutModifier = modifier.fillMaxSize() then if (getWindowVisibleDisplayDp > 180) {
+        modifier.padding(36.dp)
+    } else modifier.padding(end = 36.dp, bottom = 18.dp)
     if (isLandscape) Column(
         modifier = layoutModifier,
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.End
     ) {
         //clean all text button
-        if (readCleanAllText && getWindowVisibleDisplayDp > 178) cleanButton()
+        if (readCleanAllText && getWindowVisibleDisplayDp > 175) cleanButton()
         //done button
         Spacer(modifier = modifier.height(10.dp))
         doneButton()
