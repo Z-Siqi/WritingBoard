@@ -8,10 +8,16 @@ import android.util.Log
 import android.view.Window
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -29,13 +35,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.sqz.writingboard.ui.WritingBoardViewModel
-import com.sqz.writingboard.ui.component.WritingBoardEE
-import com.sqz.writingboard.ui.main.WritingBoardLayout
-import com.sqz.writingboard.ui.component.WritingBoardNone
-import com.sqz.writingboard.ui.setting.WritingBoardSetting
 import com.sqz.writingboard.ui.component.ErrorWithSystemVersionA13
+import com.sqz.writingboard.ui.component.WritingBoardEE
+import com.sqz.writingboard.ui.component.WritingBoardNone
+import com.sqz.writingboard.ui.main.WritingBoardLayout
+import com.sqz.writingboard.ui.setting.WritingBoardSetting
 import com.sqz.writingboard.ui.theme.ThemeColor
 import com.sqz.writingboard.ui.theme.WritingBoardTheme
+import com.sqz.writingboard.ui.theme.isAndroid15OrAbove
 import com.sqz.writingboard.ui.theme.themeColor
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "WritingBoard")
@@ -53,15 +60,22 @@ class MainActivity : ComponentActivity() {
             val window: Window = this.window
             val navController = rememberNavController()
             WritingBoardTheme {
-                window.statusBarColor = themeColor(ThemeColor.StatusBarColor).toArgb()
-                window.navigationBarColor = themeColor(ThemeColor.NavigationBarColor).toArgb()
-                Surface(
+                val setSystemBarsColor = @Composable {
+                    window.statusBarColor = themeColor(ThemeColor.StatusBarColor).toArgb()
+                    window.navigationBarColor = themeColor(ThemeColor.NavigationBarColor).toArgb()
+                }
+                if (isAndroid15OrAbove) Spacer(
                     modifier = Modifier
                         .fillMaxSize()
-                        .systemBarsPadding(),
+                        .background(themeColor(ThemeColor.StatusBarColor))
+                ) else setSystemBarsColor()
+                Surface(
+                    modifier = Modifier.fillMaxSize() then if (!isAndroid15OrAbove) {
+                        Modifier.systemBarsPadding()
+                    } else Modifier.windowInsetsPadding(WindowInsets.statusBars),
                     color = MaterialTheme.colorScheme.surfaceVariant
                 ) {
-                    var screen by rememberSaveable { mutableStateOf("") }
+                    var screen by rememberSaveable { mutableStateOf("N/A") }
                     NavHost(
                         navController = navController,
                         startDestination = NavRoute.WritingBoard.name
@@ -72,7 +86,7 @@ class MainActivity : ComponentActivity() {
                                 view = window.decorView,
                                 viewModel = viewModel
                             )
-                            screen = "WritingBoardLayout"
+                            screen = NavRoute.WritingBoard.name
                         }
                         composable(NavRoute.Setting.name) {
                             WritingBoardSetting(
@@ -81,12 +95,11 @@ class MainActivity : ComponentActivity() {
                                 view = window.decorView,
                                 viewModel = viewModel
                             )
-                            screen = "WritingBoardSetting"
+                            screen = NavRoute.Setting.name
                         }
                         composable(NavRoute.UpdateScreen.name) {
                             WritingBoardNone()
-                            window.statusBarColor = themeColor(ThemeColor.StatusBarColor).toArgb()
-                            window.navigationBarColor = themeColor(ThemeColor.NavigationBarColor).toArgb()
+                            if (!isAndroid15OrAbove) setSystemBarsColor()
                             Log.d("WritingBoardTag", "NavHost: Screen is WritingBoardNone.")
                         }
                         composable(NavRoute.EE.name) {
@@ -94,7 +107,9 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(NavRoute.ErrorWithSystemVersionA13.name) {
                             ErrorWithSystemVersionA13(navController)
-                            Log.d("WritingBoardTag", "NavHost: Screen is ErrorWithSystemVersionA13.")
+                            Log.d(
+                                "WritingBoardTag", "NavHost: Screen is ErrorWithSystemVersionA13."
+                            )
                         }
                     }
                     var it by rememberSaveable { mutableStateOf("") }

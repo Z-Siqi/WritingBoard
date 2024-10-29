@@ -1,15 +1,21 @@
 package com.sqz.writingboard.ui.main.nav
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -20,13 +26,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.sqz.writingboard.R
 import com.sqz.writingboard.ui.component.TextTooltipBox
@@ -39,11 +48,14 @@ fun NavBarStyle(
     readCleanAllText: Boolean,
     editButton: Boolean,
     readEditButton: Boolean,
+    softKeyboard: Boolean,
     modifier: Modifier = Modifier,
     landscapeMode: Boolean = isLandscape,
 ) {
     Column(
-        modifier = modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.displayCutout),
         verticalArrangement = Arrangement.Bottom
     ) {
         if (!landscapeMode) DefaultNavBar(
@@ -52,7 +64,7 @@ fun NavBarStyle(
             editButton = editButton,
             readEditButton = readEditButton,
             readCleanAllText = readCleanAllText
-        ) else Row(modifier = modifier.fillMaxSize(), horizontalArrangement = Arrangement.End) {
+        ) else Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.End) {
             LandscapeNavBar(
                 isEditing = isEditing,
                 onClickType = onClickType,
@@ -61,6 +73,23 @@ fun NavBarStyle(
                 readCleanAllText = readCleanAllText
             )
         }
+        Spacer(modifier = modifier) // this Spacer is for landscape mode
+    }
+    val density = LocalDensity.current
+    val rightInsets = WindowInsets.displayCutout.getRight(density, LayoutDirection.Rtl)
+    val modifierBar = if (isAndroid15OrAbove) {
+        if (!isLandscape && !softKeyboard) Modifier
+            .fillMaxWidth()
+            .height((WindowInsets.navigationBars.getBottom(density) / density.density).dp)
+        else Modifier
+            .fillMaxHeight()
+            .width((rightInsets / density.density).dp)
+    } else modifier
+    Column(
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = AbsoluteAlignment.Right
+    ) {
+        Spacer(modifier = modifierBar.background(themeColor(ThemeColor.NavigationBarColor)))
     }
 }
 
@@ -199,15 +228,14 @@ private fun LandscapeNavBar(
             }
         }
     }
+    val buttonPadding = Modifier.padding(8.dp) then Modifier.padding(bottom = 16.dp)
     if (readEditButton && !editButton) Column( // Edit button (Appear only when read-only mode is on)
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Bottom
     ) {
         TextTooltipBox(tooltipText = stringResource(R.string.edit)) {
             OutlinedButton(
-                modifier = Modifier
-                    .padding(8.dp)
-                        then Modifier.padding(bottom = 16.dp),
+                modifier = buttonPadding,
                 onClick = { onClickType(ButtonClickType.Edit) },
                 shape = RoundedCornerShape(5.dp)
             ) {
@@ -224,9 +252,7 @@ private fun LandscapeNavBar(
     ) {
         TextTooltipBox(tooltipText = stringResource(id = R.string.done)) {
             OutlinedButton(
-                modifier = Modifier
-                    .padding(10.dp)
-                        then Modifier.padding(bottom = 16.dp),
+                modifier = buttonPadding,
                 onClick = { onClickType(ButtonClickType.Done) },
                 shape = RoundedCornerShape(5.dp)
             ) {
@@ -237,15 +263,14 @@ private fun LandscapeNavBar(
             }
         }
     }
-    if (isEditing && readCleanAllText) Column( // Clean button
+    val getBottom = getWindowVisibleDisplayDp // detect and hide when space not enough
+    if (isEditing && readCleanAllText && getBottom > 150) Column( // Clean button
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Top
     ) {
         TextTooltipBox(stringResource(R.string.clean_all_texts_button)) {
             OutlinedButton(
-                modifier = Modifier
-                    .padding(10.dp)
-                        then Modifier.padding(end = 16.dp),
+                modifier = buttonPadding,
                 onClick = { onClickType(ButtonClickType.Clean) },
                 shape = RoundedCornerShape(5.dp)
             ) {
@@ -264,6 +289,6 @@ private fun NavBarStylePreview() {
     NavBarStyle(
         isEditing = false, onClickType = {},
         editButton = false, landscapeMode = false, readEditButton = false,
-        readCleanAllText = false
+        readCleanAllText = false, softKeyboard = false
     )
 }

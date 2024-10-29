@@ -10,12 +10,16 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -62,6 +66,7 @@ import com.sqz.writingboard.ui.main.nav.NavBarStyle
 import com.sqz.writingboard.ui.main.text.WritingBoardText
 import com.sqz.writingboard.ui.setting.data.SettingOption
 import com.sqz.writingboard.ui.theme.ThemeColor
+import com.sqz.writingboard.ui.theme.isAndroid15OrAbove
 import com.sqz.writingboard.ui.theme.isLandscape
 import com.sqz.writingboard.ui.theme.navBarHeightDp
 import com.sqz.writingboard.ui.theme.themeColor
@@ -112,7 +117,7 @@ fun WritingBoardLayout(
         //for bottom style
         val boardBottom = if (!editingHorizontalScreen) {
             if (textState.isEditing) when {
-                set.buttonStyle() == 2 -> 0.dp
+                set.buttonStyle() == 2 -> if (isLandscape) 0.dp else 45.dp
                 screenController -> 45.dp
                 else -> 0.dp
             } else when {
@@ -121,11 +126,13 @@ fun WritingBoardLayout(
                 else -> 0.dp
             }
         } else 0.dp
-        val animateBoardBottom by animateDpAsState( // animate
-            targetValue = boardBottom,
-            label = "BoardBottom"
-        )
-        val boardEnd = if (set.buttonStyle() == 2 && isLandscape) 88.dp else 0.dp
+        val animateBoardBottom by animateDpAsState(targetValue = boardBottom, label = "BoardBottom")
+        val boardEnd = when {
+            set.buttonStyle() == 2 && isLandscape -> 88.dp
+            editingHorizontalScreen -> 100.dp
+            else -> 0.dp
+        }
+        val animateBoardEnd by animateDpAsState(targetValue = boardEnd, label = "BoardEnd")
         //for horizontal screen
         val horizontalScreen =
             if (editingHorizontalScreen) {
@@ -158,8 +165,16 @@ fun WritingBoardLayout(
             }
         }
         //writing board
+        val windowInsetsPadding = if (isAndroid15OrAbove) {
+            modifier
+                .windowInsetsPadding(WindowInsets.navigationBars)
+                .windowInsetsPadding(WindowInsets.displayCutout)
+        } else modifier
         Column(
-            modifier = modifier.padding(bottom = animateBoardBottom, end = boardEnd) then horizontalScreen
+            modifier = modifier.padding(
+                bottom = animateBoardBottom,
+                end = animateBoardEnd
+            ) then windowInsetsPadding then horizontalScreen
                 .shadow(5.dp, RoundedCornerShape(26.dp))
                 .border(
                     4.dp, color = themeColor(ThemeColor.ShapeColor),
@@ -259,7 +274,8 @@ fun WritingBoardLayout(
             readCleanAllText = set.cleanAllText(),
             defaultStyle = set.buttonStyle() == 1,
             editButton = set.editButton() && !textState.editButtonState,
-            readAlwaysVisibleText = set.alwaysVisibleText()
+            readAlwaysVisibleText = set.alwaysVisibleText() && set.buttonStyle() != 2,
+            modifier = windowInsetsPadding
         )
 
         // NavBar control style
@@ -268,7 +284,9 @@ fun WritingBoardLayout(
             onClickType = onClickType,
             readCleanAllText = set.cleanAllText(),
             editButton = textState.editButtonState,
-            readEditButton = set.editButton()
+            readEditButton = set.editButton(),
+            softKeyboard = viewModel.softKeyboardState(),
+            modifier = windowInsetsPadding
         )
 
         //manual of button style

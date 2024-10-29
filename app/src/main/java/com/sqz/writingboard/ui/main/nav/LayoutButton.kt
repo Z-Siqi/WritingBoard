@@ -2,19 +2,21 @@ package com.sqz.writingboard.ui.main.nav
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -22,10 +24,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sqz.writingboard.R
 import com.sqz.writingboard.ui.component.TextTooltipBox
+import com.sqz.writingboard.ui.theme.getWindowVisibleDisplayDp
+import com.sqz.writingboard.ui.theme.isLandscape
 
 /**
  * The default control style and editing buttons.
@@ -41,11 +44,11 @@ fun LayoutButton(
     editButton: Boolean,
     readAlwaysVisibleText: Boolean,
     modifier: Modifier = Modifier
-) = if (isEditing) {
+) = if (isEditing && defaultStyle) {
     if (readAlwaysVisibleText) {
-        val bottom = if (screenController) 2.dp else 25.dp
         EditingButtonWithOpt(
-            bottom = bottom, onClick = { onClickType(ButtonClickType.Done) },
+            alwaysVisibleMode = screenController,
+            onClick = { onClickType(ButtonClickType.Done) },
             onClickClean = { onClickType(ButtonClickType.Clean) },
             readCleanAllText = readCleanAllText
         )
@@ -125,26 +128,20 @@ private fun DefaultEditingButtonStyle(
     readCleanAllText: Boolean,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(36.dp),
-        verticalArrangement = Arrangement.Bottom,
-        horizontalAlignment = Alignment.End
-    ) {
-        //clean all text button
-        if (readCleanAllText) {
-            TextTooltipBox(tooltipText = stringResource(R.string.clean_all_texts_button)) {
-                FloatingActionButton(onClick = onClickClean) {
-                    Icon(
-                        imageVector = Icons.Filled.Delete,
-                        contentDescription = stringResource(R.string.clean_all_texts_button)
-                    )
-                }
+    val cleanButton = @Composable {
+        TextTooltipBox(tooltipText = stringResource(R.string.clean_all_texts_button)) {
+            FloatingActionButton(
+                onClick = onClickClean,
+                modifier = modifier.heightIn(max = if (getWindowVisibleDisplayDp > 200) 100.dp else 35.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = stringResource(R.string.clean_all_texts_button)
+                )
             }
         }
-        //done button
-        Spacer(modifier = modifier.height(10.dp))
+    }
+    val doneButton = @Composable {
         TextTooltipBox(tooltipText = stringResource(id = R.string.done)) {
             FloatingActionButton(onClick = onClick) {
                 Icon(
@@ -153,6 +150,28 @@ private fun DefaultEditingButtonStyle(
                 )
             }
         }
+    }
+    val layoutModifier = modifier
+        .fillMaxSize()
+        .padding(36.dp)
+    if (isLandscape) Column(
+        modifier = layoutModifier,
+        verticalArrangement = Arrangement.Bottom,
+        horizontalAlignment = Alignment.End
+    ) {
+        //clean all text button
+        if (readCleanAllText && getWindowVisibleDisplayDp > 178) cleanButton()
+        //done button
+        Spacer(modifier = modifier.height(10.dp))
+        doneButton()
+    } else Row(
+        modifier = layoutModifier,
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.End
+    ) {
+        if (readCleanAllText) cleanButton()
+        Spacer(modifier = modifier.width(10.dp))
+        doneButton()
     }
 }
 
@@ -164,26 +183,44 @@ private fun DefaultEditingButtonStylePreview() {
 
 @Composable
 private fun EditingButtonWithOpt(
-    bottom: Dp,
+    alwaysVisibleMode: Boolean,
     onClick: () -> Unit,
     onClickClean: () -> Unit,
     readCleanAllText: Boolean,
     modifier: Modifier = Modifier
 ) {
-    Column(
+    val bottom = if (alwaysVisibleMode) 2.dp else 25.dp
+    val end = if (alwaysVisibleMode && readCleanAllText) 0.dp else 26.dp
+    Row(
         modifier = modifier
             .fillMaxWidth()
             .height(30.dp),
-        horizontalAlignment = Alignment.End,
-        verticalArrangement = Arrangement.Bottom
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.Bottom
     ) {
-        //done button
-        TextTooltipBox(tooltipText = stringResource(id = R.string.done)) {
-            ExtendedFloatingActionButton(
+        //clean all text button
+        if (readCleanAllText) TextTooltipBox(tooltipText = stringResource(R.string.clean_all_texts_button)) {
+            FloatingActionButton(
                 modifier = modifier
                     .padding(10.dp)
-                    .padding(end = 26.dp, bottom = bottom)
-                    .size(80.dp, 45.dp),
+                    .padding(start = 50.dp, bottom = bottom)
+                    .size(45.dp, 45.dp),
+                onClick = onClickClean,
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = stringResource(R.string.clean_all_texts_button)
+                )
+            }
+        }
+        //done button
+        TextTooltipBox(tooltipText = stringResource(id = R.string.done)) {
+            FloatingActionButton(
+                modifier = modifier
+                    .padding(10.dp)
+                    .padding(end = end, bottom = bottom)
+                    .size(if (alwaysVisibleMode && readCleanAllText) 50.dp else 80.dp, 45.dp),
                 onClick = onClick,
                 shape = RoundedCornerShape(8.dp)
             ) {
@@ -194,36 +231,10 @@ private fun EditingButtonWithOpt(
             }
         }
     }
-    //clean all text button
-    if (readCleanAllText) {
-        Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .height(30.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Bottom
-        ) {
-            TextTooltipBox(tooltipText = stringResource(R.string.clean_all_texts_button)) {
-                FloatingActionButton(
-                    modifier = modifier
-                        .padding(10.dp)
-                        .padding(start = 50.dp, bottom = bottom)
-                        .size(45.dp, 45.dp),
-                    onClick = onClickClean,
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Delete,
-                        contentDescription = stringResource(R.string.clean_all_texts_button)
-                    )
-                }
-            }
-        }
-    }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun EditingButtonWithOptPreview() {
-    EditingButtonWithOpt(0.dp, {}, {}, true)
+    EditingButtonWithOpt(false, {}, {}, true)
 }

@@ -10,9 +10,9 @@ android {
     defaultConfig {
         applicationId "com.sqz.writingboard"
         minSdk 29
-        targetSdk 34
+        targetSdk 35
         versionCode 58
-        versionName "0.7.0-alpha6"
+        versionName "0.7.0-alpha7"
     }
 
     buildTypes {
