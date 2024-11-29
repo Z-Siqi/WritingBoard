@@ -381,9 +381,11 @@ fun SettingFunctionList(
             ClickCardLayout(
                 intent = {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        val intent = Intent(Settings.ACTION_APP_LOCALE_SETTINGS)
-                        intent.data = Uri.fromParts("package", context.packageName, null)
-                        startActivityForResult(context as Activity, intent, 0, null)
+                        val intent = Intent(Settings.ACTION_APP_LOCALE_SETTINGS).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            data = Uri.fromParts("package", context.packageName, null)
+                        }
+                        context.startActivity(intent)
                         clickAction = true
                     } else {
                         Toast.makeText(

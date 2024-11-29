@@ -35,6 +35,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+private const val timeFormat = "yyyyMMdd_HHmm" + "ss" // No Android Studio grammar checking this!
+
 @Composable
 fun ShareDialog(
     onDismissRequest: () -> Unit,
@@ -56,7 +58,7 @@ fun ShareDialog(
     // Export
     var uri by remember { mutableStateOf<Uri?>(null) }
     val currentTime = remember {
-        val sdf = SimpleDateFormat("msys", Locale.getDefault())
+        val sdf = SimpleDateFormat(timeFormat, Locale.getDefault())
         sdf.format(Date())
     }
     val launcher = rememberLauncherForActivityResult(
