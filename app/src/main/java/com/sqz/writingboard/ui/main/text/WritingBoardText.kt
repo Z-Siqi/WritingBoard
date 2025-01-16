@@ -27,8 +27,8 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -36,13 +36,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sqz.writingboard.NavScreen
-import com.sqz.writingboard.R
 import com.sqz.writingboard.ui.WritingBoardViewModel
 import com.sqz.writingboard.ui.main.TextState
 import com.sqz.writingboard.ui.setting.data.SettingOption
-import com.sqz.writingboard.ui.theme.CursiveCN
 import com.sqz.writingboard.ui.theme.ThemeColor
 import com.sqz.writingboard.ui.theme.themeColor
+import java.io.File
 
 /**
  * Text-related such as typing and font.
@@ -111,15 +110,23 @@ fun WritingBoardText(
         2 -> 33.sp
         else -> 18.sp
     }
-    val fontLanguage = if (
-        (stringResource(R.string.used_language) == "CN") ||
-        (stringResource(R.string.used_language) == "TW")
-    ) CursiveCN else FontFamily.Cursive
+    var customFont by remember { mutableStateOf<FontFamily?>(FontFamily.Default) }
+    LaunchedEffect(Unit) {
+        val fontFile = File(context.filesDir, "font.ttf")
+        if (fontFile.exists()) {
+            val font = Font(fontFile)
+            customFont = FontFamily(font)
+        }
+    }
     val fontFamily = when (set.fontStyle()) {
         0 -> FontFamily.Monospace
         1 -> FontFamily.Default
         2 -> FontFamily.Serif
-        3 -> fontLanguage
+        3 -> when (set.fontStyleExtra()) {
+            0 -> FontFamily.Cursive
+            1 -> customFont
+            else -> FontFamily.Default
+        }
         else -> FontFamily.Default
     }
     val fontWeight = when (set.fontWeight()) {

@@ -59,6 +59,12 @@ class SettingOption(private val context: Context) {
         return settingState.readSegmentedButtonState(name, context)
     }
 
+    fun fontStyleExtra(write: Int? = null): Int {
+        val name = "font_style_extra"
+        if (write != null) settingState.writeSegmentedButtonState(name, context, write)
+        return settingState.readSegmentedButtonState(name, context)
+    }
+
     fun fontWeight(write: Int? = null): Int {
         val name = "font_weight"
         if (write != null) settingState.writeSegmentedButtonState(name, context, write)

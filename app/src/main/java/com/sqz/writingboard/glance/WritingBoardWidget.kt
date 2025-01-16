@@ -91,8 +91,8 @@ private fun SharedPreferences.intFlow(key: String, defaultValue: Int): Flow<Int>
 fun savedText(context: Context): String {
     val text = stringPreferencesKey("saved_text")
     val savedText by context.dataStore.data.map { preferences ->
-        preferences[text] ?: ""
-    }.collectAsState(initial = "")
+        preferences[text] ?: " "
+    }.collectAsState(initial = " ")
     return savedText
 }
 
@@ -114,3 +114,40 @@ internal fun fontStyleData(context: Context): Int {
         key = "font_style", defaultFontFamily
     ).collectAsState(initial = defaultFontFamily).value
 }
+
+/** Load font_style_extra **/
+@Composable
+internal fun fontExtraStyleData(context: Context): Int {
+    val sharedPreferences =
+        context.getSharedPreferences("WritingBoardSetting", Context.MODE_PRIVATE)
+    val defaultFontFamily = SettingOption(context).fontStyle()
+    return sharedPreferences.intFlow(
+        key = "font_style_extra", defaultFontFamily
+    ).collectAsState(initial = defaultFontFamily).value
+}
+
+/*fun Context.textAsBitmap(
+    text: String,
+    fontSize: TextUnit,
+    color: Color = Color.Black,
+    letterSpacing: Float = 0.1f,
+    fontTypeface: Typeface
+): Bitmap {
+    val paint = TextPaint(Paint.ANTI_ALIAS_FLAG)
+    paint.textSize = spToPx(fontSize.value, this.resources.displayMetrics)
+    paint.color = color.toArgb()
+    paint.letterSpacing = letterSpacing
+    paint.typeface = fontTypeface
+
+    val baseline = -paint.ascent()
+    val width = (paint.measureText(text)).toInt()
+    val height = (baseline + paint.descent()).toInt()
+    val image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(image)
+    canvas.drawText(text, 0f, baseline, paint)
+    return image
+}
+
+fun dpToPx(context: Context, dp: Float): Float {
+    return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.resources.displayMetrics)
+}*/

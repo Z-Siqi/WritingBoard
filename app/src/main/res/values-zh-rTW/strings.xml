@@ -81,4 +81,9 @@
     <string name="select_a_text_file">按下此處選擇文字文件</string>
     <string name="select_text_file_first">確認前請選擇一個文字文件</string>
     <string name="success">成功!</string>
+    <string name="more_font">更多</string>
+    <string name="custom_font">自訂字體</string>
+    <string name="font_is_imported">字體已匯入，按一下選擇新字體</string>
+    <string name="may_only_english">可能僅支援英語</string>
+    <string name="click_to_select_a_font">點選選擇字體</string>
 </resources>

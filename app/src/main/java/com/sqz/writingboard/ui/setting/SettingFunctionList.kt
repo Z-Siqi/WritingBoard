@@ -1,6 +1,5 @@
 package com.sqz.writingboard.ui.setting
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -12,9 +11,11 @@ import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.AlertDialog
@@ -31,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -39,7 +41,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat.getString
-import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.os.postDelayed
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.updateAll
@@ -60,6 +61,7 @@ import com.sqz.writingboard.ui.component.drawVerticalScrollbar
 import com.sqz.writingboard.ui.setting.card.ClickCardLayout
 import com.sqz.writingboard.ui.setting.card.DoubleButtonCard
 import com.sqz.writingboard.ui.setting.card.ExtraButtonCardLayout
+import com.sqz.writingboard.ui.setting.card.FontSelectionCard
 import com.sqz.writingboard.ui.setting.card.SegmentedButtonCardLayout
 import com.sqz.writingboard.ui.setting.card.SwitchCardLayout
 import com.sqz.writingboard.ui.setting.data.SettingOption
@@ -217,23 +219,29 @@ fun SettingFunctionList(
         }
         item {
             var onClick by remember { mutableStateOf(false) }
-            SegmentedButtonCardLayout(
+            FontSelectionCard(
                 title = stringResource(R.string.font_style),
-                options = listOf(
-                    R.string.monospace, R.string.default_string, R.string.serif, R.string.cursive,
+                defaultOptions = listOf(
+                    R.string.monospace, R.string.default_string, R.string.serif, R.string.more_font,
                 ),
-                selectedOption = set.fontStyle(),
+                selectedDefaultOption = set.fontStyle(),
+                onOptionSelected = { index ->
+                    set.fontStyle(index)
+                    clickAction = true
+                    onClick = true
+                },
+                extraOptions = listOf(R.string.cursive, R.string.custom_font),
+                selectedExtraOption = set.fontStyleExtra(),
+                onExtraOptionSelected = { index ->
+                    set.fontStyleExtra(index)
+                    clickAction = true
+                    onClick = true
+                },
                 colors = cardColors
-            ) { index ->
-                set.fontStyle(index)
-                clickAction = true
-                onClick = true
-            }
-            if (onClick) {
-                LaunchedEffect(true) {
-                    WritingBoardWidget().updateAll(context)
-                    onClick = false
-                }
+            )
+            if (onClick) LaunchedEffect(true) {
+                WritingBoardWidget().updateAll(context)
+                onClick = false
             }
         }
         item {
@@ -427,6 +435,11 @@ fun SettingFunctionList(
                 painter = R.drawable.github_mark,
                 contentDescription = stringResource(R.string.about),
                 colors = cardColors
+            )
+        }
+        item {
+            Spacer(
+                modifier = modifier.height((WindowInsets.systemBars.getTop(LocalDensity.current) / LocalDensity.current.density).dp)
             )
         }
     }

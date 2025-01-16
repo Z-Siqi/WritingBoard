@@ -82,4 +82,9 @@
     <string name="select_a_text_file">Click here to select a text file</string>
     <string name="select_text_file_first">Please select a text file before confirming</string>
     <string name="success">Success!</string>
+    <string name="more_font">More</string>
+    <string name="custom_font">Custom Font</string>
+    <string name="font_is_imported">Font is imported, Click to select a new font.</string>
+    <string name="may_only_english">May only support English language</string>
+    <string name="click_to_select_a_font">Click to select a font</string>
 </resources>

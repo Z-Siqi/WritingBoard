@@ -45,6 +45,7 @@ class WritingBoardWidget : GlanceAppWidget() {
         val context = LocalContext.current
         val size = LocalSize.current
         val fontFamily = fontStyleData(context)
+        val fontExtraStyleData = fontExtraStyleData(context)
         Box(
             modifier = modifier,
             contentAlignment = Alignment.Center
@@ -69,7 +70,11 @@ class WritingBoardWidget : GlanceAppWidget() {
                                     0 -> FontFamily.Monospace
                                     1 -> null
                                     2 -> FontFamily.Serif
-                                    3 -> FontFamily.Cursive
+                                    3 -> when (fontExtraStyleData) {
+                                        0 -> FontFamily.Cursive
+                                        1 -> null
+                                        else -> FontFamily.Cursive
+                                    }
                                     else -> null
                                 }
                             ),
