@@ -64,7 +64,7 @@ import com.sqz.writingboard.ui.setting.card.ExtraButtonCardLayout
 import com.sqz.writingboard.ui.setting.card.FontSelectionCard
 import com.sqz.writingboard.ui.setting.card.SegmentedButtonCardLayout
 import com.sqz.writingboard.ui.setting.card.SwitchCardLayout
-import com.sqz.writingboard.ui.setting.data.SettingOption
+import com.sqz.writingboard.preferences.SettingOption
 import com.sqz.writingboard.ui.theme.ThemeColor
 import com.sqz.writingboard.ui.theme.themeColor
 

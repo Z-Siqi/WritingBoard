@@ -38,7 +38,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sqz.writingboard.NavScreen
 import com.sqz.writingboard.ui.WritingBoardViewModel
 import com.sqz.writingboard.ui.main.TextState
-import com.sqz.writingboard.ui.setting.data.SettingOption
+import com.sqz.writingboard.preferences.SettingOption
 import com.sqz.writingboard.ui.theme.ThemeColor
 import com.sqz.writingboard.ui.theme.themeColor
 import java.io.File

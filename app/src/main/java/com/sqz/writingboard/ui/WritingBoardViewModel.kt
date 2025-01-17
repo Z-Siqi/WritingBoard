@@ -27,7 +27,7 @@ import com.sqz.writingboard.component.Feedback
 import com.sqz.writingboard.dataStore
 import com.sqz.writingboard.glance.WritingBoardWidget
 import com.sqz.writingboard.ui.main.TextState
-import com.sqz.writingboard.ui.setting.data.SettingOption
+import com.sqz.writingboard.preferences.SettingOption
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch

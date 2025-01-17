@@ -1,4 +1,4 @@
-package com.sqz.writingboard.ui.setting.data
+package com.sqz.writingboard.preferences
 
 import android.content.Context
 

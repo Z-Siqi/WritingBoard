@@ -2,6 +2,7 @@ package com.sqz.writingboard.ui.main.text
 
 import android.content.Context
 import android.graphics.Rect
+import android.util.Log
 import android.view.MotionEvent
 import android.view.ViewTreeObserver
 import android.view.inputmethod.InputMethodManager
@@ -54,9 +55,11 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Density
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.io.File
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalLayoutApi::class)
 @Composable
@@ -136,87 +139,95 @@ fun BasicTextField2(
     val coroutineScope = rememberCoroutineScope()
     var runFix by remember { mutableStateOf(false) }
 
-    BasicTextField(
-        state = state,
-        modifier = modifier
-            .onKeyEvent { keyEvent ->
-                //fix delete text with selection issues
-                val isSelected = state.selection.end != state.selection.start
-                if (keyEvent.nativeKeyEvent.keyCode == 59 && isSelected && enableFixSelection) {
-                    if (state.selection.start == 0 ||
-                        state.selection.end == state.text.length
-                    ) {
-                        if (runFix) coroutineScope.launch {
-                            state.edit {
-                                this.selection = TextRange(
-                                    state.selection.start,
-                                    state.selection.end - 1
-                                )
+    runCatching {
+        BasicTextField(
+            state = state,
+            modifier = modifier
+                .onKeyEvent { keyEvent ->
+                    //fix delete text with selection issues
+                    val isSelected = state.selection.end != state.selection.start
+                    if (keyEvent.nativeKeyEvent.keyCode == 59 && isSelected && enableFixSelection) {
+                        if (state.selection.start == 0 ||
+                            state.selection.end == state.text.length
+                        ) {
+                            if (runFix) coroutineScope.launch {
+                                state.edit {
+                                    this.selection = TextRange(
+                                        state.selection.start,
+                                        state.selection.end - 1
+                                    )
+                                }
+                                state.edit {
+                                    this.selection = TextRange(
+                                        state.selection.start,
+                                        state.selection.end + 1
+                                    )
+                                }
+                                runFix = false
                             }
+                        }
+                        true
+                    } else {
+                        runFix = true
+                        false
+                    }
+                }
+                .onPreviewKeyEvent { keyEvent ->
+                    if (keyEvent.key == Key.Backspace) {
+                        //fix non-english keyboard delete after selected errors
+                        if (enableFixNonEnglishKeyboard) {
                             state.edit {
-                                this.selection = TextRange(
-                                    state.selection.start,
-                                    state.selection.end + 1
-                                )
+                                val end = state.selection.end
+                                val start = state.selection.start
+
+                                if (end < start) {
+                                    delete(end, start)
+                                } else if (start < end) {
+                                    delete(start, end)
+                                }
                             }
-                            runFix = false
                         }
                     }
-                    true
-                } else {
-                    runFix = true
                     false
                 }
-            }
-            .onPreviewKeyEvent { keyEvent ->
-                if (keyEvent.key == Key.Backspace) {
-                    //fix non-english keyboard delete after selected errors
-                    if (enableFixNonEnglishKeyboard) {
-                        state.edit {
-                            val end = state.selection.end
-                            val start = state.selection.start
-
-                            if (end < start) {
-                                delete(end, start)
-                            } else if (start < end) {
-                                delete(start, end)
-                            }
+                // If the scroll is a LazyListState,
+                // please add this pointerInteropFilter to top of the function!
+                // (Such as add this to LazyColumn modifier)
+                // And the value of yInScreenFromClick should be the value of yInScreenFromClickAsLazyList
+                .pointerInteropFilter { motionEvent: MotionEvent ->
+                    //detect screen y coordinate when click
+                    when (motionEvent.action) {
+                        MotionEvent.ACTION_DOWN -> {
+                            val y = motionEvent.y
+                            yInScreenFromClick = y.toInt() + (48 * density).toInt()
                         }
                     }
+                    false
                 }
-                false
-            }
-            // If the scroll is a LazyListState,
-            // please add this pointerInteropFilter to top of the function!
-            // (Such as add this to LazyColumn modifier)
-            // And the value of yInScreenFromClick should be the value of yInScreenFromClickAsLazyList
-            .pointerInteropFilter { motionEvent: MotionEvent ->
-                //detect screen y coordinate when click
-                when (motionEvent.action) {
-                    MotionEvent.ACTION_DOWN -> {
-                        val y = motionEvent.y
-                        yInScreenFromClick = y.toInt() + (48 * density).toInt()
-                    }
-                }
-                false
-            }
-            .onFocusEvent { focusState ->
-                isEditing = focusState.isFocused
-            },
-        enabled = enabled,
-        readOnly = readOnly,
-        inputTransformation = inputTransformation,
-        textStyle = textStyle,
-        keyboardOptions = keyboardOptions,
-        onKeyboardAction = onKeyboardAction,
-        lineLimits = lineLimits,
-        onTextLayout = onTextLayout,
-        interactionSource = interactionSource,
-        cursorBrush = cursorBrush,
-        outputTransformation = outputTransformation,
-        decorator = decorator,
-        scrollState = scrollState
-    )
+                .onFocusEvent { focusState ->
+                    isEditing = focusState.isFocused
+                },
+            enabled = enabled,
+            readOnly = readOnly,
+            inputTransformation = inputTransformation,
+            textStyle = textStyle,
+            keyboardOptions = keyboardOptions,
+            onKeyboardAction = onKeyboardAction,
+            lineLimits = lineLimits,
+            onTextLayout = onTextLayout,
+            interactionSource = interactionSource,
+            cursorBrush = cursorBrush,
+            outputTransformation = outputTransformation,
+            decorator = decorator,
+            scrollState = scrollState
+        )
+    }.onFailure {
+        val fontFile = File(LocalContext.current.filesDir, "font.ttf")
+        if (fontFile.exists()) {
+            fontFile.delete()
+            Log.e("CustomFont", "Font cannot load")
+        }
+    }
 }
 
 @Composable
