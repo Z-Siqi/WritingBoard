@@ -1,6 +1,7 @@
 package com.sqz.writingboard.glance
 
 import android.content.Context
+import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceId
@@ -40,8 +41,11 @@ class WritingBoardTextOnlyWidget : GlanceAppWidget() {
         val context = LocalContext.current
         val size = LocalSize.current
         val fontFamily = fontStyleData(context)
-        val fontExtraStyleData = fontExtraStyleData(context)
-
+        val setSize = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            modifier.size(size.width - 15.dp, size.height - 8.dp)
+        } else {
+            modifier.size(size.width - 8.dp, size.height - 8.dp)
+        }
         Box(
             modifier = modifier,
             contentAlignment = Alignment.Center
@@ -49,9 +53,7 @@ class WritingBoardTextOnlyWidget : GlanceAppWidget() {
             WidgetBoard(size)
 
             Column(
-                modifier = modifier
-                    .size(size.width - 8.dp, size.height - 8.dp)
-                    .clickable { openAppAction(context) }
+                modifier = setSize then modifier.clickable { openAppAction(context) }
             ) {
                 LazyColumn(modifier = modifier.cornerRadius(15.dp)) {
                     item {
@@ -70,11 +72,7 @@ class WritingBoardTextOnlyWidget : GlanceAppWidget() {
                                     0 -> FontFamily.Monospace
                                     1 -> null
                                     2 -> FontFamily.Serif
-                                    3 -> when (fontExtraStyleData) {
-                                        0 -> FontFamily.Cursive
-                                        1 -> null
-                                        else -> FontFamily.Cursive
-                                    }
+                                    3 -> FontFamily.Cursive
                                     else -> null
                                 }
                             )

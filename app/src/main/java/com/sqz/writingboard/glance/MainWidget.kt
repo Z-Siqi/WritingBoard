@@ -1,6 +1,7 @@
 package com.sqz.writingboard.glance
 
 import android.content.Context
+import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceId
@@ -45,7 +46,11 @@ class WritingBoardWidget : GlanceAppWidget() {
         val context = LocalContext.current
         val size = LocalSize.current
         val fontFamily = fontStyleData(context)
-        val fontExtraStyleData = fontExtraStyleData(context)
+        val setSize = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            modifier.size(size.width - 18.dp, size.height - 12.dp)
+        } else {
+            modifier.size(size.width - 12.dp, size.height - 8.dp)
+        }
         Box(
             modifier = modifier,
             contentAlignment = Alignment.Center
@@ -53,7 +58,7 @@ class WritingBoardWidget : GlanceAppWidget() {
             WidgetBoard(size = size)
 
             LazyColumn(
-                modifier = modifier.size(size.width - 12.dp, size.height - 8.dp)
+                modifier = setSize
             ) {
                 item {
                     Column {
@@ -70,11 +75,7 @@ class WritingBoardWidget : GlanceAppWidget() {
                                     0 -> FontFamily.Monospace
                                     1 -> null
                                     2 -> FontFamily.Serif
-                                    3 -> when (fontExtraStyleData) {
-                                        0 -> FontFamily.Cursive
-                                        1 -> null
-                                        else -> FontFamily.Cursive
-                                    }
+                                    3 -> FontFamily.Cursive
                                     else -> null
                                 }
                             ),

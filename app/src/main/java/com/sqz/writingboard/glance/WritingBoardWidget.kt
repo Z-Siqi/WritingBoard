@@ -1,9 +1,11 @@
 package com.sqz.writingboard.glance
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,37 +43,62 @@ class WritingBoardTextOnlyWidgetReceiver : GlanceAppWidgetReceiver() {
 }
 
 /** UI function **/
+@SuppressLint("RestrictedApi")
 @Composable
 internal fun WidgetBoard(size: DpSize, modifier: GlanceModifier = GlanceModifier) {
-    val round = modifier.cornerRadius(15.dp)
-    val bgSize = modifier.size(size.width, size.height)
-    val contentSize = modifier.size(size.width - 5.dp, size.height - 5.dp)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        Spacer(
-            modifier = bgSize then round then modifier.background(
-                GlanceTheme.colors.primary
-            )
-        )
-        Spacer(
-            modifier = contentSize then round then modifier.background(
-                GlanceTheme.colors.surfaceVariant
-            )
-        )
+        WidgetBoardLayout(size)
     } else {
-        Button(
-            text = "", onClick = {},
-            modifier = bgSize then modifier.background(
-                ColorProvider(Color(0xFF00668B))
-            )
-        )
-        Button(
-            text = "", onClick = {},
-            modifier = contentSize then modifier.background(
-                ColorProvider(Color(0xFFDCE3E9))
-            ),
-            colors = ButtonDefaults.buttonColors(ColorProvider(Color(0xFFDCE3E9)))
-        )
+        WidgetBoardLayoutForOldApi(size)
     }
+}
+
+@RequiresApi(31)
+@Composable
+private fun WidgetBoardLayout(size: DpSize, modifier: GlanceModifier = GlanceModifier) {
+    val roundValue =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) 23.dp else 15.dp
+    val round = modifier.cornerRadius(roundValue)
+    Spacer(
+        modifier = modifier.bgSize(size) then round then modifier.background(
+            GlanceTheme.colors.primary
+        )
+    )
+    Spacer(
+        modifier = modifier.contentSize(size) then round then modifier.background(
+            GlanceTheme.colors.surfaceVariant
+        )
+    )
+}
+
+@SuppressLint("RestrictedApi")
+@Composable
+private fun WidgetBoardLayoutForOldApi(size: DpSize, modifier: GlanceModifier = GlanceModifier) {
+    Button(
+        text = "", onClick = {},
+        modifier = modifier.bgSize(size) then modifier.background(
+            ColorProvider(Color(0xFF00668B))
+        )
+    )
+    Button(
+        text = "", onClick = {},
+        modifier = modifier.contentSize(size) then modifier.background(
+            ColorProvider(Color(0xFFDCE3E9))
+        ),
+        colors = ButtonDefaults.buttonColors(ColorProvider(Color(0xFFDCE3E9)))
+    )
+}
+
+@Composable
+private fun GlanceModifier.bgSize(size: DpSize): GlanceModifier {
+    val bgSize = this.size(size.width, size.height)
+    return bgSize
+}
+
+@Composable
+private fun GlanceModifier.contentSize(size: DpSize): GlanceModifier {
+    val contentSize = this.size(size.width - 5.dp, size.height - 5.dp)
+    return contentSize
 }
 
 /** SharedPreferences as Flow **/
