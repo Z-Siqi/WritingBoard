@@ -23,9 +23,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.os.postDelayed
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
@@ -34,6 +36,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.sqz.writingboard.ui.MainLayout
 import com.sqz.writingboard.ui.WritingBoardViewModel
 import com.sqz.writingboard.ui.component.ErrorWithSystemVersionA13
 import com.sqz.writingboard.ui.component.WritingBoardEE
@@ -51,6 +54,8 @@ enum class NavRoute {
     WritingBoard, Setting, UpdateScreen, EE, ErrorWithSystemVersionA13
 }
 
+const val newModel: Boolean = true
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,16 +65,17 @@ class MainActivity : ComponentActivity() {
             val window: Window = this.window
             val navController = rememberNavController()
             WritingBoardTheme {
-                val setSystemBarsColor = @Composable {
-                    window.statusBarColor = themeColor(ThemeColor.StatusBarColor).toArgb()
-                    window.navigationBarColor = themeColor(ThemeColor.NavigationBarColor).toArgb()
+                val controller = WindowInsetsControllerCompat(window, window.decorView)
+                if (!isAndroid15OrAbove) {
+                    this.setSystemBarsColor()
+                } else { // for set non-gesture nav mode on Android 15+
+                    this.setNavBarColor()
                 }
-                if (isAndroid15OrAbove) Spacer(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(themeColor(ThemeColor.StatusBarColor))
-                ) else setSystemBarsColor()
-                Surface(
+                if (newModel) { //TODO: rewrite code
+                    MainLayout()
+                    controller.isAppearanceLightStatusBars = true
+                    controller.isAppearanceLightNavigationBars = true
+                } else Surface(
                     modifier = Modifier.fillMaxSize() then if (!isAndroid15OrAbove) {
                         Modifier.systemBarsPadding()
                     } else Modifier.windowInsetsPadding(WindowInsets.statusBars),
@@ -121,6 +127,17 @@ class MainActivity : ComponentActivity() {
             }
             NavScreen.screenUpdate(navController)
         }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun setNavBarColor() {
+        window.navigationBarColor = Color.Transparent.toArgb()
+    }
+
+    @Suppress("DEPRECATION")
+    private fun setSystemBarsColor() {
+        window.statusBarColor =  Color.Transparent.toArgb()
+        this.setNavBarColor()
     }
 }
 

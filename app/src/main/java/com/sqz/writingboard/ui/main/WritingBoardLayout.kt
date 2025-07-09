@@ -74,6 +74,7 @@ import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
+@Deprecated("")
 fun WritingBoardLayout(
     navToSetting: () -> Unit,
     view: View,

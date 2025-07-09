@@ -1,6 +1,7 @@
 package com.sqz.writingboard.preferences
 
 import android.content.Context
+import androidx.core.content.edit
 
 class SettingState {
 
@@ -11,9 +12,9 @@ class SettingState {
 
     fun writeSwitchState(name: String,context: Context, state: Boolean) {
         val sharedPreferences = context.getSharedPreferences("WritingBoardSetting", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putBoolean(name, state)
-        editor.apply()
+        sharedPreferences.edit {
+            putBoolean(name, state)
+        }
     }
 
     fun readSegmentedButtonState(name: String, context: Context): Int {
@@ -23,8 +24,8 @@ class SettingState {
 
     fun writeSegmentedButtonState(name: String, context: Context, state: Int){
         val sharedPreferences = context.getSharedPreferences("WritingBoardSetting", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putInt(name, state)
-        editor.apply()
+        sharedPreferences.edit {
+            putInt(name, state)
+        }
     }
 }
