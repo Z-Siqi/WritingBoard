@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -23,7 +24,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import com.sqz.writingboard.preferences.SettingOption
+import com.sqz.writingboard.preference.SettingOption
 import com.sqz.writingboard.ui.MainViewModel
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
 import com.sqz.writingboard.ui.layout.settings.item.SettingsItem
@@ -44,7 +45,8 @@ fun SettingsLayout(viewModel: MainViewModel) {
                 state = state,
                 nestedScrollConnection = { nestedScrollConnection = it }
             )
-        }
+        },
+        contentWindowInsets = WindowInsets.statusBars,
     ) { paddingValues ->
         val settingsItem = SettingsItem(settings = settings)
         LazyColumn(

@@ -26,7 +26,7 @@ import androidx.glance.layout.size
 import androidx.glance.unit.ColorProvider
 import com.sqz.writingboard.MainActivity
 import com.sqz.writingboard.dataStore
-import com.sqz.writingboard.preferences.SettingOption
+import com.sqz.writingboard.preference.SettingOption
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow

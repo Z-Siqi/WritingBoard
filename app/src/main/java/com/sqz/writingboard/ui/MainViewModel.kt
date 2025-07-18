@@ -12,7 +12,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sqz.writingboard.dataStore
-import com.sqz.writingboard.preferences.SettingOption
+import com.sqz.writingboard.preference.SettingOption
 import com.sqz.writingboard.ui.layout.LocalState
 import com.sqz.writingboard.ui.layout.handler.RequestHandler
 import com.sqz.writingboard.ui.layout.handler.NavControllerHandler
@@ -84,11 +84,5 @@ class MainViewModel : ViewModel() {
         }
         // this assert is to make sure saving cannot before loading.
         assert(savedTextHashCode != null)
-    }
-
-    @Override
-    override fun onCleared() {
-        super.onCleared()
-        Log.d("TEST", "AAAAAAAAAAAAAAAAAAA")
     }
 }

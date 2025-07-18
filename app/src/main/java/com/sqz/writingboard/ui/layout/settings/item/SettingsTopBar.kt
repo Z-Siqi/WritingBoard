@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import com.sqz.writingboard.R
 import com.sqz.writingboard.ui.layout.handler.NavControllerHandler
 import com.sqz.writingboard.ui.theme.isAndroid15OrAbove
+import com.sqz.writingboard.ui.theme.isLandscape
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,6 +86,7 @@ fun SettingsTopBar(
         modifier = modifier
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.statusBars)
+            .displayCutoutPadding(true)
             .height(65.dp)
             .pointerInput(Unit) { detectVerticalDragGestures { _, _ -> } },
         horizontalAlignment = Alignment.Start
@@ -111,7 +113,9 @@ private fun Modifier.shadow(show: Boolean): Modifier {
 }
 
 @Composable
-private fun Modifier.displayCutoutPadding(): Modifier {
-    if (isAndroid15OrAbove) return this.windowInsetsPadding(WindowInsets.displayCutout)
+private fun Modifier.displayCutoutPadding(landscapeOnly: Boolean = false): Modifier {
+    if (isAndroid15OrAbove && (!landscapeOnly || isLandscape)) {
+        return this.windowInsetsPadding(WindowInsets.displayCutout)
+    }
     return this
 }

@@ -53,18 +53,57 @@ class BoardSizeHandler {
     private val _writingBoardPadding = MutableStateFlow(defaultSize())
     val writingBoardPadding: StateFlow<WritingBoardPadding> = _writingBoardPadding
 
+    // Resetting defaultPadding value is only allowed once
+    private var _defaultWithIme: Boolean = false
+    private var _defaultWithWidthScreen: Boolean = false
+
     private fun defaultPadding(contentSize: IntSize) {
         // Edit via ime with low screen height
         if (_state.value.isImeOn && contentSize.height < 300) {
+            _defaultWithIme = true
             _writingBoardPadding.update { it.copy(top = 2.dp, bottom = 3.dp) }
-        } else _writingBoardPadding.update { update ->
+        } else if (_defaultWithIme) _writingBoardPadding.update { update ->
+            _defaultWithIme = false
             defaultSize().let { update.copy(top = it.top, bottom = it.bottom) }
         }
         // With a long width screen
         if (_localData.value.isLandscape && contentSize.width > 580) {
+            _defaultWithWidthScreen = true
             _writingBoardPadding.update { it.copy(start = 30.dp, end = 30.dp) }
-        } else _writingBoardPadding.update { update ->
+        } else if (_defaultWithWidthScreen) _writingBoardPadding.update { update ->
+            _defaultWithWidthScreen = false
             defaultSize().let { update.copy(start = it.start, end = it.end) }
+        }
+    }
+
+    private val _increasedBottom = MutableStateFlow(false)
+    val increasedBottom: StateFlow<Boolean> = _increasedBottom
+
+    fun boardBottomPadding(increase: Boolean, height: Int = 64) {
+        if (increase && !_defaultWithIme) {
+            if (!_increasedBottom.value) _writingBoardPadding.update {
+                _increasedBottom.value = true
+                it.copy(bottom = it.bottom + height.dp)
+            }
+        } else if (_increasedBottom.value) {
+            _writingBoardPadding.update {
+                _increasedBottom.value = false
+                it.copy(bottom = (it.bottom - height.dp).let { if (it < 0.dp) 0.dp else it })
+            }
+        }
+    }
+
+
+    private val _increasedEnd = MutableStateFlow(false)
+    val increasedEnd: StateFlow<Boolean> = _increasedBottom
+
+    fun boardEndPadding(width: Int = 90) { //TODO: fix this
+        if (!_increasedEnd.value) _writingBoardPadding.update {
+            _increasedEnd.value = true
+            it.copy(end = it.end + width.dp)
+        } else if (_increasedEnd.value) _writingBoardPadding.update {
+            _increasedEnd.value = false
+            it.copy(end = (it.end - width.dp).let { if (it < 0.dp) 0.dp else it })
         }
     }
 
@@ -73,16 +112,26 @@ class BoardSizeHandler {
         contentSize: IntSize,
         navHeight: Int,
         stateHeight: Int,
+        navBarButtonMode: Boolean
     ): StateFlow<WritingBoardPadding> {
-        this.defaultPadding(contentSize)
-        _localData.update {
-            it.copy(isLandscape = landscapeUnit(screenSize.height, screenSize.width))
-        }
-        _localData.update {
-            when {
-                navHeight != 0 && stateHeight != 0 -> it.copy(stateHeight, navHeight)
-                stateHeight != 0 -> it.copy(stateHeight = stateHeight)
-                else -> it.copy(navHeight = navHeight)
+        when {
+            navBarButtonMode -> {
+                if (stateHeight != 0) _localData.update { it.copy(stateHeight = stateHeight) }
+                if (navHeight != 0) _localData.update { it.copy(navHeight = navHeight) }
+            }
+
+            else -> {
+                this.defaultPadding(contentSize)
+                _localData.update {
+                    it.copy(isLandscape = landscapeUnit(screenSize.height, screenSize.width))
+                }
+                _localData.update {
+                    when {
+                        navHeight != 0 && stateHeight != 0 -> it.copy(stateHeight, navHeight)
+                        stateHeight != 0 -> it.copy(stateHeight = stateHeight)
+                        else -> it.copy(navHeight = navHeight)
+                    }
+                }
             }
         }
         return this.writingBoardPadding

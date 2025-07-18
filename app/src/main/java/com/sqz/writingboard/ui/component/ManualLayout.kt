@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sqz.writingboard.R
 
+@Deprecated("")
 @Composable
 fun ManualLayout(
     @SuppressLint("ModifierParameter") modifierPadding: Modifier,

@@ -47,7 +47,6 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.pointer.pointerInteropFilter
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
@@ -55,7 +54,6 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Density
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -95,7 +93,7 @@ fun BasicTextField2(
     if (verticalScrollWhenCursorUnderKeyboard) {
         var initScroll by rememberSaveable { mutableStateOf(false) }
         val keyboardHeight = currentKeyboardHeightInPx()
-        val screenHeight = LocalConfiguration.current.screenHeightDp * LocalDensity.current.density
+        val screenHeight = LocalWindowInfo.current.containerSize.height.toFloat()
 
         if (WindowInsets.isImeVisible && !isLandscape()) {
             val high = screenHeight - (extraScrollValue * density).toInt()
@@ -232,15 +230,14 @@ fun BasicTextField2(
 
 @Composable
 private fun isLandscape(): Boolean {
-    val config = LocalConfiguration.current
-    return config.screenWidthDp > (config.screenHeightDp * 1.1)
+    val config = LocalWindowInfo.current.containerSize
+    return config.width > (config.height * 1.1)
 }
 
 @Composable
 private fun currentKeyboardHeightInPx(): Int {
     val context = LocalContext.current
-    val localScreenHeight =
-        (LocalConfiguration.current.screenHeightDp * LocalDensity.current.density).toInt()
+    val localScreenHeight = LocalWindowInfo.current.containerSize.height
     val rootView = LocalView.current
     val inputMethodManager =
         context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager

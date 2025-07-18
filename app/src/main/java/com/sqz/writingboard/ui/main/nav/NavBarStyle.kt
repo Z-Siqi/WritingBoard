@@ -41,6 +41,7 @@ import com.sqz.writingboard.R
 import com.sqz.writingboard.ui.component.TextTooltipBox
 import com.sqz.writingboard.ui.theme.*
 
+@Deprecated("")
 @Composable
 fun NavBarStyle(
     isEditing: Boolean,

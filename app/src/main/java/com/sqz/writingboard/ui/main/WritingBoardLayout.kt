@@ -64,7 +64,7 @@ import com.sqz.writingboard.ui.main.nav.HideStyle
 import com.sqz.writingboard.ui.main.nav.LayoutButton
 import com.sqz.writingboard.ui.main.nav.NavBarStyle
 import com.sqz.writingboard.ui.main.text.WritingBoardText
-import com.sqz.writingboard.preferences.SettingOption
+import com.sqz.writingboard.preference.SettingOption
 import com.sqz.writingboard.ui.theme.ThemeColor
 import com.sqz.writingboard.ui.theme.isAndroid15OrAbove
 import com.sqz.writingboard.ui.theme.isLandscape
@@ -340,6 +340,7 @@ private fun editingHorizontalScreen(
     } else isLandscape && isEditing && withoutSoftKeyboard
 }
 
+@Deprecated("")
 @Composable
 private fun Manual(
     stateSetter: (Boolean) -> Unit,
@@ -356,7 +357,7 @@ private fun Manual(
                 stateSetter(false)
                 NavScreen.updateScreen()
             },
-            text = stringResource(R.string.button_manual)
+            text = stringResource(R.string.settings_button_manual)
         )
     }
     //manual of edit button

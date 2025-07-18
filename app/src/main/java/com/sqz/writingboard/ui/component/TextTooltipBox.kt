@@ -15,6 +15,7 @@ import com.sqz.writingboard.component.Feedback
 @Composable
 fun TextTooltipBox(
     tooltipText: String,
+    enable: Boolean = true,
     content: @Composable () -> Unit
 ) {
     TooltipBox(
@@ -28,7 +29,8 @@ fun TextTooltipBox(
                 }
             }
         },
-        state = rememberTooltipState()
+        state = rememberTooltipState(),
+        enableUserInput = enable
     ) {
         content()
     }

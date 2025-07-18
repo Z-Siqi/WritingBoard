@@ -2,10 +2,11 @@ package com.sqz.writingboard.ui.theme
 
 import android.graphics.Rect
 import android.os.Build
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
@@ -44,3 +45,23 @@ fun Int.pxToDp(): Dp {
 fun Int.pxToDpInt(): Int {
     return this.pxToDp().value.toInt()
 }
+
+@Composable
+@ReadOnlyComposable
+fun WindowInsets.getTopDp(): Int = this.getTop(LocalDensity.current).pxToDpInt()
+
+@Composable
+@ReadOnlyComposable
+fun WindowInsets.getBottomDp(): Int = this.getBottom(LocalDensity.current).pxToDpInt()
+
+@Composable
+@ReadOnlyComposable
+fun WindowInsets.getLeftDp(): Int = this.getLeft(
+    LocalDensity.current, LocalLayoutDirection.current
+).pxToDpInt()
+
+@Composable
+@ReadOnlyComposable
+fun WindowInsets.getRightDp(): Int = this.getRight(
+    LocalDensity.current, LocalLayoutDirection.current
+).pxToDpInt()

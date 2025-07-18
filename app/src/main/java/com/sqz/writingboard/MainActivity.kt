@@ -8,8 +8,6 @@ import android.util.Log
 import android.view.Window
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBars
@@ -17,7 +15,6 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -43,13 +40,12 @@ import com.sqz.writingboard.ui.component.WritingBoardEE
 import com.sqz.writingboard.ui.component.WritingBoardNone
 import com.sqz.writingboard.ui.main.WritingBoardLayout
 import com.sqz.writingboard.ui.setting.WritingBoardSetting
-import com.sqz.writingboard.ui.theme.ThemeColor
 import com.sqz.writingboard.ui.theme.WritingBoardTheme
 import com.sqz.writingboard.ui.theme.isAndroid15OrAbove
-import com.sqz.writingboard.ui.theme.themeColor
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "WritingBoard")
 
+@Deprecated("")
 enum class NavRoute {
     WritingBoard, Setting, UpdateScreen, EE, ErrorWithSystemVersionA13
 }

@@ -17,14 +17,13 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sqz.writingboard.R
-import com.sqz.writingboard.preferences.SettingOption
+import com.sqz.writingboard.preference.SettingOption
 import com.sqz.writingboard.ui.component.TextTooltipBox
 import com.sqz.writingboard.ui.layout.LocalState
 import com.sqz.writingboard.ui.layout.handler.RequestHandler
@@ -32,24 +31,24 @@ import com.sqz.writingboard.ui.layout.main.item.WritingBoardPadding
 
 @Composable
 fun DefaultButton(
-    state: State<LocalState>,
+    state: LocalState,
     writingBoardPadding: WritingBoardPadding,
     settings: SettingOption,
     requestHandler: RequestHandler,
     modifier: Modifier = Modifier
 ) {
-    if (!state.value.isFocus) SettingButton(
+    if (!state.isFocus) SettingButton(
         onClick = { requestHandler.onSettingsClick() },
         writingBoardPadding = writingBoardPadding
     )
-    if (state.value.isFocus) {
+    if (state.isFocus) {
         val context = LocalContext.current
         OnEditTextButton(
             onClick = { requestHandler.finishClick(context) },
             writingBoardPadding = writingBoardPadding
         )
     }
-    if (settings.editButton() && !state.value.isEditable) EditButton(
+    if (settings.editButton() && !state.isEditable) EditButton(
         onClick = { requestHandler.onEditClick() },
         writingBoardPadding = writingBoardPadding
     )
@@ -99,7 +98,7 @@ private fun ColumnEnd(
 )
 
 @Composable
-private fun OnEditTextButton(
+fun OnEditTextButton(
     onClick: () -> Unit,
     writingBoardPadding: WritingBoardPadding,
     modifier: Modifier = Modifier

@@ -38,7 +38,7 @@
     <string name="button_style">WritingBoard 控件样式</string>
     <string name="button_hide">隐藏</string>
     <string name="button_bottom_bar">导航栏</string>
-    <string name="button_manual">单击红色区域打开设置屏幕</string>
+    <string name="settings_button_manual">单击红色区域打开设置屏幕</string>
     <string name="edit_button_manual">单击紫色区域可编辑WritingBoard文本</string>
     <string name="easter_eggs">致所有发现这里的人:\n恭喜你，你找到了彩蛋!\n\n祝你有美好的一天!!</string>
     <string name="may_all_people_equal">愿所有人以平等的眼光看待任何群体</string>

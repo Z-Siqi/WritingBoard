@@ -1,43 +1,71 @@
 package com.sqz.writingboard.ui.layout.main.item
 
 import android.util.Log
+import android.view.MotionEvent
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableIntState
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sqz.writingboard.component.KeyboardVisibilityObserver
-import com.sqz.writingboard.preferences.SettingOption
+import com.sqz.writingboard.preference.SettingOption
 import com.sqz.writingboard.ui.MainViewModel
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
 import com.sqz.writingboard.ui.layout.LocalState
+import com.sqz.writingboard.ui.layout.handler.RequestHandler
 import com.sqz.writingboard.ui.main.text.BasicTextField2
+import com.sqz.writingboard.ui.theme.getBottomDp
+import com.sqz.writingboard.ui.theme.getTopDp
+import com.sqz.writingboard.ui.theme.isLandscape
+import com.sqz.writingboard.ui.theme.pxToDp
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import java.io.File
 
 @Composable
-fun BoardContent(viewModel: MainViewModel, settings: SettingOption) {
+fun BoardContent(
+    viewModel: MainViewModel,
+    writingBoardPadding: WritingBoardPadding,
+    settings: SettingOption
+) {
     val context = LocalContext.current
     val scrollState = rememberLazyListState()
     val focusManager = viewModel.requestHandler.focusManager(
@@ -47,22 +75,35 @@ fun BoardContent(viewModel: MainViewModel, settings: SettingOption) {
         focusManager = LocalFocusManager.current,
         focusRequester = remember { FocusRequester() }
     )
+    var customFont by remember { mutableStateOf<FontFamily?>(FontFamily.Default) } //TODO
+    LaunchedEffect(Unit) {
+        val fontFile = File(context.filesDir, "font.ttf")
+        if (fontFile.exists()) {
+            val font = Font(fontFile)
+            customFont = FontFamily(font)
+        }
+    }
     val getState = viewModel.state.collectAsState().value
+    var yInScreenFromClick = remember { mutableIntStateOf(0) }
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .drawVerticalScrollbar(scrollState)
             .pointerInput(Unit) {
                 detectTapGestures { _ -> viewModel.requestHandler.requestWriting() }
-            },
+            }
+            .yInScreenFromClickGetter(
+                value = yInScreenFromClick, writingBoardPadding = writingBoardPadding
+            ),
         state = scrollState
     ) {
+        val enableSpacer = settings.buttonStyle() == 1 && !settings.alwaysVisibleText()
         if (getState.isEditable) item {
             BasicTextField2(
                 state = viewModel.textFieldState(context),
                 lazyListState = scrollState,
                 verticalScrollWhenCursorUnderKeyboard = true,
-                extraScrollValue = 1,
+                extraScrollValue = (WindowInsets.navigationBars.getBottomDp() + writingBoardPadding.bottom.value).toInt(),
                 modifier = Modifier
                     .fillMaxSize()
                     .focusRequester(focusManager)
@@ -70,29 +111,67 @@ fun BoardContent(viewModel: MainViewModel, settings: SettingOption) {
                         viewModel.state.update { it.copy(isFocus = focusState.isFocused) }
                     },
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurfaceVariant),
-                textStyle = textStyle(settings),
-                yInScreenFromClickAsLazyList = 0
+                textStyle = textStyle(settings, customFont),
+                yInScreenFromClickAsLazyList = yInScreenFromClick.intValue
             )
-            viewModel.requestHandler.saveTextWhenWindowNotFocused(
-                windowInfo = LocalWindowInfo.current,
-                context = context
-            )
+            Spacer(enableSpacer, viewModel.requestHandler, writingBoardPadding)
         } else item {
             BasicText(
                 text = viewModel.textFieldState(context).text.toString(),
                 modifier = Modifier.fillMaxSize(),
-                style = textStyle(settings)
+                style = textStyle(settings, customFont)
             )
+            Spacer(enableSpacer, viewModel.requestHandler, writingBoardPadding)
         }
     }
-    ImeVisibilityHandler(
-        state = viewModel.state
-    )
+    if (settings.alwaysVisibleText()) { // Change board size when the button will obscures the text
+        val getMoveBoardState = getMoveBoardState(scrollState)
+        val defaultButtonMode = getMoveBoardState && settings.buttonStyle() == 1
+        val hidedButtonMode = if (settings.editButton() && getState.isEditable) {
+            getMoveBoardState && settings.buttonStyle() == 0
+        } else getMoveBoardState && getState.isFocus
+        if (isLandscape) viewModel.boardSizeHandler.boardEndPadding() else {
+            viewModel.boardSizeHandler.boardBottomPadding(defaultButtonMode || hidedButtonMode)
+        }
+    }
+}
+
+@Composable
+private fun Modifier.yInScreenFromClickGetter(
+    value: MutableIntState, writingBoardPadding: WritingBoardPadding
+): Modifier {
+    val density = LocalDensity.current
+    val barsHeight = WindowInsets.navigationBars.getBottomDp() + WindowInsets.statusBars.getTopDp()
+    val paddingHeight = writingBoardPadding.bottom.value
+    val modifier = this.pointerInteropFilter { motionEvent: MotionEvent ->
+        when (motionEvent.action) { //detect this item screen y coordinate when click
+            MotionEvent.ACTION_DOWN -> {
+                val y = motionEvent.y
+                value.intValue =
+                    y.toInt() + ((barsHeight + paddingHeight) * density.density).toInt()
+            }
+        }
+        false
+    }
+    return modifier
+}
+
+@Composable
+private fun Spacer(
+    enable: Boolean, requestHandler: RequestHandler, writingBoardPadding: WritingBoardPadding
+) {
+    if (enable) {
+        val bottomHeight = WindowInsets.navigationBars.getBottom(LocalDensity.current).pxToDp()
+        val height = bottomHeight + writingBoardPadding.bottom + 20.dp
+        Spacer(Modifier.height(height) then Modifier.pointerInput(Unit) {
+            detectTapGestures { _ -> requestHandler.requestWriting() }
+        })
+    }
 }
 
 @Composable
 @ReadOnlyComposable
-private fun textStyle(settings: SettingOption): TextStyle {
+private fun textStyle(settings: SettingOption, customFont: FontFamily?): TextStyle {
     val fontSize = when (settings.fontSize()) {
         0 -> 18.sp
         1 -> 23.sp
@@ -111,9 +190,10 @@ private fun textStyle(settings: SettingOption): TextStyle {
         2 -> FontFamily.Serif
         3 -> when (settings.fontStyleExtra()) {
             0 -> FontFamily.Cursive
-            //1 -> customFont //TODO: customer font
+            1 -> customFont
             else -> FontFamily.Default
         }
+
         else -> FontFamily.Default
     }
     val fontStyle = if (settings.italics()) FontStyle.Italic else FontStyle.Normal
@@ -126,14 +206,26 @@ private fun textStyle(settings: SettingOption): TextStyle {
     )
 }
 
+
 @Composable
-private fun ImeVisibilityHandler(state: MutableStateFlow<LocalState>) {
-    KeyboardVisibilityObserver { isVisible ->
-        state.update { it.copy(isImeOn = isVisible) }
-    }
-    LaunchedEffect(state.collectAsState().value.isImeOn) {
-        if (state.value.isImeOn) Log.d("WritingBoard", "Keyboard is visible") else {
-            Log.d("WritingBoard", "Keyboard is close")
+private fun getMoveBoardState(scrollState: LazyListState): Boolean {
+    var state by remember { mutableStateOf(false) }
+    val highValue = (75 * LocalDensity.current.density).toInt()
+    var maxValue by remember { mutableIntStateOf(-1) }
+    val offset by remember { derivedStateOf { scrollState.firstVisibleItemScrollOffset } }
+    if (!scrollState.canScrollForward) {
+        LaunchedEffect(Unit) {
+            if (scrollState.firstVisibleItemScrollOffset != 0) {
+                maxValue = scrollState.firstVisibleItemScrollOffset
+            }
+            delay(50)
+            if (scrollState.firstVisibleItemScrollOffset == maxValue && !state) {
+                delay(50)
+                state = true
+            }
         }
+    } else if (offset < maxValue - highValue) {
+        state = false
     }
+    return state
 }

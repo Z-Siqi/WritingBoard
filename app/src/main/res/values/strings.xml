@@ -39,8 +39,8 @@
     <string name="button_style">WritingBoard control style</string>
     <string name="button_hide">Hide</string>
     <string name="button_bottom_bar">Bottom Bar</string>
-    <string name="button_manual">Click the red area to open setting screen.</string>
-    <string name="edit_button_manual">Click the purple area to edit WritingBoard texts.</string>
+    <string name="settings_button_manual">Note: Click the red area to open WritingBoard settings.</string>
+    <string name="edit_button_manual">Note: Click the purple area to edit WritingBoard texts.</string>
     <string name="easter_eggs">To All People Who Found Here:\nCongratulations, you find the easter eggs!\n\nHave a good day!!</string>
     <string name="may_all_people_equal">May all people view any group with equal eyes.</string>
     <string name="to_the_special_you"><![CDATA[To the Special You 🏳️‍⚧️:\nDon’t surrender to anxiety and depression, There will eventually be a place for us in this world.\nPlease do not despair, there is always someone standing by your side.\n\n - text by MtF.wiki & Z-Siqi]]></string>
@@ -54,7 +54,7 @@
     <string name="lower_than_android13">Your system version is lower than Android 13</string>
     <string name="feature_supports_android13">This feature only supports Android 13+</string>
     <string name="back">Go Back</string>
-    <string name="always_visible_text">Prevent text\nfrom being obscured</string>
+    <string name="always_visible_text">Prevent text from being obscured</string>
     <string name="vibrate_settings">Vibration feedback</string>
     <string name="disable">Disable</string>
     <string name="more">More</string>

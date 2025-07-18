@@ -2,17 +2,20 @@ package com.sqz.writingboard.ui.layout.handler
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.foundation.text.input.delete
 import androidx.compose.foundation.text.input.placeCursorAtEnd
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.platform.WindowInfo
-import com.sqz.writingboard.preferences.SettingOption
+import com.sqz.writingboard.preference.PreferenceLocal
+import com.sqz.writingboard.preference.SettingOption
 import com.sqz.writingboard.ui.MainViewModel
 import com.sqz.writingboard.ui.NavRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlin.text.endsWith
 
 class RequestHandler {
     private val _viewModel: MainViewModel
@@ -22,6 +25,9 @@ class RequestHandler {
     }
 
     fun onSettingsClick() {
+        if (_viewModel.state.value.isInReadOnlyMode) {
+            _viewModel.state.update { it.copy(isEditable = false) }
+        }
         _viewModel.navControllerHandler.navigate(NavRoute.Setting)
     }
 
@@ -32,6 +38,16 @@ class RequestHandler {
 
     fun finishClick(context: Context) {
         _request.update { it.copy(freeFocus = true) }
+        _viewModel.textFieldState().let { text ->
+            val prefs = PreferenceLocal(context)
+            if (text.text.toString().endsWith("\uD83C\uDFF3️\u200D⚧️") && !prefs.easterEgg()) {
+                prefs.easterEgg(true)
+                _viewModel.navControllerHandler.navigate(NavRoute.EE)
+            } else if (text.text.toString().endsWith("_-OPEN_IT")) {
+                text.edit { delete(text.text.length - 9, text.text.length) }
+                _viewModel.navControllerHandler.navigate(NavRoute.EE)
+            } else text
+        }
         _viewModel.saveTextToStorage(context)
     }
 
@@ -39,7 +55,7 @@ class RequestHandler {
         _viewModel.state.value.let {
             if (it.isImeOn) _request.update { update ->
                 update.copy(freeKeyboard = true)
-            } else if (it.isFocus) _request.update { update ->
+            } else _request.update { update ->
                 update.copy(freeFocus = true)
             }
         }
