@@ -1,5 +1,6 @@
 package com.sqz.writingboard.ui.layout.main
 
+import android.content.Context
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -44,9 +45,10 @@ import com.sqz.writingboard.ui.theme.pxToDpInt
 @Composable
 fun WritingBoardLayout(
     viewModel: MainViewModel,
+    context: Context,
     modifier: Modifier = Modifier
 ) {
-    val settings = SettingOption(context = LocalContext.current)
+    val settings = SettingOption(context = context)
     val defaultButtonMode = settings.buttonStyle() == 1 && !settings.alwaysVisibleText()
     val hideButtonMode = settings.buttonStyle() == 0
     val navBarButtonMode = settings.buttonStyle() == 2
@@ -61,7 +63,6 @@ fun WritingBoardLayout(
         stateHeight = WindowInsets.let {
             if (isLandscape) it.statusBars.getTopDp() else it.displayCutout.getTopDp()
         },
-        navBarButtonMode = navBarButtonMode,
     )
     val stateValue = viewModel.state.collectAsState().value
     val navButtons = NavButtons(
@@ -91,7 +92,7 @@ fun WritingBoardLayout(
                         navigationBars = navBarButtonMode && !isLandscape || stateValue.isImeOn
                     ),
                 contentSize = { contentSize = it },
-                imePadding = !navBarButtonMode,
+                imePadding = !navBarButtonMode || isLandscape,
                 backgroundColor = MaterialTheme.colorScheme.background,
                 borderColor = MaterialTheme.colorScheme.primary,
             ) {
@@ -112,7 +113,7 @@ fun WritingBoardLayout(
         if (!navBarButtonMode) OutsideButton(
             onHidedButtonInReadOnly = hideButtonMode,
             enableOutsideButton = settings.alwaysVisibleText(),
-            outside = viewModel.boardSizeHandler.increasedBottom.collectAsState().value,
+            boardSizeHandler = viewModel.boardSizeHandler,
             state = stateValue,
             writingBoardPadding = writingBoardPadding.collectAsState().value,
             requestHandler = viewModel.requestHandler,
@@ -146,5 +147,5 @@ private fun Modifier.windowInsetPaddings( // WindowInsets padding for WritingBoa
 @Composable
 private fun Preview() {
     val viewModel: MainViewModel = viewModel()
-    WritingBoardLayout(viewModel)
+    WritingBoardLayout(viewModel, LocalContext.current)
 }

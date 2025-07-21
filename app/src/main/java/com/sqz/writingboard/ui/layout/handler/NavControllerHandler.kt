@@ -32,7 +32,7 @@ class NavControllerHandler {
     }
 
     @Composable
-    fun Controller(navController: NavHostController) {
+    fun controller(navController: NavHostController): NavHostController {
         if (_requestBack.collectAsState().value) {
             navController.popBackStack()
             _requestBack.update { false }
@@ -41,5 +41,6 @@ class NavControllerHandler {
             navController.navigate(_navTo.collectAsState().value!!.name)
             _navTo.update { null }
         }
+        return navController
     }
 }

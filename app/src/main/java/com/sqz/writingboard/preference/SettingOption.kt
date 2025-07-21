@@ -8,6 +8,7 @@ class SettingOption(context: Context) : PreferenceHelper(context) {
         return "WritingBoardSetting"
     }
 
+    @Deprecated("No need anymore")
     fun allowMultipleLines(write: Boolean? = null): Boolean {
         val name = "allow_multiple_lines"
         if (write != null) super.writePreferencesState(name, write)
@@ -26,12 +27,14 @@ class SettingOption(context: Context) : PreferenceHelper(context) {
         return super.readPreferencesState(name, 1)
     }
 
+    @Deprecated("No need anymore")
     fun cleanAllText(write: Boolean? = null): Boolean {
         val name = "clean_all_text"
         if (write != null) super.writePreferencesState(name, write)
         return super.readPreferencesState(name, false)
     }
 
+    @Deprecated("No need anymore")
     fun disableAutoSave(write: Boolean? = null): Boolean {
         val name = "disable_auto_save"
         if (write != null) super.writePreferencesState(name, write)
@@ -66,7 +69,7 @@ class SettingOption(context: Context) : PreferenceHelper(context) {
     fun fontStyleExtra(write: Int? = null): Int {
         val name = "font_style_extra"
         if (write != null) super.writePreferencesState(name, write)
-        return super.readPreferencesState(name, 1)
+        return super.readPreferencesState(name, 0)
     }
 
     fun fontWeight(write: Int? = null): Int {

@@ -1,5 +1,6 @@
 package com.sqz.writingboard.ui.layout.settings
 
+import android.content.Context
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.displayCutout
@@ -33,8 +34,8 @@ import com.sqz.writingboard.ui.theme.isAndroid15OrAbove
 import com.sqz.writingboard.ui.theme.isLandscape
 
 @Composable
-fun SettingsLayout(viewModel: MainViewModel) {
-    val settings = SettingOption(context = LocalContext.current)
+fun SettingsLayout(viewModel: MainViewModel, context: Context) {
+    val settings = SettingOption(context = context)
     val state = rememberLazyListState()
     var nestedScrollConnection by remember { mutableStateOf<NestedScrollConnection?>(null) }
     Scaffold(
@@ -59,7 +60,7 @@ fun SettingsLayout(viewModel: MainViewModel) {
         ) {
             item { Spacer(modifier = Modifier.height(1.dp)) }
             item { Spacer(modifier = Modifier.height(5.dp)) }
-            items(settingsItem.list(viewModel)) {
+            items(settingsItem.list(viewModel, context)) {
                 it.content()
             }
             item { Spacer(modifier = Modifier.navBarHeight()) }

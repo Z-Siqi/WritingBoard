@@ -86,4 +86,5 @@
     <string name="font_is_imported">字体已导入，点击选择新字体</string>
     <string name="may_only_english">可能仅支持英语</string>
     <string name="click_to_select_a_font">单击选择字体</string>
+    <string name="font_is_invalid">Font is invalid! Please click to select a valid font</string>
 </resources>

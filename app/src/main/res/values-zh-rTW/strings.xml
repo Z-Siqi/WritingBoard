@@ -86,4 +86,5 @@
     <string name="font_is_imported">字體已匯入，按一下選擇新字體</string>
     <string name="may_only_english">可能僅支援英語</string>
     <string name="click_to_select_a_font">點選選擇字體</string>
+    <string name="font_is_invalid">Font is invalid! Please click to select a valid font</string>
 </resources>

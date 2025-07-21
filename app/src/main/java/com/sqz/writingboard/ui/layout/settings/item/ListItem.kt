@@ -192,9 +192,10 @@ open class ListItem {
     }
 
     @Composable
-    protected fun SegmentedButtonWithSegmentedButtonAndCard( //TODO: Test
+    protected fun SegmentedButtonWithSegmentedButtonAndCard(
         title: String, defOption: List<String>, onDefChange: (Int?) -> Int,
-        showAll: Boolean, subOption: List<String>, onSubChange: (Int?) -> Int
+        showAll: Boolean, subOption: List<String>, onSubChange: (Int?) -> Int,
+        onSubCardClick: () -> Unit, enableSubCardClick: Boolean, onSubCardText: String
     ) = this.ExtendableCardView(title = title) {
         var selectedIndex by remember { mutableIntStateOf(onDefChange(null)) }
         selectedIndex = segmentedButtonView(
@@ -206,18 +207,28 @@ open class ListItem {
                 .padding(start = 15.dp, end = 15.dp)
         ).let { onDefChange(it) }
         if (showAll) {
-            var selectedSubIndex by remember { mutableIntStateOf(onDefChange(null)) }
+            var selectedSubIndex by remember { mutableIntStateOf(onSubChange(null)) }
             selectedSubIndex = segmentedButtonView(
                 list = subOption.toTypedArray(),
                 label = { label -> subOption.find { it == label } ?: "N/A" },
-                initSetter = selectedIndex,
+                initSetter = selectedSubIndex,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 15.dp, end = 15.dp)
             ).let { onSubChange(it) }
-            OutlinedCard(Modifier.fillMaxWidth() then Modifier.heightIn(min = 50.dp)) { //TODO: finish it
+            OutlinedCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 58.dp)
+                    .padding(start = 15.dp, end = 15.dp, bottom = 12.dp),
+                onClick = onSubCardClick, enabled = enableSubCardClick,
+            ) {
+                Text(
+                    modifier = Modifier.padding(8.dp), text = onSubCardText, fontSize = 15.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-        }
+        } else Spacer(modifier = Modifier.height(12.dp))
     }
 
     data class Item(

@@ -1,5 +1,6 @@
 package com.sqz.writingboard.ui.layout.settings.item
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -7,19 +8,27 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
+import androidx.glance.appwidget.updateAll
 import com.sqz.writingboard.R
+import com.sqz.writingboard.file.rememberImportFontManager
+import com.sqz.writingboard.glance.WritingBoardWidget
 import com.sqz.writingboard.preference.SettingOption
 import com.sqz.writingboard.ui.MainViewModel
 import com.sqz.writingboard.ui.theme.WritingBoardTheme
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class SettingsItem(private val settings: SettingOption) : ListItem() {
 
-    @Composable
-    private fun Int.string(): String = stringResource(this)
+    @OptIn(DelicateCoroutinesApi::class)
+    private fun updateWidget(context: Context) {
+        GlobalScope.launch { WritingBoardWidget().updateAll(context) }
+    }
 
     @Composable
-    private fun Theme(viewModel: MainViewModel) {
+    private fun Theme() {
         super.BasicSegmentedButtonLayout(
             title = stringResource(R.string.choose_theme),
             option = listOf(
@@ -32,17 +41,22 @@ class SettingsItem(private val settings: SettingOption) : ListItem() {
     }
 
     @Composable
-    private fun ControlStyle() {
+    private fun ControlStyle(viewModel: MainViewModel) {
         var controlStyle by remember { mutableIntStateOf(settings.buttonStyle()) }
         super.SegmentedButtonWithSwitch(
             title = stringResource(R.string.button_style), option = listOf(
                 stringResource(R.string.button_hide),
                 stringResource(R.string.default_string),
                 stringResource(R.string.button_bottom_bar)
-            ), onChange = { settings.buttonStyle(it).also { controlStyle = it } },
-            switch = settings.buttonStyle() != 2,
+            ), onChange = {
+                if (it == 2) viewModel.boardSizeHandler.resetPadding()
+                settings.buttonStyle(it).also { controlStyle = it }
+            }, switch = settings.buttonStyle() != 2,
             switchText = stringResource(R.string.always_visible_text),
-            onCheckedChange = { settings.alwaysVisibleText(it) }
+            onCheckedChange = {
+                viewModel.boardSizeHandler.resetPadding()
+                settings.alwaysVisibleText(it)
+            }
         )
     }
 
@@ -80,15 +94,52 @@ class SettingsItem(private val settings: SettingOption) : ListItem() {
         )
     }
 
-    fun list(viewModel: MainViewModel): List<Item> {
+    @Composable
+    private fun FontStyle(context: Context) {
+        val importFontManager = rememberImportFontManager()
+        super.SegmentedButtonWithSegmentedButtonAndCard(
+            title = stringResource(R.string.font_style), defOption = listOf(
+                stringResource(R.string.monospace),
+                stringResource(R.string.default_string),
+                stringResource(R.string.serif),
+                stringResource(R.string.more_font)
+            ), onDefChange = { settings.fontStyle(it).also { updateWidget(context) } },
+            showAll = settings.fontStyle() == 3, subOption = listOf(
+                stringResource(R.string.cursive),
+                stringResource(R.string.custom_font)
+            ), onSubChange = { settings.fontStyleExtra(it).also { updateWidget(context) } },
+            onSubCardClick = { importFontManager.importFont() },
+            enableSubCardClick = settings.fontStyleExtra() == 1,
+            onSubCardText = if (settings.fontStyleExtra() == 0) {
+                stringResource(R.string.may_only_english)
+            } else importFontManager.getState(context)
+        )
+    }
+
+    @Composable
+    private fun FontWeight() {
+        super.BasicSegmentedButtonLayout(
+            title = stringResource(R.string.font_weight), option = listOf(
+                stringResource(R.string.thin),
+                stringResource(R.string.normal),
+                stringResource(R.string.thick),
+            ), onChange = { settings.fontWeight(it) }
+        )
+    }
+
+    fun list(viewModel: MainViewModel, context: Context): List<Item> {
         return listOf(
             Item { super.ListTitle(R.string.writingboard_app) },
-            Item { this.Theme(viewModel) },
-            Item { this.ControlStyle() },
+            Item { this.Theme() },
+            Item { this.ControlStyle(viewModel) },
             Item { this.ReadOnlyMode(viewModel) },
             Item { super.ListTitle(R.string.writingboard) },
             Item { this.FontSize() },
             Item { this.ItalicFont() },
+            Item { this.FontStyle(context) },
+            Item { this.FontWeight() },
+            //Item { super.ListTitle(R.string.keyboard_texts_action) }, TODO: write new
+            //Item { super.ListTitle(R.string.others) },
         )
     }
 }

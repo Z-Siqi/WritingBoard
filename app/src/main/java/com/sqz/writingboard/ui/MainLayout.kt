@@ -1,12 +1,12 @@
 package com.sqz.writingboard.ui
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -25,20 +25,20 @@ enum class NavRoute {
 }
 
 @Composable
-fun MainLayout(modifier: Modifier = Modifier) {
+fun MainLayout(context: Context, modifier: Modifier = Modifier) {
     val viewModel: MainViewModel = viewModel()
     val navController = rememberNavController()
     NavHost(
-        navController = navController,
+        navController = viewModel.navControllerHandler.controller(navController),
         startDestination = NavRoute.WritingBoard.name,
         modifier = modifier
     ) {
         composable(NavRoute.WritingBoard.name) {
-            WritingBoardLayout(viewModel = viewModel)
+            WritingBoardLayout(viewModel = viewModel, context = context)
             ImeVisibilityHandler(state = viewModel.state)
         }
         composable(NavRoute.Setting.name) {
-            SettingsLayout(viewModel = viewModel)
+            SettingsLayout(viewModel = viewModel, context = context)
         }
         composable(NavRoute.EE.name) {
             Surface {
@@ -47,10 +47,8 @@ fun MainLayout(modifier: Modifier = Modifier) {
         }
     }
     viewModel.requestHandler.saveTextWhenWindowNotFocused(
-        windowInfo = LocalWindowInfo.current,
-        context = LocalContext.current
+        windowInfo = LocalWindowInfo.current, context = context
     )
-    viewModel.navControllerHandler.Controller(navController)
 }
 
 @Composable

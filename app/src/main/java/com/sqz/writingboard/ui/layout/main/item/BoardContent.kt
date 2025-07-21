@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
@@ -44,19 +43,17 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sqz.writingboard.component.KeyboardVisibilityObserver
+import com.sqz.writingboard.file.importedFontName
 import com.sqz.writingboard.preference.SettingOption
 import com.sqz.writingboard.ui.MainViewModel
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
-import com.sqz.writingboard.ui.layout.LocalState
 import com.sqz.writingboard.ui.layout.handler.RequestHandler
 import com.sqz.writingboard.ui.main.text.BasicTextField2
 import com.sqz.writingboard.ui.theme.getBottomDp
 import com.sqz.writingboard.ui.theme.getTopDp
-import com.sqz.writingboard.ui.theme.isLandscape
+import com.sqz.writingboard.ui.theme.navBarHeightDpIsEditing
 import com.sqz.writingboard.ui.theme.pxToDp
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import java.io.File
 
@@ -75,9 +72,9 @@ fun BoardContent(
         focusManager = LocalFocusManager.current,
         focusRequester = remember { FocusRequester() }
     )
-    var customFont by remember { mutableStateOf<FontFamily?>(FontFamily.Default) } //TODO
+    var customFont by remember { mutableStateOf<FontFamily?>(FontFamily.Default) }
     LaunchedEffect(Unit) {
-        val fontFile = File(context.filesDir, "font.ttf")
+        val fontFile = File(context.filesDir, importedFontName)
         if (fontFile.exists()) {
             val font = Font(fontFile)
             customFont = FontFamily(font)
@@ -85,6 +82,7 @@ fun BoardContent(
     }
     val getState = viewModel.state.collectAsState().value
     var yInScreenFromClick = remember { mutableIntStateOf(0) }
+    val extraScrollValue = (WindowInsets.navigationBars.getBottomDp() + writingBoardPadding.bottom.value).toInt()
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -97,13 +95,16 @@ fun BoardContent(
             ),
         state = scrollState
     ) {
-        val enableSpacer = settings.buttonStyle() == 1 && !settings.alwaysVisibleText()
+        val enableSpacer = !settings.alwaysVisibleText() && settings.buttonStyle() == 1
+                || settings.alwaysVisibleText() && viewModel.boardSizeHandler.editWithLowScreenHeight()
         if (getState.isEditable) item {
             BasicTextField2(
                 state = viewModel.textFieldState(context),
                 lazyListState = scrollState,
                 verticalScrollWhenCursorUnderKeyboard = true,
-                extraScrollValue = (WindowInsets.navigationBars.getBottomDp() + writingBoardPadding.bottom.value).toInt(),
+                extraScrollValue = if (settings.buttonStyle() != 2) extraScrollValue else {
+                    extraScrollValue + navBarHeightDpIsEditing
+                },
                 modifier = Modifier
                     .fillMaxSize()
                     .focusRequester(focusManager)
@@ -124,15 +125,15 @@ fun BoardContent(
             Spacer(enableSpacer, viewModel.requestHandler, writingBoardPadding)
         }
     }
-    if (settings.alwaysVisibleText()) { // Change board size when the button will obscures the text
+    // Change board size when the button will obscures the text
+    if (settings.alwaysVisibleText() && settings.buttonStyle() != 2) {
         val getMoveBoardState = getMoveBoardState(scrollState)
         val defaultButtonMode = getMoveBoardState && settings.buttonStyle() == 1
         val hidedButtonMode = if (settings.editButton() && getState.isEditable) {
             getMoveBoardState && settings.buttonStyle() == 0
         } else getMoveBoardState && getState.isFocus
-        if (isLandscape) viewModel.boardSizeHandler.boardEndPadding() else {
-            viewModel.boardSizeHandler.boardBottomPadding(defaultButtonMode || hidedButtonMode)
-        }
+        viewModel.boardSizeHandler.boardBottomPadding(defaultButtonMode || hidedButtonMode)
+        viewModel.boardSizeHandler.boardEndPadding()
     }
 }
 
@@ -141,14 +142,14 @@ private fun Modifier.yInScreenFromClickGetter(
     value: MutableIntState, writingBoardPadding: WritingBoardPadding
 ): Modifier {
     val density = LocalDensity.current
-    val barsHeight = WindowInsets.navigationBars.getBottomDp() + WindowInsets.statusBars.getTopDp()
+    val barHeight = WindowInsets.navigationBars.getBottomDp() + WindowInsets.statusBars.getTopDp()
     val paddingHeight = writingBoardPadding.bottom.value
     val modifier = this.pointerInteropFilter { motionEvent: MotionEvent ->
         when (motionEvent.action) { //detect this item screen y coordinate when click
             MotionEvent.ACTION_DOWN -> {
                 val y = motionEvent.y
-                value.intValue =
-                    y.toInt() + ((barsHeight + paddingHeight) * density.density).toInt()
+                value.intValue = y.toInt() + ((barHeight + paddingHeight) * density.density).toInt()
+                Log.d("WritingBoard_Debug", "[value.intValue y: ${value.intValue}] [y: $y]")
             }
         }
         false
@@ -214,7 +215,7 @@ private fun getMoveBoardState(scrollState: LazyListState): Boolean {
     var maxValue by remember { mutableIntStateOf(-1) }
     val offset by remember { derivedStateOf { scrollState.firstVisibleItemScrollOffset } }
     if (!scrollState.canScrollForward) {
-        LaunchedEffect(Unit) {
+        LaunchedEffect(offset, Unit) {
             if (scrollState.firstVisibleItemScrollOffset != 0) {
                 maxValue = scrollState.firstVisibleItemScrollOffset
             }

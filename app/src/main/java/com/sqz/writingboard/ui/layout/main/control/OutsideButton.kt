@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -28,13 +29,14 @@ import com.sqz.writingboard.preference.SettingOption
 import com.sqz.writingboard.ui.component.TextTooltipBox
 import com.sqz.writingboard.ui.layout.LocalState
 import com.sqz.writingboard.ui.layout.handler.RequestHandler
+import com.sqz.writingboard.ui.layout.main.item.BoardSizeHandler
 import com.sqz.writingboard.ui.layout.main.item.WritingBoardPadding
 
 @Composable
 fun OutsideButton(
     onHidedButtonInReadOnly: Boolean,
     enableOutsideButton: Boolean,
-    outside: Boolean,
+    boardSizeHandler: BoardSizeHandler,
     state: LocalState,
     writingBoardPadding: WritingBoardPadding,
     requestHandler: RequestHandler,
@@ -51,6 +53,8 @@ fun OutsideButton(
         )
     }
     if (enableOutsideButton) {
+        val outside = boardSizeHandler.increasedBottom.collectAsState().value
+        val boardEnd = boardSizeHandler.increasedEnd.collectAsState().value
         if (settings.buttonStyle() == 1) {
             if (!state.isFocus) SettingOutsideButton(
                 onClick = { requestHandler.onSettingsClick() },
@@ -68,12 +72,14 @@ fun OutsideButton(
             OnEditTextOutsideButton(
                 onClick = { requestHandler.finishClick(context) },
                 writingBoardPadding = writingBoardPadding,
+                boardEnd = boardEnd,
                 modifier = Modifier.buttonPaddings(outside, writingBoardPadding)
             )
         } else if (state.isFocus) {
             OnEditTextOutsideButton(
                 onClick = { requestHandler.finishClick(context) },
                 writingBoardPadding = writingBoardPadding,
+                boardEnd = boardEnd,
                 modifier = Modifier.buttonPaddings(outside, writingBoardPadding)
             )
         }
@@ -98,12 +104,14 @@ private fun Modifier.buttonPaddings(
 private fun OnEditTextOutsideButton(
     onClick: () -> Unit,
     writingBoardPadding: WritingBoardPadding,
+    boardEnd: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val boardEndPadding = if (boardEnd) 0.dp else writingBoardPadding.end
     Column(
         modifier = modifier
             .windowInsetsPadding(WindowInsets.ime)
-            .padding(end = writingBoardPadding.end),
+            .padding(end = boardEndPadding),
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.End,
     ) {

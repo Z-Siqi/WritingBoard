@@ -34,6 +34,7 @@ import com.sqz.writingboard.ui.theme.isLandscape
  * The default control style and editing buttons.
  * AlwaysVisibleText; ButtonStyle is 0 & 1
  **/
+@Deprecated("")
 @Composable
 fun LayoutButton(
     screenController: Boolean,

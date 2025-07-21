@@ -68,7 +68,7 @@ class MainActivity : ComponentActivity() {
                     this.setNavBarColor()
                 }
                 if (newModel) { //TODO: rewrite code
-                    MainLayout()
+                    MainLayout(applicationContext)
                     controller.isAppearanceLightStatusBars = true
                     controller.isAppearanceLightNavigationBars = true
                 } else Surface(
