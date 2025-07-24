@@ -1,4 +1,4 @@
-package com.sqz.writingboard.file
+package com.sqz.writingboard.common.io
 
 import android.content.Context
 import android.graphics.Typeface

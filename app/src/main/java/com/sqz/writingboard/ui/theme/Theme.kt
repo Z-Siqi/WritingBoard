@@ -1,6 +1,5 @@
 package com.sqz.writingboard.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -30,11 +29,61 @@ class WritingBoardTheme private constructor(private val localMode: Int) {
         val color @Composable get() = WritingBoardTheme(this.mode.collectAsState().value)
     }
 
-    val backgroundColor: Color //TODO
+    val backgroundColor: Color
         @ReadOnlyComposable @Composable get() = when (localMode) {
-            1 -> MaterialTheme.colorScheme.background
+            1 -> MaterialTheme.colorScheme.surfaceContainer
+            2 -> MaterialTheme.colorScheme.surfaceVariant
             else -> MaterialTheme.colorScheme.background
         }
+    val boardBackground: Color
+        @ReadOnlyComposable @Composable get() = when (localMode) {
+            1 -> MaterialTheme.colorScheme.surfaceContainerLow
+            2 -> MaterialTheme.colorScheme.surfaceContainer
+            else -> MaterialTheme.colorScheme.background
+        }
+    val boardShape: Color
+        @ReadOnlyComposable @Composable get() = when (localMode) {
+            1 -> MaterialTheme.colorScheme.primary
+            2 -> MaterialTheme.colorScheme.tertiary
+            else -> MaterialTheme.colorScheme.primary
+        }
+    val boardText: Color
+        @ReadOnlyComposable @Composable get() = when (localMode) {
+            1 -> MaterialTheme.colorScheme.secondary
+            2 -> MaterialTheme.colorScheme.primary
+            else -> MaterialTheme.colorScheme.onSurfaceVariant
+        }
+    val settingsCardBackground: Color
+        @ReadOnlyComposable @Composable get() = when (localMode) {
+            1 -> MaterialTheme.colorScheme.surfaceContainer
+            2 -> MaterialTheme.colorScheme.inversePrimary
+            else -> MaterialTheme.colorScheme.surface
+        }
+    val settingsBackground: Color
+        @ReadOnlyComposable @Composable get() = when (localMode) {
+            1 -> MaterialTheme.colorScheme.surfaceContainerLow
+            2 -> MaterialTheme.colorScheme.surfaceContainerHigh
+            else -> MaterialTheme.colorScheme.surface
+        }
+    val settingsBgTopBarScrolled: Color
+        @ReadOnlyComposable @Composable get() = when (localMode) {
+            1 -> MaterialTheme.colorScheme.surfaceContainerHigh
+            2 -> MaterialTheme.colorScheme.surfaceContainerHighest
+            else -> MaterialTheme.colorScheme.surfaceContainer
+        }
+    val settingsTopBarContent: Color
+        @ReadOnlyComposable @Composable get() = when (localMode) {
+            1 -> MaterialTheme.colorScheme.secondary
+            2 -> MaterialTheme.colorScheme.primary
+            else -> MaterialTheme.colorScheme.onSurface
+        }
+    val scrollBar: Color
+        @ReadOnlyComposable @Composable get() = when (localMode) {
+            1 -> MaterialTheme.colorScheme.surfaceTint
+            2 -> MaterialTheme.colorScheme.primary
+            else -> MaterialTheme.colorScheme.secondary
+        }
+    val transparent: Color = Color.Transparent
 }
 
 @Composable
@@ -60,7 +109,7 @@ fun WritingBoardTheme(
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
-            val window = (view.context as Activity).window
+            //val window = (view.context as Activity).window
             //WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
         }
     }
@@ -70,116 +119,4 @@ fun WritingBoardTheme(
         typography = Typography,
         content = content
     )
-}
-
-enum class ThemeColor {
-    StatusBarColor, NavigationBarColor, BackgroundColor, ShapeColor, BoardColor,
-    CardColor, ScrolledContainerColor, TitleContentColor, SettingBackgroundColor,
-    TextColor, BarColor,
-}
-
-@Composable
-fun themeColor(themeColor: ThemeColor): Color {
-    val readTheme = SettingOption(LocalContext.current).theme()
-    when (themeColor) {
-        //App Bars
-        ThemeColor.StatusBarColor -> {
-            return when (readTheme) {
-                0 -> MaterialTheme.colorScheme.outline
-                1 -> MaterialTheme.colorScheme.secondary
-                2 -> MaterialTheme.colorScheme.tertiary
-                else -> MaterialTheme.colorScheme.secondary
-            }
-        }
-
-        ThemeColor.NavigationBarColor -> {
-            return when (readTheme) {
-                0 -> MaterialTheme.colorScheme.surfaceVariant
-                1 -> MaterialTheme.colorScheme.secondaryContainer
-                2 -> MaterialTheme.colorScheme.primaryContainer
-                else -> MaterialTheme.colorScheme.secondaryContainer
-            }
-        }
-
-        //WritingBoard screen
-        ThemeColor.BackgroundColor -> {
-            return when (readTheme) {
-                0 -> MaterialTheme.colorScheme.surfaceContainerLowest
-                1 -> MaterialTheme.colorScheme.surfaceVariant
-                2 -> MaterialTheme.colorScheme.primaryContainer
-                else -> MaterialTheme.colorScheme.surfaceVariant
-            }
-        }
-
-        ThemeColor.ShapeColor -> {
-            return when (readTheme) {
-                0 -> MaterialTheme.colorScheme.tertiary
-                1 -> MaterialTheme.colorScheme.primary
-                2 -> MaterialTheme.colorScheme.secondary
-                else -> MaterialTheme.colorScheme.primary
-            }
-        }
-
-        ThemeColor.BoardColor -> {
-            return when (readTheme) {
-                0 -> MaterialTheme.colorScheme.surfaceBright
-                1 -> MaterialTheme.colorScheme.surfaceContainerLow
-                2 -> MaterialTheme.colorScheme.tertiaryContainer
-                else -> MaterialTheme.colorScheme.surfaceContainerLow
-            }
-        }
-        //Setting screen
-        ThemeColor.CardColor -> {
-            return when (readTheme) {
-                0 -> MaterialTheme.colorScheme.surfaceContainerHighest
-                1 -> MaterialTheme.colorScheme.primaryContainer
-                2 -> MaterialTheme.colorScheme.secondaryContainer
-                else -> MaterialTheme.colorScheme.primaryContainer
-            }
-        }
-
-        ThemeColor.ScrolledContainerColor -> {
-            return when (readTheme) {
-                0 -> MaterialTheme.colorScheme.surfaceDim
-                1 -> MaterialTheme.colorScheme.secondaryContainer
-                2 -> MaterialTheme.colorScheme.tertiaryContainer
-                else -> MaterialTheme.colorScheme.secondaryContainer
-            }
-        }
-
-        ThemeColor.TitleContentColor -> {
-            return when (readTheme) {
-                0 -> MaterialTheme.colorScheme.secondary
-                1 -> MaterialTheme.colorScheme.primary
-                2 -> MaterialTheme.colorScheme.tertiary
-                else -> MaterialTheme.colorScheme.primary
-            }
-        }
-
-        ThemeColor.SettingBackgroundColor -> {
-            return when (readTheme) {
-                0 -> MaterialTheme.colorScheme.surfaceBright
-                1 -> MaterialTheme.colorScheme.surfaceVariant
-                2 -> MaterialTheme.colorScheme.tertiaryContainer
-                else -> MaterialTheme.colorScheme.surfaceVariant
-            }
-        }
-        //WritingBoard text
-        ThemeColor.TextColor -> {
-            return when (readTheme) {
-                1 -> MaterialTheme.colorScheme.secondary
-                2 -> MaterialTheme.colorScheme.tertiary
-                else -> MaterialTheme.colorScheme.secondary
-            }
-        }
-        //Scroll bar color
-        ThemeColor.BarColor -> {
-            return when (readTheme) {
-                0 -> MaterialTheme.colorScheme.secondary
-                1 -> MaterialTheme.colorScheme.surfaceTint
-                2 -> MaterialTheme.colorScheme.primary
-                else -> MaterialTheme.colorScheme.onSurfaceVariant
-            }
-        }
-    }
 }

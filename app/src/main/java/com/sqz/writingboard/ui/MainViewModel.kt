@@ -9,14 +9,16 @@ import androidx.datastore.core.IOException
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sqz.writingboard.dataStore
+import com.sqz.writingboard.glance.WritingBoardWidget
+import com.sqz.writingboard.data.dataStore
 import com.sqz.writingboard.preference.SettingOption
 import com.sqz.writingboard.ui.layout.LocalState
 import com.sqz.writingboard.ui.layout.handler.RequestHandler
 import com.sqz.writingboard.ui.layout.handler.NavControllerHandler
-import com.sqz.writingboard.ui.layout.main.item.BoardSizeHandler
+import com.sqz.writingboard.ui.layout.handler.BoardSizeHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -61,7 +63,12 @@ class MainViewModel : ViewModel() {
                     } else throw it
                 }.map { prefs -> prefs[stringPreferencesKey("saved_text")] ?: "" }.first()
                 if (_textFieldState.text.isNotEmpty()) throw TypeCastException("Text is already exist! Pls report this!")
-                _textFieldState.edit { insert(0, savedText) }
+                if (SettingOption(context).mergeLineBreak() && savedText.isNotEmpty() && savedText.last() == '\n') {
+                    Log.d("WritingBoardTag", "Removing line breaks and adding a new line.")
+                    _textFieldState.edit { insert(0, savedText.trimEnd { it == '\n' }.plus('\n')) }
+                } else {
+                    _textFieldState.edit { insert(0, savedText) }
+                }
                 savedTextHashCode = savedText.hashCode()
             }
         }
@@ -79,6 +86,7 @@ class MainViewModel : ViewModel() {
                 }
                 Log.i("WritingBoardTag", "Text is saved")
                 savedTextHashCode = _textFieldState.text.hashCode()
+                WritingBoardWidget().updateAll(context)
                 _saver = false
             }
         }

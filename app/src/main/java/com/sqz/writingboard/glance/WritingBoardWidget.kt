@@ -25,7 +25,7 @@ import androidx.glance.layout.Spacer
 import androidx.glance.layout.size
 import androidx.glance.unit.ColorProvider
 import com.sqz.writingboard.MainActivity
-import com.sqz.writingboard.dataStore
+import com.sqz.writingboard.data.dataStore
 import com.sqz.writingboard.preference.SettingOption
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -45,7 +45,7 @@ class WritingBoardTextOnlyWidgetReceiver : GlanceAppWidgetReceiver() {
 /** UI function **/
 @SuppressLint("RestrictedApi")
 @Composable
-internal fun WidgetBoard(size: DpSize, modifier: GlanceModifier = GlanceModifier) {
+internal fun WidgetBoard(size: DpSize) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         WidgetBoardLayout(size)
     } else {
@@ -120,7 +120,11 @@ fun savedText(context: Context): String {
     val savedText by context.dataStore.data.map { preferences ->
         preferences[text] ?: " "
     }.collectAsState(initial = " ")
-    return savedText
+    return if (SettingOption(context).mergeLineBreak()
+        && savedText.isNotEmpty() && savedText.last() == '\n'
+    ) {
+        savedText.trimEnd { it == '\n' }.plus('\n')
+    } else savedText
 }
 
 /** Open WritingBoard app action**/

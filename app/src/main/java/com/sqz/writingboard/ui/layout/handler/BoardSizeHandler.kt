@@ -1,9 +1,10 @@
-package com.sqz.writingboard.ui.layout.main.item
+package com.sqz.writingboard.ui.layout.handler
 
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.sqz.writingboard.ui.MainViewModel
 import com.sqz.writingboard.ui.layout.LocalState
+import com.sqz.writingboard.ui.layout.main.item.WritingBoardPadding
 import com.sqz.writingboard.ui.theme.landscapeUnit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

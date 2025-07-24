@@ -1,7 +1,7 @@
 package com.sqz.writingboard.ui.layout.main
 
-import android.content.Context
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.displayCutout
@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.waterfall
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -22,10 +21,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.sqz.writingboard.common.feedback.AndroidFeedback
+import com.sqz.writingboard.common.feedback.Feedback
 import com.sqz.writingboard.preference.SettingOption
 import com.sqz.writingboard.ui.MainViewModel
 import com.sqz.writingboard.ui.layout.handler.RequestHandler
@@ -45,10 +48,10 @@ import com.sqz.writingboard.ui.theme.pxToDpInt
 @Composable
 fun WritingBoardLayout(
     viewModel: MainViewModel,
-    context: Context,
+    settings: SettingOption,
+    feedback: Feedback,
     modifier: Modifier = Modifier
 ) {
-    val settings = SettingOption(context = context)
     val defaultButtonMode = settings.buttonStyle() == 1 && !settings.alwaysVisibleText()
     val hideButtonMode = settings.buttonStyle() == 0
     val navBarButtonMode = settings.buttonStyle() == 2
@@ -66,7 +69,10 @@ fun WritingBoardLayout(
     )
     val stateValue = viewModel.state.collectAsState().value
     val navButtons = NavButtons(
-        state = stateValue, requestHandler = viewModel.requestHandler, settings = settings
+        state = stateValue,
+        requestHandler = viewModel.requestHandler,
+        settings = settings,
+        feedback = feedback
     )
     Scaffold(
         modifier = modifier.bgClick(viewModel.requestHandler),
@@ -77,7 +83,10 @@ fun WritingBoardLayout(
         containerColor = WritingBoardTheme.color.backgroundColor,
     ) { paddingValues ->
         if (hideButtonMode) HidedButton(
-            state = stateValue, requestHandler = viewModel.requestHandler, settings = settings
+            state = stateValue,
+            requestHandler = viewModel.requestHandler,
+            settings = settings,
+            feedback = feedback
         )
         Row(modifier = modifier.padding(paddingValues)) {
             WritingBoard(
@@ -92,12 +101,16 @@ fun WritingBoardLayout(
                         navigationBars = navBarButtonMode && !isLandscape || stateValue.isImeOn
                     ),
                 contentSize = { contentSize = it },
+                contentPadding = PaddingValues(
+                    start = 15.dp, end = 8.dp, top = 8.dp, bottom = 8.dp
+                ),
                 imePadding = !navBarButtonMode || isLandscape,
-                backgroundColor = MaterialTheme.colorScheme.background,
-                borderColor = MaterialTheme.colorScheme.primary,
+                backgroundColor = WritingBoardTheme.color.boardBackground,
+                borderColor = WritingBoardTheme.color.boardShape,
             ) {
                 BoardContent(
                     viewModel = viewModel,
+                    feedback = feedback,
                     writingBoardPadding = writingBoardPadding.collectAsState().value,
                     settings = settings
                 )
@@ -108,7 +121,8 @@ fun WritingBoardLayout(
             state = stateValue,
             writingBoardPadding = writingBoardPadding.collectAsState().value,
             requestHandler = viewModel.requestHandler,
-            settings = settings
+            settings = settings,
+            feedback = feedback
         )
         if (!navBarButtonMode) OutsideButton(
             onHidedButtonInReadOnly = hideButtonMode,
@@ -117,7 +131,8 @@ fun WritingBoardLayout(
             state = stateValue,
             writingBoardPadding = writingBoardPadding.collectAsState().value,
             requestHandler = viewModel.requestHandler,
-            settings = settings
+            settings = settings,
+            feedback = feedback
         )
     }
 }
@@ -133,19 +148,20 @@ private fun Modifier.bgClick(requestHandler: RequestHandler): Modifier {
 private fun Modifier.windowInsetPaddings( // WindowInsets padding for WritingBoard
     displayCutout: Boolean, navigationBars: Boolean
 ): Modifier {
-    val displayCutout = if (displayCutout) this else {
+    val displayCutoutLocal = if (displayCutout) this else {
         this.windowInsetsPadding(WindowInsets.displayCutout)
     }
-    val navigationBars = if (navigationBars) this else {
+    val navigationBarsLocal = if (navigationBars) this else {
         this.windowInsetsPadding(WindowInsets.navigationBars)
     }
     val stateBars = this.windowInsetsPadding(WindowInsets.statusBars)
-    return displayCutout then navigationBars then stateBars
+    return displayCutoutLocal then navigationBarsLocal then stateBars
 }
 
 @Preview
 @Composable
 private fun Preview() {
     val viewModel: MainViewModel = viewModel()
-    WritingBoardLayout(viewModel, LocalContext.current)
+    val settings = SettingOption(LocalContext.current)
+    WritingBoardLayout(viewModel, settings, AndroidFeedback(settings, LocalView.current))
 }

@@ -8,6 +8,7 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.platform.WindowInfo
+import com.sqz.writingboard.common.feedback.Feedback
 import com.sqz.writingboard.preference.PreferenceLocal
 import com.sqz.writingboard.preference.SettingOption
 import com.sqz.writingboard.ui.MainViewModel
@@ -24,19 +25,21 @@ class RequestHandler {
         this._viewModel = viewModel
     }
 
-    fun onSettingsClick() {
+    fun onSettingsClick(feedback: Feedback) {
+        feedback.onClickEffect()
         if (_viewModel.state.value.isInReadOnlyMode) {
             _viewModel.state.update { it.copy(isEditable = false) }
         }
         _viewModel.navControllerHandler.navigate(NavRoute.Setting)
     }
 
-    fun onEditClick() {
+    fun onEditClick(feedback: Feedback) {
+        feedback.onDoubleTickEffect()
         _viewModel.state.update { it.copy(isEditable = true) }
     }
 
-
-    fun finishClick(context: Context) {
+    fun finishClick(context: Context, feedback: Feedback) {
+        feedback.onHeavyClickEffect()
         _request.update { it.copy(freeFocus = true) }
         _viewModel.textFieldState().let { text ->
             val prefs = PreferenceLocal(context)
@@ -71,6 +74,14 @@ class RequestHandler {
         if (!windowInfo.isWindowFocused && _viewModel.savedTextHashCode != null && textIsEdited) {
             Log.d("WritingBoard", "RequestHandler: isWindowFocused")
             _viewModel.saveTextToStorage(context, false)
+        }
+    }
+
+    fun saveTextImmediately(context: Context) {
+        if (_viewModel.savedTextHashCode != null) {
+            if (_viewModel.textFieldState().text.hashCode() != _viewModel.savedTextHashCode) {
+                _viewModel.saveTextToStorage(context, false)
+            }
         }
     }
 

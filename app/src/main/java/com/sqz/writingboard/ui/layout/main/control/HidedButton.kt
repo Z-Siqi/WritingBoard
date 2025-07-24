@@ -29,18 +29,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.sqz.writingboard.R
+import com.sqz.writingboard.common.feedback.Feedback
 import com.sqz.writingboard.preference.PreferenceLocal
 import com.sqz.writingboard.preference.SettingOption
 import com.sqz.writingboard.ui.layout.LocalState
 import com.sqz.writingboard.ui.layout.handler.RequestHandler
 import com.sqz.writingboard.ui.theme.PurpleForManual
 import com.sqz.writingboard.ui.theme.RedForManual
+import com.sqz.writingboard.ui.theme.WritingBoardTheme
 
 @Composable
 fun HidedButton(
     state: LocalState,
     requestHandler: RequestHandler,
     settings: SettingOption,
+    feedback: Feedback,
     modifier: Modifier = Modifier
 ) {
     val modifierWithWindowInsets = modifier.let {
@@ -50,13 +53,13 @@ fun HidedButton(
     }
     Column(modifier = modifierWithWindowInsets.fillMaxSize()) {
         HidedButtonLayout(
-            onClick = { requestHandler.onSettingsClick() },
+            onClick = { requestHandler.onSettingsClick(feedback) },
             weight = 1f,
             bgColor = hidedButtonManual(ButtonType.Settings)
         )
         Spacer(modifier = Modifier.weight(2f))
         if (settings.editButton() && !state.isEditable) HidedButtonLayout(
-            onClick = { requestHandler.onEditClick() },
+            onClick = { requestHandler.onEditClick(feedback) },
             weight = 1.5f,
             bgColor = hidedButtonManual(ButtonType.Edit)
         ) else Spacer(
@@ -104,7 +107,7 @@ private fun hidedButtonManual(buttonType: ButtonType): Color {
             return color
         }
     }
-    return Color.Transparent
+    return WritingBoardTheme.color.transparent
 }
 
 @Composable

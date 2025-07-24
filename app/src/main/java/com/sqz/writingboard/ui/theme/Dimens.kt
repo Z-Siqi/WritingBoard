@@ -13,6 +13,8 @@ import androidx.compose.ui.unit.Dp
 
 val isAndroid15OrAbove = Build.VERSION.SDK_INT > Build.VERSION_CODES.UPSIDE_DOWN_CAKE
 
+val isAndroid13OrAbove = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+
 const val navBarHeightDp = 70
 const val navBarHeightDpIsEditing = 55
 const val navBarHeightDpLandscape = 88

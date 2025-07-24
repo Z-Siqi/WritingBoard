@@ -33,11 +33,14 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sqz.writingboard.R
+import com.sqz.writingboard.common.feedback.AndroidFeedback
+import com.sqz.writingboard.common.feedback.Feedback
 import com.sqz.writingboard.preference.SettingOption
 import com.sqz.writingboard.ui.MainViewModel
 import com.sqz.writingboard.ui.component.TextTooltipBox
@@ -54,6 +57,7 @@ class NavButtons(
     private val state: LocalState,
     private val requestHandler: RequestHandler,
     private val settings: SettingOption,
+    private val feedback: Feedback,
 ) {
     @Composable
     fun NavBar(enable: Boolean, modifier: Modifier = Modifier) = if (!enable) Box {} else {
@@ -80,15 +84,15 @@ class NavButtons(
             ) {
                 if (!state.isFocus) {
                     if (settings.editButton()) Spacer(Modifier.width(16.dp))
-                    SettingsButton { requestHandler.onSettingsClick() }
+                    SettingsButton { requestHandler.onSettingsClick(feedback) }
                     if (settings.editButton()) Spacer(Modifier.weight(1f))
                 }
                 if (state.isFocus || state.isInReadOnlyMode && state.isEditable) {
                     Spacer(Modifier.weight(1f))
-                    OnEditTextButton { requestHandler.finishClick(context) }
+                    OnEditTextButton { requestHandler.finishClick(context, feedback) }
                 }
                 if (settings.editButton() && !state.isEditable) {
-                    EditButton { requestHandler.onEditClick() }
+                    EditButton { requestHandler.onEditClick(feedback) }
                 }
             }
         }
@@ -122,15 +126,15 @@ class NavButtons(
             ) {
                 if (!state.isFocus) {
                     if (settings.editButton()) Spacer(Modifier.width(16.dp))
-                    SettingsButton { requestHandler.onSettingsClick() }
+                    SettingsButton { requestHandler.onSettingsClick(feedback) }
                     if (settings.editButton()) Spacer(Modifier.weight(1f))
                 }
                 if (state.isFocus) {
                     Spacer(Modifier.weight(1f))
-                    OnEditTextButton { requestHandler.finishClick(context) }
+                    OnEditTextButton { requestHandler.finishClick(context, feedback) }
                 }
                 if (settings.editButton() && !state.isEditable) {
-                    EditButton { requestHandler.onEditClick() }
+                    EditButton { requestHandler.onEditClick(feedback) }
                 }
             }
         }
@@ -190,15 +194,17 @@ fun NavBarButton(
     state: LocalState,
     requestHandler: RequestHandler,
     settings: SettingOption,
+    feedback: Feedback,
     modifier: Modifier = Modifier
-) = NavButtons(state, requestHandler, settings).NavBar(true, modifier)
+) = NavButtons(state, requestHandler, settings, feedback).NavBar(true, modifier)
 
 @Preview
 @Composable
 private fun NavBarButtonPreview() {
+    val settings = SettingOption(LocalContext.current)
     NavBarButton(
         LocalState(), RequestHandler(viewModel { MainViewModel() }),
-        SettingOption(LocalContext.current)
+        settings, AndroidFeedback(settings, LocalView.current)
     )
 }
 
@@ -207,14 +213,16 @@ fun NavRailButton(
     state: LocalState,
     requestHandler: RequestHandler,
     settings: SettingOption,
+    feedback: Feedback,
     modifier: Modifier = Modifier
-) = NavButtons(state, requestHandler, settings).NavRail(true, modifier)
+) = NavButtons(state, requestHandler, settings, feedback).NavRail(true, modifier)
 
 @Preview
 @Composable
 private fun NavRailButtonPreview() {
+    val settings = SettingOption(LocalContext.current)
     NavRailButton(
         LocalState(), RequestHandler(viewModel { MainViewModel() }),
-        SettingOption(LocalContext.current)
+        settings, AndroidFeedback(settings, LocalView.current)
     )
 }

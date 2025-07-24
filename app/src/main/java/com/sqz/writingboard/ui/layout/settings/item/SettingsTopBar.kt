@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.sqz.writingboard.R
 import com.sqz.writingboard.ui.layout.handler.NavControllerHandler
+import com.sqz.writingboard.ui.theme.WritingBoardTheme
 import com.sqz.writingboard.ui.theme.isAndroid15OrAbove
 import com.sqz.writingboard.ui.theme.isLandscape
 
@@ -56,7 +57,11 @@ fun SettingsTopBar(
         if (firstVisibleItemIndex.value <= 1) scrolled = true
     }
     LargeTopAppBar(
-        colors = TopAppBarDefaults.mediumTopAppBarColors(),
+        colors = TopAppBarDefaults.mediumTopAppBarColors(
+            containerColor = WritingBoardTheme.color.settingsBackground,
+            scrolledContainerColor = WritingBoardTheme.color.settingsBgTopBarScrolled,
+            titleContentColor = WritingBoardTheme.color.settingsTopBarContent
+        ),
         title = {
             Text(
                 text = stringResource(R.string.settings),

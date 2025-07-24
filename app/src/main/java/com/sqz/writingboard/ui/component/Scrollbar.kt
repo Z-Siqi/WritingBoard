@@ -60,8 +60,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastSumBy
-import com.sqz.writingboard.ui.theme.ThemeColor
-import com.sqz.writingboard.ui.theme.themeColor
+import com.sqz.writingboard.ui.theme.WritingBoardTheme
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -252,7 +251,7 @@ private fun Modifier.drawScrollbar(
 }
 
 private val barColor: Color
-    @Composable get() = themeColor(ThemeColor.BarColor).copy(alpha = 0.5f)
+    @Composable get() = WritingBoardTheme.color.scrollBar.copy(alpha = 0.5f)
 
 private val thickness = 4.dp
 private val fadeOutAnimationSpec =

@@ -1,4 +1,4 @@
-package com.sqz.writingboard.ui.main.text
+package com.sqz.writingboard.ui.component
 
 import android.content.Context
 import android.graphics.Rect

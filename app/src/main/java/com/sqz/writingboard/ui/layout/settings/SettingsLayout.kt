@@ -22,19 +22,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import com.sqz.writingboard.common.feedback.Feedback
 import com.sqz.writingboard.preference.SettingOption
 import com.sqz.writingboard.ui.MainViewModel
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
 import com.sqz.writingboard.ui.layout.settings.item.SettingsItem
 import com.sqz.writingboard.ui.layout.settings.item.SettingsTopBar
+import com.sqz.writingboard.ui.theme.WritingBoardTheme
 import com.sqz.writingboard.ui.theme.isAndroid15OrAbove
 import com.sqz.writingboard.ui.theme.isLandscape
 
 @Composable
-fun SettingsLayout(viewModel: MainViewModel, context: Context) {
+fun SettingsLayout(viewModel: MainViewModel, feedback: Feedback, context: Context) {
     val settings = SettingOption(context = context)
     val state = rememberLazyListState()
     var nestedScrollConnection by remember { mutableStateOf<NestedScrollConnection?>(null) }
@@ -47,9 +48,10 @@ fun SettingsLayout(viewModel: MainViewModel, context: Context) {
                 nestedScrollConnection = { nestedScrollConnection = it }
             )
         },
+        containerColor = WritingBoardTheme.color.settingsBackground,
         contentWindowInsets = WindowInsets.statusBars,
     ) { paddingValues ->
-        val settingsItem = SettingsItem(settings = settings)
+        val settingsItem = SettingsItem(settings = settings, feedback = feedback)
         LazyColumn(
             modifier = Modifier
                 .padding(paddingValues)

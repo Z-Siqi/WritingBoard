@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sqz.writingboard.R
+import com.sqz.writingboard.common.feedback.Feedback
 import com.sqz.writingboard.preference.SettingOption
 import com.sqz.writingboard.ui.component.TextTooltipBox
 import com.sqz.writingboard.ui.layout.LocalState
@@ -35,21 +36,21 @@ fun DefaultButton(
     writingBoardPadding: WritingBoardPadding,
     settings: SettingOption,
     requestHandler: RequestHandler,
-    modifier: Modifier = Modifier
+    feedback: Feedback,
 ) {
     if (!state.isFocus) SettingButton(
-        onClick = { requestHandler.onSettingsClick() },
+        onClick = { requestHandler.onSettingsClick(feedback) },
         writingBoardPadding = writingBoardPadding
     )
     if (state.isFocus) {
         val context = LocalContext.current
         OnEditTextButton(
-            onClick = { requestHandler.finishClick(context) },
+            onClick = { requestHandler.finishClick(context, feedback) },
             writingBoardPadding = writingBoardPadding
         )
     }
     if (settings.editButton() && !state.isEditable) EditButton(
-        onClick = { requestHandler.onEditClick() },
+        onClick = { requestHandler.onEditClick(feedback) },
         writingBoardPadding = writingBoardPadding
     )
 }
@@ -117,7 +118,6 @@ fun OnEditTextButton(
 private fun EditButton(
     onClick: () -> Unit,
     writingBoardPadding: WritingBoardPadding,
-    modifier: Modifier = Modifier
 ) = ColumnEnd(writingBoardPadding) {
     TextTooltipBox(tooltipText = stringResource(R.string.edit)) {
         FloatingActionButton(onClick = onClick) {

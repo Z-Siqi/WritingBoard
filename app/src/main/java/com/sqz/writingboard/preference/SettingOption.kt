@@ -8,13 +8,6 @@ class SettingOption(context: Context) : PreferenceHelper(context) {
         return "WritingBoardSetting"
     }
 
-    @Deprecated("No need anymore")
-    fun allowMultipleLines(write: Boolean? = null): Boolean {
-        val name = "allow_multiple_lines"
-        if (write != null) super.writePreferencesState(name, write)
-        return super.readPreferencesState(name, false)
-    }
-
     fun alwaysVisibleText(write: Boolean? = null): Boolean {
         val name = "always_visible_text"
         if (write != null) super.writePreferencesState(name, write)
@@ -25,27 +18,6 @@ class SettingOption(context: Context) : PreferenceHelper(context) {
         val name = "button_style"
         if (write != null) super.writePreferencesState(name, write)
         return super.readPreferencesState(name, 1)
-    }
-
-    @Deprecated("No need anymore")
-    fun cleanAllText(write: Boolean? = null): Boolean {
-        val name = "clean_all_text"
-        if (write != null) super.writePreferencesState(name, write)
-        return super.readPreferencesState(name, false)
-    }
-
-    @Deprecated("No need anymore")
-    fun disableAutoSave(write: Boolean? = null): Boolean {
-        val name = "disable_auto_save"
-        if (write != null) super.writePreferencesState(name, write)
-        return super.readPreferencesState(name, false)
-    }
-
-    @Deprecated("still in old model")
-    fun easterEgg(write: Boolean? = null): Boolean {
-        val name = "easter_eggs"
-        if (write != null) super.writePreferencesState(name, write)
-        return super.readPreferencesState(name, false)
     }
 
     fun editButton(write: Boolean? = null): Boolean {
@@ -84,20 +56,6 @@ class SettingOption(context: Context) : PreferenceHelper(context) {
         return super.readPreferencesState(name, false)
     }
 
-    @Deprecated("still in old model")
-    fun offButtonManual(write: Boolean? = null): Boolean {
-        val name = "off_button_manual"
-        if (write != null) super.writePreferencesState(name, write)
-        return super.readPreferencesState(name, false)
-    }
-
-    @Deprecated("still in old model")
-    fun offEditButtonManual(write: Boolean? = null): Boolean {
-        val name = "off_editButton_manual"
-        if (write != null) super.writePreferencesState(name, write)
-        return super.readPreferencesState(name, false)
-    }
-
     fun theme(write: Int? = null): Int {
         val name = "theme"
         if (write != null) super.writePreferencesState(name, write)
@@ -108,5 +66,17 @@ class SettingOption(context: Context) : PreferenceHelper(context) {
         val name = "vibrate_settings"
         if (write != null) super.writePreferencesState(name, write)
         return super.readPreferencesState(name, 1)
+    }
+
+    fun mergeLineBreak(write: Boolean? = null): Boolean {
+        val name = "merge_line_break"
+        if (write != null) super.writePreferencesState(name, write)
+        return super.readPreferencesState(name, true)
+    }
+
+    fun instantSaveText(write: Boolean? = null): Boolean {
+        val name = "instant_save_text"
+        if (write != null) super.writePreferencesState(name, write)
+        return super.readPreferencesState(name, false)
     }
 }

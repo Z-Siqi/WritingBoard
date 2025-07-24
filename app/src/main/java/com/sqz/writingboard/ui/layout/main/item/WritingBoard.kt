@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.displayCutout
@@ -56,7 +57,7 @@ fun WritingBoard(
     backgroundColor: Color,
     borderColor: Color,
     modifier: Modifier = Modifier,
-    contentPadding: Dp = 16.dp,
+    contentPadding: PaddingValues = PaddingValues(16.dp),
     imePadding: Boolean = true,
     contentSize: (IntSize) -> Unit = {},
     content: @Composable (ColumnScope.() -> Unit)
@@ -125,7 +126,7 @@ fun WritingBoard(navControllerHandler: NavControllerHandler) = Column(modifier =
         writingBoardPadding = WritingBoardPadding(5.dp, 12.dp, 18.dp, 18.dp),
         backgroundColor = MaterialTheme.colorScheme.background,
         borderColor = MaterialTheme.colorScheme.primary,
-        contentPadding = 0.dp,
+        contentPadding = PaddingValues(0.dp),
     ) {
         Box {
             Column(modifier = Modifier.fillMaxSize()) {

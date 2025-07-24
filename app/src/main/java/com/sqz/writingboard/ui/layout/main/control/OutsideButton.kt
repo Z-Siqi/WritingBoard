@@ -25,11 +25,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sqz.writingboard.R
+import com.sqz.writingboard.common.feedback.Feedback
 import com.sqz.writingboard.preference.SettingOption
 import com.sqz.writingboard.ui.component.TextTooltipBox
 import com.sqz.writingboard.ui.layout.LocalState
 import com.sqz.writingboard.ui.layout.handler.RequestHandler
-import com.sqz.writingboard.ui.layout.main.item.BoardSizeHandler
+import com.sqz.writingboard.ui.layout.handler.BoardSizeHandler
 import com.sqz.writingboard.ui.layout.main.item.WritingBoardPadding
 
 @Composable
@@ -40,15 +41,16 @@ fun OutsideButton(
     state: LocalState,
     writingBoardPadding: WritingBoardPadding,
     requestHandler: RequestHandler,
-    settings: SettingOption
+    settings: SettingOption,
+    feedback: Feedback
 ) {
     val context = LocalContext.current
     if (onHidedButtonInReadOnly && !enableOutsideButton) {
         if (settings.editButton() && state.isEditable) OnEditTextButton(
-            onClick = { requestHandler.finishClick(context) },
+            onClick = { requestHandler.finishClick(context, feedback) },
             writingBoardPadding = writingBoardPadding
         ) else if (state.isFocus) OnEditTextButton(
-            onClick = { requestHandler.finishClick(context) },
+            onClick = { requestHandler.finishClick(context, feedback) },
             writingBoardPadding = writingBoardPadding,
         )
     }
@@ -57,27 +59,26 @@ fun OutsideButton(
         val boardEnd = boardSizeHandler.increasedEnd.collectAsState().value
         if (settings.buttonStyle() == 1) {
             if (!state.isFocus) SettingOutsideButton(
-                onClick = { requestHandler.onSettingsClick() },
+                onClick = { requestHandler.onSettingsClick(feedback) },
                 writingBoardPadding = writingBoardPadding,
                 modifier = Modifier.buttonPaddings(outside, writingBoardPadding)
             )
             if (settings.editButton() && !state.isEditable) EditOutsideButton(
-                onClick = { requestHandler.onEditClick() },
+                onClick = { requestHandler.onEditClick(feedback) },
                 writingBoardPadding = writingBoardPadding,
                 modifier = Modifier.buttonPaddings(outside, writingBoardPadding)
             )
         }
-        val context = LocalContext.current
         if (settings.editButton() && state.isEditable) {
             OnEditTextOutsideButton(
-                onClick = { requestHandler.finishClick(context) },
+                onClick = { requestHandler.finishClick(context, feedback) },
                 writingBoardPadding = writingBoardPadding,
                 boardEnd = boardEnd,
                 modifier = Modifier.buttonPaddings(outside, writingBoardPadding)
             )
         } else if (state.isFocus) {
             OnEditTextOutsideButton(
-                onClick = { requestHandler.finishClick(context) },
+                onClick = { requestHandler.finishClick(context, feedback) },
                 writingBoardPadding = writingBoardPadding,
                 boardEnd = boardEnd,
                 modifier = Modifier.buttonPaddings(outside, writingBoardPadding)

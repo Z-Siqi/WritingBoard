@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
@@ -43,12 +44,14 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.sqz.writingboard.file.importedFontName
+import com.sqz.writingboard.common.feedback.Feedback
+import com.sqz.writingboard.common.io.importedFontName
 import com.sqz.writingboard.preference.SettingOption
 import com.sqz.writingboard.ui.MainViewModel
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
 import com.sqz.writingboard.ui.layout.handler.RequestHandler
-import com.sqz.writingboard.ui.main.text.BasicTextField2
+import com.sqz.writingboard.ui.component.BasicTextField2
+import com.sqz.writingboard.ui.theme.WritingBoardTheme
 import com.sqz.writingboard.ui.theme.getBottomDp
 import com.sqz.writingboard.ui.theme.getTopDp
 import com.sqz.writingboard.ui.theme.navBarHeightDpIsEditing
@@ -60,6 +63,7 @@ import java.io.File
 @Composable
 fun BoardContent(
     viewModel: MainViewModel,
+    feedback: Feedback,
     writingBoardPadding: WritingBoardPadding,
     settings: SettingOption
 ) {
@@ -88,7 +92,10 @@ fun BoardContent(
             .fillMaxSize()
             .drawVerticalScrollbar(scrollState)
             .pointerInput(Unit) {
-                detectTapGestures { _ -> viewModel.requestHandler.requestWriting() }
+                detectTapGestures { _ ->
+                    if (settings.vibrate() != 0) feedback.onClickSound()
+                    viewModel.requestHandler.requestWriting()
+                }
             }
             .yInScreenFromClickGetter(
                 value = yInScreenFromClick, writingBoardPadding = writingBoardPadding
@@ -98,6 +105,7 @@ fun BoardContent(
         val enableSpacer = !settings.alwaysVisibleText() && settings.buttonStyle() == 1
                 || settings.alwaysVisibleText() && viewModel.boardSizeHandler.editWithLowScreenHeight()
         if (getState.isEditable) item {
+            Spacer(Modifier.height(4.dp))
             BasicTextField2(
                 state = viewModel.textFieldState(context),
                 lazyListState = scrollState,
@@ -112,15 +120,21 @@ fun BoardContent(
                         viewModel.state.update { it.copy(isFocus = focusState.isFocused) }
                     },
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurfaceVariant),
-                textStyle = textStyle(settings, customFont),
-                yInScreenFromClickAsLazyList = yInScreenFromClick.intValue
+                textStyle = textStyle(settings, customFont, WritingBoardTheme.color.boardText),
+                onTextLayout = {
+                    if (settings.instantSaveText()) {
+                        viewModel.requestHandler.saveTextImmediately(context)
+                    }
+                },
+                yInScreenFromClickAsLazyList = yInScreenFromClick.intValue,
             )
             Spacer(enableSpacer, viewModel.requestHandler, writingBoardPadding)
         } else item {
+            Spacer(Modifier.height(4.dp))
             BasicText(
                 text = viewModel.textFieldState(context).text.toString(),
                 modifier = Modifier.fillMaxSize(),
-                style = textStyle(settings, customFont)
+                style = textStyle(settings, customFont, WritingBoardTheme.color.boardText)
             )
             Spacer(enableSpacer, viewModel.requestHandler, writingBoardPadding)
         }
@@ -172,7 +186,9 @@ private fun Spacer(
 
 @Composable
 @ReadOnlyComposable
-private fun textStyle(settings: SettingOption, customFont: FontFamily?): TextStyle {
+private fun textStyle(
+    settings: SettingOption, customFont: FontFamily?, textColor: Color
+): TextStyle {
     val fontSize = when (settings.fontSize()) {
         0 -> 18.sp
         1 -> 23.sp
@@ -203,7 +219,7 @@ private fun textStyle(settings: SettingOption, customFont: FontFamily?): TextSty
         fontWeight = fontWeight,
         fontFamily = fontFamily,
         fontStyle = fontStyle,
-        color = MaterialTheme.colorScheme.secondary
+        color = textColor
     )
 }
 

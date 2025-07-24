@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="used_language">TW</string> <!-- DO NOT TRANSLATE IT -->
+    <string name="language">TW</string> <!-- DO NOT TRANSLATE IT -->
     <string name="app_name">寫字板</string>
     <string name="confirm">確認</string>
     <string name="cancel">取消</string>
@@ -12,11 +12,13 @@
     <string name="done">完畢</string>
     <string name="edit">編輯</string>
     <string name="settings">設置</string>
-    <string name="allow_multiple_lines">允許末尾有多個換行符\n(多於一個換行符)</string>
+    <string name="merge_line_break">將末尾的多個換行符合並為一個 \n(從儲存中載入時)</string>
     <string name="clean_pointer_focus">鍵盤收起時清除鍵盤指針焦點</string>
     <string name="clean_all_texts_button">刪除所有文本按鈕</string>
     <string name="edit_writingboard_button">唯讀模式\n(新增一個按鈕來編輯文本)</string>
-    <string name="language">語言 (Android 13+)\n單擊以打開App系統設置進行更改</string>
+    <string name="language_support">語言 \n(單擊以進行更改)</string>
+    <string name="language_unsupported">語言 (Android 13+)\n不支援! 此功能需要 Android API 33+</string>
+    <string name="language_no_support">Android13以下不支援語言設定 \n請嘗試更新您的系統!</string>
     <string name="small">小號字體</string>
     <string name="medium">中號字體</string>
     <string name="large">大號字體</string>
@@ -34,7 +36,7 @@
     <string name="keyboard_texts_action">文字行為</string>
     <string name="others">其它</string>
     <string name="about">關於</string>
-    <string name="about_app">關於寫字板\ngithub.com/Z-Siqi/WrtingBoard</string>
+    <string name="about_app">關於寫字板</string>
     <string name="button_style">WritingBoard 控制項樣式</string>
     <string name="button_hide">隱藏</string>
     <string name="button_bottom_bar">導覽列</string>
@@ -49,7 +51,7 @@
     <string name="thin">細的</string>
     <string name="normal">正常</string>
     <string name="thick">粗的</string>
-    <string name="disable_auto_save">停用自動儲存文字</string>
+    <string name="instant_save_text">即時儲存文本 \n(文本改變時立即儲存)</string>
     <string name="lower_than_android13">您的系統版本低於Android 13</string>
     <string name="feature_supports_android13">此功能僅支援Android 13+</string>
     <string name="back">返回</string>
@@ -62,10 +64,9 @@
     <string name="TILE_ADD_REQUEST_NotDetected">未檢測到，請再次嘗試單擊</string>
     <string name="TILE_ADD_REQUEST_NO_SUPPORT">不支援 Android 13 以下的系統!</string>
     <string name="REQUEST_IN_PROGRESS">請求正在進行</string>
-    <string name="TILE_ADD_REQUEST_0">未添加</string>
+    <string name="TILE_ADD_REQUEST_0">未能添加或添加已取消</string>
     <string name="TILE_ADD_REQUEST_1">已經加入</string>
     <string name="TILE_ADD_REQUEST_2">瓷磚已添加</string>
-    <string name="language_no_support">Android13以下不支援語言設定 \n請嘗試更新您的系統!</string>
     <string name="request_widget">添加書寫板小工具</string>
     <string name="text_only">仅文本</string>
     <string name="not_support">不支援</string>
@@ -87,4 +88,6 @@
     <string name="may_only_english">可能僅支援英語</string>
     <string name="click_to_select_a_font">點選選擇字體</string>
     <string name="font_is_invalid">Font is invalid! Please click to select a valid font</string>
+    <string name="less">Less</string>
+    <string name="sponsor_me">Sponsor Me \n(If you like my work, please consider supporting me with a donation!)</string>
 </resources>
