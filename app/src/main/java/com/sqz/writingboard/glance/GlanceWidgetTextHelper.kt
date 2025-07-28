@@ -12,21 +12,16 @@ import android.text.TextPaint
 import android.util.TypedValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.core.graphics.createBitmap
 import androidx.core.util.TypedValueCompat.spToPx
-import androidx.datastore.preferences.core.stringPreferencesKey
-import com.sqz.writingboard.data.dataStore
-import com.sqz.writingboard.data.textDataKey
 import com.sqz.writingboard.preference.SettingOption
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.map
 
 class GlanceWidgetTextHelper(private val context: Context) {
 
@@ -72,19 +67,6 @@ class GlanceWidgetTextHelper(private val context: Context) {
         awaitClose { unregisterOnSharedPreferenceChangeListener(listener) }
     }
 
-    @Composable
-    fun getSavedText(): String {
-        val text = stringPreferencesKey(textDataKey)
-        val savedText by context.dataStore.data.map { preferences ->
-            preferences[text] ?: " "
-        }.collectAsState(initial = " ")
-        return if (SettingOption(context).mergeLineBreak()
-            && savedText.isNotEmpty() && savedText.last() == '\n'
-        ) {
-            savedText.trimEnd { it == '\n' }.plus('\n')
-        } else savedText
-    }
-
     companion object {
         fun Context.textAsBitmap(
             text: String,
@@ -101,7 +83,7 @@ class GlanceWidgetTextHelper(private val context: Context) {
                 this.letterSpacing = letterSpacing
                 typeface = fontTypeface
             }
-            var textIn = text.replace("\n\n", "\n")
+            var textIn = text.replace("\n\n\n", "\n\n")
 
             // Use StaticLayout to handle line breaks
             var staticLayout =

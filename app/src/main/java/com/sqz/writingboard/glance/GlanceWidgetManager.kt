@@ -8,11 +8,14 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.Button
 import androidx.glance.ButtonDefaults
 import androidx.glance.GlanceId
@@ -39,12 +42,16 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.sqz.writingboard.MainActivity
 import com.sqz.writingboard.common.io.importedFontName
+import com.sqz.writingboard.data.dataStore
+import com.sqz.writingboard.data.textDataKey
 import com.sqz.writingboard.glance.GlanceWidgetManager.Companion.isAndroid15Min
 import com.sqz.writingboard.glance.GlanceWidgetTextHelper.Companion.textAsBitmap
 import com.sqz.writingboard.glance.GlanceWidgetTextHelper.Companion.toPxInt
+import com.sqz.writingboard.preference.SettingOption
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -83,6 +90,13 @@ open class GlanceWidgetManager : GlanceAppWidget() {
         context: Context,
         modifier: GlanceModifier = GlanceModifier
     ) {
+        val text = stringPreferencesKey(textDataKey)
+        val savedText by context.dataStore.data.map { prefs -> prefs[text] ?: " " }
+            .collectAsState(initial = " ")
+        val formatText = if (SettingOption(context).mergeLineBreak()
+            && savedText.isNotEmpty() && savedText.last() == '\n'
+        ) savedText.trimEnd { it == '\n' }.plus('\n') else savedText
+
         val textHelper = GlanceWidgetTextHelper(context)
         val isCustomFontSetting =
             textHelper.fontStyleData() == 3 && textHelper.fontStyleExtraData() == 1
@@ -91,18 +105,18 @@ open class GlanceWidgetManager : GlanceAppWidget() {
             Image(
                 provider = ImageProvider(
                     context.textAsBitmap(
-                        text = textHelper.getSavedText(),
+                        text = formatText,
                         fontSize = 15.sp,
                         letterSpacing = 0.1f,
                         fontTypeface = Typeface.Builder(fontFile).build(),
                         maxWidth = (size.width - (widthDecrease * 2)).toPxInt(context)
                     )
                 ),
-                contentDescription = textHelper.getSavedText(),
+                contentDescription = formatText,
                 modifier = modifier.fillMaxSize()
             )
         } else Text(
-            text = textHelper.getSavedText(),
+            text = formatText,
             style = TextStyle(
                 color = GlanceTheme.colors.onSurfaceVariant,
                 fontWeight = if (
