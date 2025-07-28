@@ -28,20 +28,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.glance.appwidget.GlanceAppWidgetManager
-import androidx.glance.appwidget.updateAll
 import com.sqz.writingboard.R
 import com.sqz.writingboard.common.feedback.Feedback
 import com.sqz.writingboard.common.io.rememberImportFontManager
-import com.sqz.writingboard.glance.WritingBoardTextOnlyWidgetReceiver
-import com.sqz.writingboard.glance.WritingBoardWidget
-import com.sqz.writingboard.glance.WritingBoardWidgetReceiver
+import com.sqz.writingboard.glance.GlanceWidgetManager
+import com.sqz.writingboard.glance.receiver.WritingBoardTextOnlyWidgetReceiver
+import com.sqz.writingboard.glance.receiver.WritingBoardWidgetReceiver
 import com.sqz.writingboard.preference.SettingOption
 import com.sqz.writingboard.tile.QSTileRequestHelper
 import com.sqz.writingboard.ui.MainViewModel
 import com.sqz.writingboard.ui.theme.WritingBoardTheme
 import com.sqz.writingboard.ui.theme.isAndroid13OrAbove
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -83,11 +80,6 @@ class SettingsItem(
                 enableDialog = false
             }, context = context
         )
-    }
-
-    @OptIn(DelicateCoroutinesApi::class)
-    private fun updateWidget(context: Context) {
-        GlobalScope.launch { WritingBoardWidget().updateAll(context) }
     }
 
     @Composable
@@ -166,12 +158,14 @@ class SettingsItem(
                 stringResource(R.string.default_string),
                 stringResource(R.string.serif),
                 stringResource(R.string.more_font)
-            ), onDefChange = { settings.fontStyle(it).also { updateWidget(context) } },
-            showAll = settings.fontStyle() == 3, subOption = listOf(
+            ), onDefChange = {
+                settings.fontStyle(it).also { GlanceWidgetManager.updateWidget(context) }
+            }, showAll = settings.fontStyle() == 3, subOption = listOf(
                 stringResource(R.string.cursive),
                 stringResource(R.string.custom_font)
-            ), onSubChange = { settings.fontStyleExtra(it).also { updateWidget(context) } },
-            onSubCardClick = { importFontManager.importFont() },
+            ), onSubChange = {
+                settings.fontStyleExtra(it).also { GlanceWidgetManager.updateWidget(context) }
+            }, onSubCardClick = { importFontManager.importFont() },
             enableSubCardClick = settings.fontStyleExtra() == 1,
             onSubCardText = if (settings.fontStyleExtra() == 0) {
                 stringResource(R.string.may_only_english)

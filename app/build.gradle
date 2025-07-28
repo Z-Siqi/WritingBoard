@@ -12,12 +12,12 @@ android {
         minSdk 29
         targetSdk 36
         versionCode 58
-        versionName "0.7.0-alpha8.b"
+        versionName "0.7.0-alpha9"
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -44,9 +44,9 @@ android {
 dependencies {
     implementation 'androidx.core:core-ktx:1.16.0'
     implementation platform('org.jetbrains.kotlin:kotlin-bom:1.8.22')
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.9.1'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.9.2'
     implementation 'androidx.activity:activity-compose:1.10.1'
-    implementation platform('androidx.compose:compose-bom:2025.06.01')
+    implementation platform('androidx.compose:compose-bom:2025.07.00')
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.ui:ui-graphics'
     implementation 'androidx.compose.ui:ui-tooling-preview'
@@ -56,7 +56,7 @@ dependencies {
     //leakcanary
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.14'
     //navigation
-    implementation "androidx.navigation:navigation-compose:2.9.0"
+    implementation "androidx.navigation:navigation-compose:2.9.2"
     //datastore
     implementation "androidx.datastore:datastore-preferences:1.1.7"
     //glanceWidget

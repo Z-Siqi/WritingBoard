@@ -33,19 +33,19 @@ class SettingOption(context: Context) : PreferenceHelper(context) {
     }
 
     fun fontStyle(write: Int? = null): Int {
-        val name = "font_style"
+        val name = FONT_STYLE
         if (write != null) super.writePreferencesState(name, write)
         return super.readPreferencesState(name, 1)
     }
 
     fun fontStyleExtra(write: Int? = null): Int {
-        val name = "font_style_extra"
+        val name = FONT_STYLE_EXTRA
         if (write != null) super.writePreferencesState(name, write)
         return super.readPreferencesState(name, 0)
     }
 
     fun fontWeight(write: Int? = null): Int {
-        val name = "font_weight"
+        val name = FONT_WEIGHT
         if (write != null) super.writePreferencesState(name, write)
         return super.readPreferencesState(name, 1)
     }
@@ -78,5 +78,11 @@ class SettingOption(context: Context) : PreferenceHelper(context) {
         val name = "instant_save_text"
         if (write != null) super.writePreferencesState(name, write)
         return super.readPreferencesState(name, false)
+    }
+
+    companion object {
+        const val FONT_STYLE = "font_style"
+        const val FONT_STYLE_EXTRA = "font_style_extra"
+        const val FONT_WEIGHT = "font_weight"
     }
 }

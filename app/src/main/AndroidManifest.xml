@@ -27,7 +27,7 @@
         </activity>
 
         <receiver
-            android:name=".glance.WritingBoardWidgetReceiver"
+            android:name=".glance.receiver.WritingBoardWidgetReceiver"
             android:exported="true"
             android:label="@string/app_name">
             <intent-filter>
@@ -38,7 +38,7 @@
                 android:resource="@xml/writingboard_widget_info" />
         </receiver>
         <receiver
-            android:name=".glance.WritingBoardTextOnlyWidgetReceiver"
+            android:name=".glance.receiver.WritingBoardTextOnlyWidgetReceiver"
             android:exported="true"
             android:label="@string/widget_textonly">
             <intent-filter>

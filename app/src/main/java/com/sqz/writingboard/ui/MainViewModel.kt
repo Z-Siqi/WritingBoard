@@ -9,11 +9,11 @@ import androidx.datastore.core.IOException
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sqz.writingboard.glance.WritingBoardWidget
 import com.sqz.writingboard.data.dataStore
+import com.sqz.writingboard.data.textDataKey
+import com.sqz.writingboard.glance.GlanceWidgetManager
 import com.sqz.writingboard.preference.SettingOption
 import com.sqz.writingboard.ui.layout.LocalState
 import com.sqz.writingboard.ui.layout.handler.RequestHandler
@@ -61,7 +61,7 @@ class MainViewModel : ViewModel() {
                         Log.e(ContentValues.TAG, "Error reading preferences.", it)
                         emit(emptyPreferences())
                     } else throw it
-                }.map { prefs -> prefs[stringPreferencesKey("saved_text")] ?: "" }.first()
+                }.map { prefs -> prefs[stringPreferencesKey(textDataKey)] ?: "" }.first()
                 if (_textFieldState.text.isNotEmpty()) throw TypeCastException("Text is already exist! Pls report this!")
                 if (SettingOption(context).mergeLineBreak() && savedText.isNotEmpty() && savedText.last() == '\n') {
                     Log.d("WritingBoardTag", "Removing line breaks and adding a new line.")
@@ -82,11 +82,11 @@ class MainViewModel : ViewModel() {
         if (!_saver && savedTextHashCode != null) _saver = true.also {
             viewModelScope.launch(dispatchers) {
                 context.dataStore.edit { prefs ->
-                    prefs[stringPreferencesKey("saved_text")] = _textFieldState.text.toString()
+                    prefs[stringPreferencesKey(textDataKey)] = _textFieldState.text.toString()
                 }
                 Log.i("WritingBoardTag", "Text is saved")
                 savedTextHashCode = _textFieldState.text.hashCode()
-                WritingBoardWidget().updateAll(context)
+                GlanceWidgetManager.updateWidget(context)
                 _saver = false
             }
         }

@@ -1,5 +1,6 @@
 package com.sqz.writingboard.ui.layout.main
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -134,6 +135,9 @@ fun WritingBoardLayout(
             settings = settings,
             feedback = feedback
         )
+    }
+    BackHandler(stateValue.isFocus) { // Disable back and exit app directly when is editing
+        viewModel.requestHandler.freeEditing()
     }
 }
 

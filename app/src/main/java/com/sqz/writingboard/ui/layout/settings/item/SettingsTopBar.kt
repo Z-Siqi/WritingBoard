@@ -68,7 +68,7 @@ fun SettingsTopBar(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.displayCutoutPadding(),
+                modifier = Modifier.displayCutoutPadding(true),
             )
         },
         navigationIcon = {

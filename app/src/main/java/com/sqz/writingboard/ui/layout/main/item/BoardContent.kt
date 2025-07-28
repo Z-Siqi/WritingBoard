@@ -45,12 +45,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sqz.writingboard.common.feedback.Feedback
+import com.sqz.writingboard.common.io.deleteFont
 import com.sqz.writingboard.common.io.importedFontName
 import com.sqz.writingboard.preference.SettingOption
 import com.sqz.writingboard.ui.MainViewModel
+import com.sqz.writingboard.ui.component.BasicTextField2
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
 import com.sqz.writingboard.ui.layout.handler.RequestHandler
-import com.sqz.writingboard.ui.component.BasicTextField2
 import com.sqz.writingboard.ui.theme.WritingBoardTheme
 import com.sqz.writingboard.ui.theme.getBottomDp
 import com.sqz.writingboard.ui.theme.getTopDp
@@ -86,7 +87,8 @@ fun BoardContent(
     }
     val getState = viewModel.state.collectAsState().value
     var yInScreenFromClick = remember { mutableIntStateOf(0) }
-    val extraScrollValue = (WindowInsets.navigationBars.getBottomDp() + writingBoardPadding.bottom.value).toInt()
+    val extraScrollValue =
+        (WindowInsets.navigationBars.getBottomDp() + writingBoardPadding.bottom.value).toInt()
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -121,12 +123,13 @@ fun BoardContent(
                     },
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurfaceVariant),
                 textStyle = textStyle(settings, customFont, WritingBoardTheme.color.boardText),
-                onTextLayout = {
+                onTextLayout = { textLayoutResult ->
                     if (settings.instantSaveText()) {
                         viewModel.requestHandler.saveTextImmediately(context)
                     }
                 },
                 yInScreenFromClickAsLazyList = yInScreenFromClick.intValue,
+                onFailure = { deleteFont(context) },
             )
             Spacer(enableSpacer, viewModel.requestHandler, writingBoardPadding)
         } else item {
@@ -215,14 +218,10 @@ private fun textStyle(
     }
     val fontStyle = if (settings.italics()) FontStyle.Italic else FontStyle.Normal
     return TextStyle.Default.copy(
-        fontSize = fontSize,
-        fontWeight = fontWeight,
-        fontFamily = fontFamily,
-        fontStyle = fontStyle,
-        color = textColor
+        fontSize = fontSize, fontWeight = fontWeight,
+        fontFamily = fontFamily, fontStyle = fontStyle, color = textColor
     )
 }
-
 
 @Composable
 private fun getMoveBoardState(scrollState: LazyListState): Boolean {

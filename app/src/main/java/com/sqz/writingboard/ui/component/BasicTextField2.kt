@@ -2,7 +2,6 @@ package com.sqz.writingboard.ui.component
 
 import android.content.Context
 import android.graphics.Rect
-import android.util.Log
 import android.view.MotionEvent
 import android.view.ViewTreeObserver
 import android.view.inputmethod.InputMethodManager
@@ -57,8 +56,31 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Density
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.io.File
 
+/**
+ * Basic text composable that extend from [BasicTextField]. Below param is the modify by
+ * the [BasicTextField2].
+ *
+ * @param cursorBrush [Brush] to paint cursor with. [BasicTextField2] modify the default brush color
+ *   to MaterialTheme.colorScheme.onSurfaceVariant for fix [BasicTextField] default brush color
+ *   not change to light color when system in dark mode.
+ * @param enableFixSelection A [BasicTextField2] param, enable this will fix the delete text
+ *   with selection issues.
+ * @param enableFixNonEnglishKeyboard A [BasicTextField2] param, enable this will fix cannot delete
+ *   selected text (at Text editing page on soft-keyboard) in non-english keyboard.
+ * @param verticalScrollWhenCursorUnderKeyboard A [BasicTextField2] param, enable this will allow
+ *   the text field scroll to visible when user input the cursor is under the keyboard.
+ * @param lazyListState A [BasicTextField2] param, for [verticalScrollWhenCursorUnderKeyboard] work,
+ *   please link the [LazyListState] to parent [androidx.compose.foundation.lazy.LazyColumn] method.
+ * @param yInScreenFromClickAsLazyList A [BasicTextField2] param, for
+ *   [verticalScrollWhenCursorUnderKeyboard] work, please add [Modifier.pointerInteropFilter] to
+ *   [androidx.compose.foundation.lazy.LazyColumn] and get the screen y coordinate from user click,
+ *   and pass it to this param.
+ * @param extraScrollValue A [BasicTextField2] param, for [verticalScrollWhenCursorUnderKeyboard];
+ *   this value is a extra scroll value for solve may not able to scroll to right position caused by
+ *   nav bars height or other system bars height.
+ * @param onFailure when [BasicTextField] throw exception, this function will be called.
+ */
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalLayoutApi::class)
 @Composable
 fun BasicTextField2(
@@ -77,6 +99,7 @@ fun BasicTextField2(
     outputTransformation: OutputTransformation? = null,
     decorator: TextFieldDecorator? = null,
     scrollState: ScrollState = rememberScrollState(),
+    onFailure: () -> Unit = {},
     // Fixes Control
     enableFixSelection: Boolean = true,
     enableFixNonEnglishKeyboard: Boolean = true,
@@ -134,60 +157,12 @@ fun BasicTextField2(
         if (!isEditing) rememberScroll = 0
     }
 
-    val coroutineScope = rememberCoroutineScope()
-    var runFix by remember { mutableStateOf(false) }
-
     runCatching {
         BasicTextField(
             state = state,
             modifier = modifier
-                .onKeyEvent { keyEvent ->
-                    //fix delete text with selection issues
-                    val isSelected = state.selection.end != state.selection.start
-                    if (keyEvent.nativeKeyEvent.keyCode == 59 && isSelected && enableFixSelection) {
-                        if (state.selection.start == 0 ||
-                            state.selection.end == state.text.length
-                        ) {
-                            if (runFix) coroutineScope.launch {
-                                state.edit {
-                                    this.selection = TextRange(
-                                        state.selection.start,
-                                        state.selection.end - 1
-                                    )
-                                }
-                                state.edit {
-                                    this.selection = TextRange(
-                                        state.selection.start,
-                                        state.selection.end + 1
-                                    )
-                                }
-                                runFix = false
-                            }
-                        }
-                        true
-                    } else {
-                        runFix = true
-                        false
-                    }
-                }
-                .onPreviewKeyEvent { keyEvent ->
-                    if (keyEvent.key == Key.Backspace) {
-                        //fix non-english keyboard delete after selected errors
-                        if (enableFixNonEnglishKeyboard) {
-                            state.edit {
-                                val end = state.selection.end
-                                val start = state.selection.start
-
-                                if (end < start) {
-                                    delete(end, start)
-                                } else if (start < end) {
-                                    delete(start, end)
-                                }
-                            }
-                        }
-                    }
-                    false
-                }
+                .deleteTextWithSelectionFix(state, enableFixSelection)
+                .nonEnglishKeyboardFix(state, enableFixNonEnglishKeyboard)
                 // If the scroll is a LazyListState,
                 // please add this pointerInteropFilter to top of the function!
                 // (Such as add this to LazyColumn modifier)
@@ -202,9 +177,7 @@ fun BasicTextField2(
                     }
                     false
                 }
-                .onFocusEvent { focusState ->
-                    isEditing = focusState.isFocused
-                },
+                .onFocusEvent { focusState -> isEditing = focusState.isFocused },
             enabled = enabled,
             readOnly = readOnly,
             inputTransformation = inputTransformation,
@@ -220,11 +193,63 @@ fun BasicTextField2(
             scrollState = scrollState
         )
     }.onFailure {
-        val fontFile = File(LocalContext.current.filesDir, "font.ttf")
-        if (fontFile.exists()) {
-            fontFile.delete()
-            Log.e("CustomFont", "Font cannot load")
+        onFailure()
+    }
+}
+
+/** Fix delete text with selection issues **/
+@Composable
+private fun Modifier.deleteTextWithSelectionFix(state: TextFieldState, enabled: Boolean): Modifier {
+    val coroutineScope = rememberCoroutineScope()
+    var runFix by remember { mutableStateOf(false) }
+
+    val isSelected = state.selection.end != state.selection.start
+    return this.onKeyEvent { keyEvent ->
+        if (keyEvent.nativeKeyEvent.keyCode == 59 && isSelected && enabled) {
+            if (state.selection.start == 0 ||
+                state.selection.end == state.text.length
+            ) {
+                if (runFix) coroutineScope.launch {
+                    state.edit {
+                        this.selection = TextRange(
+                            state.selection.start,
+                            state.selection.end - 1
+                        )
+                    }
+                    state.edit {
+                        this.selection = TextRange(
+                            state.selection.start,
+                            state.selection.end + 1
+                        )
+                    }
+                    runFix = false
+                }
+            }
+            true
+        } else {
+            runFix = true
+            false
         }
+    }
+}
+
+/** Fix non-english keyboard delete after selected errors **/
+@Composable
+private fun Modifier.nonEnglishKeyboardFix(state: TextFieldState, enabled: Boolean): Modifier {
+    return this.onPreviewKeyEvent { keyEvent ->
+        if (keyEvent.key == Key.Backspace) {
+            if (enabled) state.edit {
+                val end = state.selection.end
+                val start = state.selection.start
+
+                if (end < start) {
+                    delete(end, start)
+                } else if (start < end) {
+                    delete(start, end)
+                }
+            }
+        }
+        false
     }
 }
 
