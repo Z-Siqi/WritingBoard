@@ -9,7 +9,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
@@ -90,9 +90,10 @@ open class GlanceWidgetManager : GlanceAppWidget() {
         context: Context,
         modifier: GlanceModifier = GlanceModifier
     ) {
-        val text = stringPreferencesKey(textDataKey)
-        val savedText by context.dataStore.data.map { prefs -> prefs[text] ?: " " }
-            .collectAsState(initial = " ")
+        val textData = remember {
+            context.dataStore.data.map { prefs -> prefs[stringPreferencesKey(textDataKey)] ?: " " }
+        }
+        val savedText = textData.collectAsState(initial = " ").value
         val formatText = if (SettingOption(context).mergeLineBreak()
             && savedText.isNotEmpty() && savedText.last() == '\n'
         ) savedText.trimEnd { it == '\n' }.plus('\n') else savedText
