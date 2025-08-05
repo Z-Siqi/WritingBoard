@@ -56,7 +56,8 @@
     <string name="lower_than_android13">Your system version is lower than Android 13</string>
     <string name="feature_supports_android13">This feature only supports Android 13+</string>
     <string name="back">Go Back</string>
-    <string name="always_visible_text">Prevent text from being obscured</string>
+    <string name="dynamic_board_size">Dynamic WritingBoard size \n(Long press to view details)</string>
+    <string name="change_size_description_text">If not enabled: \nIncrease text area height when the button will obscures the text. \n\nIf enable:\nMove WritingBoard when the button will obscures the text.</string>
     <string name="vibrate_settings">Vibration feedback</string>
     <string name="disable">Disable</string>
     <string name="more">More</string>
@@ -91,4 +92,5 @@
     <string name="font_is_invalid">Font is invalid! Please click to select a valid font</string>
     <string name="less">Less</string>
     <string name="sponsor_me">Sponsor Me \n(If you like my work, please consider supporting me with a donation!)</string>
+    <string name="capitalization_sentences">Request capitalized first letter from soft keyboard (IME)</string>
 </resources>

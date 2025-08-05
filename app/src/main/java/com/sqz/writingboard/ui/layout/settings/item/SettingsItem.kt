@@ -107,11 +107,10 @@ class SettingsItem(
                 if (it == 2) viewModel.boardSizeHandler.resetPadding()
                 settings.buttonStyle(it).also { controlStyle = it }
             }, switch = settings.buttonStyle() != 2,
-            switchText = stringResource(R.string.always_visible_text),
-            onCheckedChange = {
+            switchText = stringResource(R.string.dynamic_board_size), onCheckedChange = {
                 viewModel.boardSizeHandler.resetPadding()
                 settings.alwaysVisibleText(it)
-            }
+            }, switchTextDescription = stringResource(R.string.change_size_description_text)
         )
     }
 
@@ -181,6 +180,16 @@ class SettingsItem(
                 stringResource(R.string.normal),
                 stringResource(R.string.thick),
             ), onChange = { settings.fontWeight(it) }
+        )
+    }
+
+    @Composable
+    private fun CapitalizationSentences() {
+        var state by remember { mutableStateOf(settings.capitalizationSentences()) }
+        super.SwitchCardLayout(
+            text = stringResource(R.string.capitalization_sentences),
+            checked = state,
+            onCheckedChange = { state = settings.capitalizationSentences(it) }
         )
     }
 
@@ -347,6 +356,7 @@ class SettingsItem(
             Item { this.FontStyle(context) },
             Item { this.FontWeight() },
             Item { super.ListTitle(R.string.keyboard_texts_action) },
+            Item { this.CapitalizationSentences() },
             Item { this.MergeLineBreak() },
             Item { this.InstantSaveText() },
             Item { super.ListTitle(R.string.others) },

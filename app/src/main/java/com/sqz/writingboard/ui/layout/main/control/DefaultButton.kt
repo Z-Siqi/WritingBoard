@@ -40,18 +40,21 @@ fun DefaultButton(
 ) {
     if (!state.isFocus) SettingButton(
         onClick = { requestHandler.onSettingsClick(feedback) },
-        writingBoardPadding = writingBoardPadding
+        writingBoardPadding = writingBoardPadding,
+        feedback = feedback
     )
     if (state.isFocus) {
         val context = LocalContext.current
         OnEditTextButton(
             onClick = { requestHandler.finishClick(context, feedback) },
-            writingBoardPadding = writingBoardPadding
+            writingBoardPadding = writingBoardPadding,
+            feedback = feedback
         )
     }
     if (settings.editButton() && !state.isEditable) EditButton(
         onClick = { requestHandler.onEditClick(feedback) },
-        writingBoardPadding = writingBoardPadding
+        writingBoardPadding = writingBoardPadding,
+        feedback = feedback
     )
 }
 
@@ -69,6 +72,7 @@ private fun Modifier.buttonPaddings(): Modifier {
 private fun SettingButton(
     onClick: () -> Unit,
     writingBoardPadding: WritingBoardPadding,
+    feedback: Feedback,
     modifier: Modifier = Modifier
 ) = Column(
     modifier = modifier
@@ -77,7 +81,7 @@ private fun SettingButton(
     verticalArrangement = Arrangement.Bottom,
     horizontalAlignment = Alignment.Start
 ) {
-    TextTooltipBox(tooltipText = stringResource(R.string.settings)) {
+    TextTooltipBox(tooltipText = stringResource(R.string.settings), feedback = feedback) {
         FloatingActionButton(onClick = onClick) {
             Icon(Icons.Filled.Settings, stringResource(R.string.settings))
         }
@@ -102,12 +106,13 @@ private fun ColumnEnd(
 fun OnEditTextButton(
     onClick: () -> Unit,
     writingBoardPadding: WritingBoardPadding,
+    feedback: Feedback,
     modifier: Modifier = Modifier
 ) = ColumnEnd(
     writingBoardPadding = writingBoardPadding,
     modifier = modifier.windowInsetsPadding(WindowInsets.ime)
 ) {
-    TextTooltipBox(tooltipText = stringResource(id = R.string.done)) {
+    TextTooltipBox(tooltipText = stringResource(id = R.string.done), feedback = feedback) {
         FloatingActionButton(onClick = onClick) {
             Icon(Icons.Filled.Done, stringResource(R.string.done))
         }
@@ -118,8 +123,9 @@ fun OnEditTextButton(
 private fun EditButton(
     onClick: () -> Unit,
     writingBoardPadding: WritingBoardPadding,
+    feedback: Feedback,
 ) = ColumnEnd(writingBoardPadding) {
-    TextTooltipBox(tooltipText = stringResource(R.string.edit)) {
+    TextTooltipBox(tooltipText = stringResource(R.string.edit), feedback = feedback) {
         FloatingActionButton(onClick = onClick) {
             Icon(Icons.Filled.Edit, stringResource(R.string.edit))
         }

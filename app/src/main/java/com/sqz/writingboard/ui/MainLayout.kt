@@ -37,9 +37,12 @@ fun MainLayout(
     val settings = SettingOption(context = context)
     val feedback = AndroidFeedback(settings = settings, view = view)
 
-    val navController = rememberNavController()
+    val navController = viewModel.navControllerHandler.controller(
+        navController = rememberNavController(),
+        getValue = viewModel.navControllerHandler.getNavState.collectAsState()
+    )
     NavHost(
-        navController = viewModel.navControllerHandler.controller(navController),
+        navController = navController,
         startDestination = NavRoute.WritingBoard.name,
         modifier = modifier
     ) {

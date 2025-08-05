@@ -3,6 +3,8 @@ package com.sqz.writingboard.ui.theme
 import android.graphics.Rect
 import android.os.Build
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.platform.LocalDensity
@@ -35,6 +37,15 @@ val getWindowVisibleDisplayDp: Int
     }
 
 @Composable
+fun getSystemTopBarMaxHeightDp(): Int {
+    return if (WindowInsets.statusBars.getTopDp() > WindowInsets.displayCutout.getTopDp()) {
+        WindowInsets.statusBars.getTopDp()
+    } else {
+        WindowInsets.displayCutout.getTopDp()
+    }
+}
+
+@Composable
 @ReadOnlyComposable
 fun Int.pxToDp(): Dp {
     val it = this
@@ -50,11 +61,28 @@ fun Int.pxToDpInt(): Int {
 
 @Composable
 @ReadOnlyComposable
+fun Int.dpToPxInt(): Int {
+    val density = LocalDensity.current.density
+    return (density * this).toInt()
+}
+
+@Composable
+@ReadOnlyComposable
+fun Float.dpToPxInt(): Int {
+    return this.toInt().dpToPxInt()
+}
+
+@Composable
+@ReadOnlyComposable
 fun WindowInsets.getTopDp(): Int = this.getTop(LocalDensity.current).pxToDpInt()
 
 @Composable
 @ReadOnlyComposable
-fun WindowInsets.getBottomDp(): Int = this.getBottom(LocalDensity.current).pxToDpInt()
+fun WindowInsets.getBottomPx(): Int = this.getBottom(LocalDensity.current)
+
+@Composable
+@ReadOnlyComposable
+fun WindowInsets.getBottomDp(): Int = this.getBottomPx().pxToDpInt()
 
 @Composable
 @ReadOnlyComposable

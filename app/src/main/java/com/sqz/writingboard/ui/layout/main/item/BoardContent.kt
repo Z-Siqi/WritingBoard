@@ -8,11 +8,10 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,6 +41,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sqz.writingboard.common.feedback.Feedback
@@ -54,7 +54,7 @@ import com.sqz.writingboard.ui.component.drawVerticalScrollbar
 import com.sqz.writingboard.ui.layout.handler.RequestHandler
 import com.sqz.writingboard.ui.theme.WritingBoardTheme
 import com.sqz.writingboard.ui.theme.getBottomDp
-import com.sqz.writingboard.ui.theme.getTopDp
+import com.sqz.writingboard.ui.theme.getSystemTopBarMaxHeightDp
 import com.sqz.writingboard.ui.theme.navBarHeightDpIsEditing
 import com.sqz.writingboard.ui.theme.pxToDp
 import kotlinx.coroutines.delay
@@ -66,10 +66,11 @@ fun BoardContent(
     viewModel: MainViewModel,
     feedback: Feedback,
     writingBoardPadding: WritingBoardPadding,
-    settings: SettingOption
+    cursorPosition: (x: Int, y: Int) -> Unit = { _, _ -> },
+    settings: SettingOption,
+    scrollState: LazyListState
 ) {
     val context = LocalContext.current
-    val scrollState = rememberLazyListState()
     val focusManager = viewModel.requestHandler.focusManager(
         getValue = viewModel.requestHandler.getValue.collectAsState().value,
         context = context,
@@ -87,8 +88,7 @@ fun BoardContent(
     }
     val getState = viewModel.state.collectAsState().value
     var yInScreenFromClick = remember { mutableIntStateOf(0) }
-    val extraScrollValue =
-        (WindowInsets.navigationBars.getBottomDp() + writingBoardPadding.bottom.value).toInt()
+    val extraScrollValue = (writingBoardPadding.bottom.value).toInt()
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -124,12 +124,25 @@ fun BoardContent(
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurfaceVariant),
                 textStyle = textStyle(settings, customFont, WritingBoardTheme.color.boardText),
                 onTextLayout = { textLayoutResult ->
-                    if (settings.instantSaveText()) {
+                    if (viewModel.state.value.isFocus) { // get cursor position
+                        val getCursorRect = textLayoutResult.invoke()?.getCursorRect(
+                            viewModel.textFieldState().selection.start
+                        )
+                        val cursorX = getCursorRect?.left
+                        val cursorY = getCursorRect?.top?.minus(
+                            scrollState.firstVisibleItemScrollOffset.toFloat()
+                        )
+                        if (cursorY != null && cursorX != null) {
+                            cursorPosition(cursorX.toInt(), cursorY.toInt())
+                        }
+                    }
+                    if (settings.instantSaveText()) { // saveTextImmediately
                         viewModel.requestHandler.saveTextImmediately(context)
                     }
                 },
                 yInScreenFromClickAsLazyList = yInScreenFromClick.intValue,
                 onFailure = { deleteFont(context) },
+                keyboardOptions = keyboardOptions(settings),
             )
             Spacer(enableSpacer, viewModel.requestHandler, writingBoardPadding)
         } else item {
@@ -159,7 +172,7 @@ private fun Modifier.yInScreenFromClickGetter(
     value: MutableIntState, writingBoardPadding: WritingBoardPadding
 ): Modifier {
     val density = LocalDensity.current
-    val barHeight = WindowInsets.navigationBars.getBottomDp() + WindowInsets.statusBars.getTopDp()
+    val barHeight = WindowInsets.navigationBars.getBottomDp() + getSystemTopBarMaxHeightDp()
     val paddingHeight = writingBoardPadding.bottom.value
     val modifier = this.pointerInteropFilter { motionEvent: MotionEvent ->
         when (motionEvent.action) { //detect this item screen y coordinate when click
@@ -221,6 +234,16 @@ private fun textStyle(
         fontSize = fontSize, fontWeight = fontWeight,
         fontFamily = fontFamily, fontStyle = fontStyle, color = textColor
     )
+}
+
+@Composable
+private fun keyboardOptions(settings: SettingOption): KeyboardOptions {
+    val capitalization = if (settings.capitalizationSentences()) {
+        KeyboardCapitalization.Sentences
+    } else {
+        KeyboardCapitalization.Unspecified
+    }
+    return KeyboardOptions.Default.copy(capitalization = capitalization)
 }
 
 @Composable

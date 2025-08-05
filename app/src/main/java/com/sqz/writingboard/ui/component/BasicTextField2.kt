@@ -244,7 +244,8 @@ private fun Modifier.nonEnglishKeyboardFix(state: TextFieldState, enabled: Boole
 
                 if (end < start) {
                     delete(end, start)
-                } else if (start < end) {
+                }
+                if (start < end) {
                     delete(start, end)
                 }
             }
@@ -255,8 +256,7 @@ private fun Modifier.nonEnglishKeyboardFix(state: TextFieldState, enabled: Boole
 
 @Composable
 private fun isLandscape(): Boolean {
-    val config = LocalWindowInfo.current.containerSize
-    return config.width > (config.height * 1.1)
+    return LocalWindowInfo.current.containerSize.let { it.width > (it.height * 1.1) }
 }
 
 @Composable

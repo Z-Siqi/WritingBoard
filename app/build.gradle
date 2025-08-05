@@ -12,7 +12,7 @@ android {
         minSdk 29
         targetSdk 36
         versionCode 58
-        versionName "0.7.0-alpha9"
+        versionName "0.7.0-beta1"
     }
 
     buildTypes {
@@ -56,7 +56,7 @@ dependencies {
     //leakcanary
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.14'
     //navigation
-    implementation "androidx.navigation:navigation-compose:2.9.2"
+    implementation "androidx.navigation:navigation-compose:2.9.3"
     //datastore
     implementation "androidx.datastore:datastore-preferences:1.1.7"
     //glanceWidget

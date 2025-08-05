@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -46,6 +45,7 @@ import com.sqz.writingboard.ui.MainViewModel
 import com.sqz.writingboard.ui.component.TextTooltipBox
 import com.sqz.writingboard.ui.layout.LocalState
 import com.sqz.writingboard.ui.layout.handler.RequestHandler
+import com.sqz.writingboard.ui.theme.WritingBoardTheme
 import com.sqz.writingboard.ui.theme.getLeftDp
 import com.sqz.writingboard.ui.theme.getRightDp
 import com.sqz.writingboard.ui.theme.navBarHeightDp
@@ -72,7 +72,7 @@ class NavButtons(
                 .windowInsetsPadding(WindowInsets.ime)
                 .height(navHeight)
                 .shadow(7.dp),
-            color = MaterialTheme.colorScheme.surfaceContainer,
+            color = WritingBoardTheme.color.navBars,
         ) {
             val windowInsetsModifier = Modifier.let {
                 if (state.isImeOn) it else it.windowInsetsPadding(WindowInsets.navigationBars)
@@ -84,15 +84,15 @@ class NavButtons(
             ) {
                 if (!state.isFocus) {
                     if (settings.editButton()) Spacer(Modifier.width(16.dp))
-                    SettingsButton { requestHandler.onSettingsClick(feedback) }
+                    SettingsButton(feedback) { requestHandler.onSettingsClick(feedback) }
                     if (settings.editButton()) Spacer(Modifier.weight(1f))
                 }
                 if (state.isFocus || state.isInReadOnlyMode && state.isEditable) {
                     Spacer(Modifier.weight(1f))
-                    OnEditTextButton { requestHandler.finishClick(context, feedback) }
+                    OnEditTextButton(feedback) { requestHandler.finishClick(context, feedback) }
                 }
                 if (settings.editButton() && !state.isEditable) {
-                    EditButton { requestHandler.onEditClick(feedback) }
+                    EditButton(feedback) { requestHandler.onEditClick(feedback) }
                 }
             }
         }
@@ -108,7 +108,7 @@ class NavButtons(
                 .windowInsetsPadding(WindowInsets.ime)
                 .width(navWidth)
                 .shadow(7.dp),
-            color = MaterialTheme.colorScheme.surfaceContainer,
+            color = WritingBoardTheme.color.navBars,
         ) {
             val windowInsetsModifier = Modifier.let {
                 val stateBar = it.windowInsetsPadding(WindowInsets.statusBars)
@@ -126,15 +126,15 @@ class NavButtons(
             ) {
                 if (!state.isFocus) {
                     if (settings.editButton()) Spacer(Modifier.width(16.dp))
-                    SettingsButton { requestHandler.onSettingsClick(feedback) }
+                    SettingsButton(feedback) { requestHandler.onSettingsClick(feedback) }
                     if (settings.editButton()) Spacer(Modifier.weight(1f))
                 }
                 if (state.isFocus) {
                     Spacer(Modifier.weight(1f))
-                    OnEditTextButton { requestHandler.finishClick(context, feedback) }
+                    OnEditTextButton(feedback) { requestHandler.finishClick(context, feedback) }
                 }
                 if (settings.editButton() && !state.isEditable) {
-                    EditButton { requestHandler.onEditClick(feedback) }
+                    EditButton(feedback) { requestHandler.onEditClick(feedback) }
                 }
             }
         }
@@ -142,8 +142,8 @@ class NavButtons(
 }
 
 @Composable
-private fun SettingsButton(onClick: () -> Unit) {
-    TextTooltipBox(tooltipText = stringResource(R.string.settings)) {
+private fun SettingsButton(feedback: Feedback, onClick: () -> Unit) {
+    TextTooltipBox(tooltipText = stringResource(R.string.settings), feedback = feedback) {
         OutlinedButton(
             modifier = Modifier.padding(10.dp),
             onClick = onClick,
@@ -158,8 +158,8 @@ private fun SettingsButton(onClick: () -> Unit) {
 }
 
 @Composable
-private fun OnEditTextButton(onClick: () -> Unit) {
-    TextTooltipBox(tooltipText = stringResource(id = R.string.done)) {
+private fun OnEditTextButton(feedback: Feedback, onClick: () -> Unit) {
+    TextTooltipBox(tooltipText = stringResource(id = R.string.done), feedback = feedback) {
         OutlinedButton(
             modifier = Modifier.padding(10.dp),
             onClick = onClick,
@@ -174,8 +174,8 @@ private fun OnEditTextButton(onClick: () -> Unit) {
 }
 
 @Composable
-private fun EditButton(onClick: () -> Unit) {
-    TextTooltipBox(tooltipText = stringResource(R.string.edit)) {
+private fun EditButton(feedback: Feedback, onClick: () -> Unit) {
+    TextTooltipBox(tooltipText = stringResource(R.string.edit), feedback = feedback) {
         OutlinedButton(
             modifier = Modifier.padding(10.dp),
             onClick = onClick,

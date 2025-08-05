@@ -20,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,7 +33,9 @@ import com.sqz.writingboard.R
 import com.sqz.writingboard.common.feedback.Feedback
 import com.sqz.writingboard.preference.PreferenceLocal
 import com.sqz.writingboard.preference.SettingOption
+import com.sqz.writingboard.ui.NavRoute
 import com.sqz.writingboard.ui.layout.LocalState
+import com.sqz.writingboard.ui.layout.handler.NavControllerHandler
 import com.sqz.writingboard.ui.layout.handler.RequestHandler
 import com.sqz.writingboard.ui.theme.PurpleForManual
 import com.sqz.writingboard.ui.theme.RedForManual
@@ -42,6 +45,7 @@ import com.sqz.writingboard.ui.theme.WritingBoardTheme
 fun HidedButton(
     state: LocalState,
     requestHandler: RequestHandler,
+    navControllerHandler: NavControllerHandler,
     settings: SettingOption,
     feedback: Feedback,
     modifier: Modifier = Modifier
@@ -51,17 +55,18 @@ fun HidedButton(
         val navigationBars = it.windowInsetsPadding(WindowInsets.navigationBars)
         statusBars then navigationBars
     }
+    val navState = navControllerHandler.getNavState.collectAsState().value
     Column(modifier = modifierWithWindowInsets.fillMaxSize()) {
         HidedButtonLayout(
             onClick = { requestHandler.onSettingsClick(feedback) },
             weight = 1f,
-            bgColor = hidedButtonManual(ButtonType.Settings)
+            bgColor = hidedButtonManual(ButtonType.Settings, navState.currentDestination)
         )
         Spacer(modifier = Modifier.weight(2f))
         if (settings.editButton() && !state.isEditable) HidedButtonLayout(
             onClick = { requestHandler.onEditClick(feedback) },
             weight = 1.5f,
-            bgColor = hidedButtonManual(ButtonType.Edit)
+            bgColor = hidedButtonManual(ButtonType.Edit, navState.currentDestination)
         ) else Spacer(
             modifier = Modifier.weight(1.5f)
         )
@@ -71,7 +76,7 @@ fun HidedButton(
 private enum class ButtonType { Settings, Edit }
 
 @Composable
-private fun hidedButtonManual(buttonType: ButtonType): Color {
+private fun hidedButtonManual(buttonType: ButtonType, currentDestination: NavRoute?): Color {
     val localPrefs = PreferenceLocal(LocalContext.current)
     if (localPrefs.settingsButtonManual() || localPrefs.editButtonManual()) {
         val getter: Boolean = when (buttonType) {
@@ -79,7 +84,7 @@ private fun hidedButtonManual(buttonType: ButtonType): Color {
             ButtonType.Edit -> localPrefs.editButtonManual()
         }
         var show by remember { mutableStateOf(getter) }
-        if (show) {
+        if (show && currentDestination != null && currentDestination == NavRoute.WritingBoard) {
             val text = when (buttonType) {
                 ButtonType.Settings -> stringResource(R.string.settings_button_manual)
                 ButtonType.Edit -> stringResource(R.string.edit_button_manual)

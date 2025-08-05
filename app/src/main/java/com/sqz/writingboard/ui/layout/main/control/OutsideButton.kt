@@ -48,10 +48,10 @@ fun OutsideButton(
     if (onHidedButtonInReadOnly && !enableOutsideButton) {
         if (settings.editButton() && state.isEditable) OnEditTextButton(
             onClick = { requestHandler.finishClick(context, feedback) },
-            writingBoardPadding = writingBoardPadding
+            writingBoardPadding = writingBoardPadding, feedback = feedback
         ) else if (state.isFocus) OnEditTextButton(
             onClick = { requestHandler.finishClick(context, feedback) },
-            writingBoardPadding = writingBoardPadding,
+            writingBoardPadding = writingBoardPadding, feedback = feedback
         )
     }
     if (enableOutsideButton) {
@@ -61,12 +61,14 @@ fun OutsideButton(
             if (!state.isFocus) SettingOutsideButton(
                 onClick = { requestHandler.onSettingsClick(feedback) },
                 writingBoardPadding = writingBoardPadding,
-                modifier = Modifier.buttonPaddings(outside, writingBoardPadding)
+                modifier = Modifier.buttonPaddings(outside, writingBoardPadding),
+                feedback = feedback
             )
             if (settings.editButton() && !state.isEditable) EditOutsideButton(
                 onClick = { requestHandler.onEditClick(feedback) },
                 writingBoardPadding = writingBoardPadding,
-                modifier = Modifier.buttonPaddings(outside, writingBoardPadding)
+                modifier = Modifier.buttonPaddings(outside, writingBoardPadding),
+                feedback = feedback
             )
         }
         if (settings.editButton() && state.isEditable) {
@@ -74,14 +76,16 @@ fun OutsideButton(
                 onClick = { requestHandler.finishClick(context, feedback) },
                 writingBoardPadding = writingBoardPadding,
                 boardEnd = boardEnd,
-                modifier = Modifier.buttonPaddings(outside, writingBoardPadding)
+                modifier = Modifier.buttonPaddings(outside, writingBoardPadding),
+                feedback = feedback
             )
         } else if (state.isFocus) {
             OnEditTextOutsideButton(
                 onClick = { requestHandler.finishClick(context, feedback) },
                 writingBoardPadding = writingBoardPadding,
                 boardEnd = boardEnd,
-                modifier = Modifier.buttonPaddings(outside, writingBoardPadding)
+                modifier = Modifier.buttonPaddings(outside, writingBoardPadding),
+                feedback = feedback
             )
         }
     }
@@ -106,6 +110,7 @@ private fun OnEditTextOutsideButton(
     onClick: () -> Unit,
     writingBoardPadding: WritingBoardPadding,
     boardEnd: Boolean,
+    feedback: Feedback,
     modifier: Modifier = Modifier
 ) {
     val boardEndPadding = if (boardEnd) 0.dp else writingBoardPadding.end
@@ -116,7 +121,7 @@ private fun OnEditTextOutsideButton(
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.End,
     ) {
-        TextTooltipBox(tooltipText = stringResource(id = R.string.done)) {
+        TextTooltipBox(tooltipText = stringResource(id = R.string.done), feedback = feedback) {
             FloatingActionButton(
                 onClick = onClick, modifier = Modifier.size(80.dp, 45.dp),
                 shape = RoundedCornerShape(8.dp)
@@ -131,6 +136,7 @@ private fun OnEditTextOutsideButton(
 private fun SettingOutsideButton(
     onClick: () -> Unit,
     writingBoardPadding: WritingBoardPadding,
+    feedback: Feedback,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -138,7 +144,7 @@ private fun SettingOutsideButton(
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.Start
     ) {
-        TextTooltipBox(tooltipText = stringResource(R.string.settings)) {
+        TextTooltipBox(tooltipText = stringResource(R.string.settings), feedback = feedback) {
             FloatingActionButton(onClick = onClick) {
                 Icon(Icons.Filled.Settings, stringResource(R.string.settings))
             }
@@ -150,6 +156,7 @@ private fun SettingOutsideButton(
 private fun EditOutsideButton(
     onClick: () -> Unit,
     writingBoardPadding: WritingBoardPadding,
+    feedback: Feedback,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -157,7 +164,7 @@ private fun EditOutsideButton(
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.End,
     ) {
-        TextTooltipBox(tooltipText = stringResource(R.string.edit)) {
+        TextTooltipBox(tooltipText = stringResource(R.string.edit), feedback = feedback) {
             FloatingActionButton(onClick = onClick) {
                 Icon(Icons.Filled.Edit, stringResource(R.string.edit))
             }

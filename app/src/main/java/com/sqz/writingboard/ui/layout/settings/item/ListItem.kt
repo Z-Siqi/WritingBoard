@@ -90,7 +90,7 @@ open class ListItem(private val feedback: Feedback) {
     @Composable
     private fun SwitchView(
         text: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit,
-        modifier: Modifier = Modifier
+        modifier: Modifier = Modifier, textDescription: String? = null
     ) = Column {
         Row(
             modifier = modifier
@@ -99,16 +99,18 @@ open class ListItem(private val feedback: Feedback) {
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = text,
-                modifier = modifier.widthIn(
-                    max = (LocalWindowInfo.current.containerSize.width * 0.68).toInt().pxToDp()
-                ),
-                fontSize = 18.sp,
-                lineHeight = 20.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.secondary,
-            )
+            TextTooltipBox(textDescription ?: text, textDescription != null, feedback) {
+                Text(
+                    text = text,
+                    modifier = modifier.widthIn(
+                        max = (LocalWindowInfo.current.containerSize.width * 0.68).toInt().pxToDp()
+                    ),
+                    fontSize = 18.sp,
+                    lineHeight = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.secondary,
+                )
+            }
             Spacer(modifier = modifier.weight(1f))
             Switch(
                 checked = checked, onCheckedChange = {
@@ -134,7 +136,7 @@ open class ListItem(private val feedback: Feedback) {
                         index = index, count = list.size
                     ), label = {
                         var overflow by remember { mutableStateOf(false) }
-                        TextTooltipBox(label(item), enable = overflow) {
+                        TextTooltipBox(label(item), enable = overflow, feedback = feedback) {
                             Text(
                                 text = label(item), overflow = TextOverflow.Visible, maxLines = 2,
                                 fontSize = 15.sp / LocalConfiguration.current.fontScale,
@@ -197,7 +199,8 @@ open class ListItem(private val feedback: Feedback) {
     @Composable
     protected fun SegmentedButtonWithSwitch(
         title: String, option: List<String>, onChange: (Int?) -> Int,
-        switch: Boolean, switchText: String, onCheckedChange: (Boolean?) -> Boolean
+        switch: Boolean, switchText: String, onCheckedChange: (Boolean?) -> Boolean,
+        switchTextDescription: String
     ) = this.ExtendableCardView(title = title) {
         var selectedIndex by remember { mutableIntStateOf(onChange(null)) }
         selectedIndex = segmentedButtonView(
@@ -211,7 +214,7 @@ open class ListItem(private val feedback: Feedback) {
         var checked by remember { mutableStateOf(onCheckedChange(null)) }
         if (switch) SwitchView(text = switchText, checked = checked, onCheckedChange = {
             checked = onCheckedChange(it)
-        }) else Spacer(modifier = Modifier.height(12.dp))
+        }, textDescription = switchTextDescription) else Spacer(modifier = Modifier.height(12.dp))
     }
 
     @Composable

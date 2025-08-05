@@ -55,7 +55,8 @@
     <string name="lower_than_android13">您的系统版本低于Android 13</string>
     <string name="feature_supports_android13">此功能仅支持Android 13+</string>
     <string name="back">返回</string>
-    <string name="always_visible_text">防止文本被遮挡</string>
+    <string name="dynamic_board_size">动态书写板尺寸\n(长按查看详情)</string>
+    <string name="change_size_description_text">如果未启用: \n当按钮遮挡文本时，增加文本区域的高度。 \n\n如果启用:\n当按钮遮挡文本时移动 WritingBoard。</string>
     <string name="vibrate_settings">震动反馈</string>
     <string name="disable">禁用</string>
     <string name="more">较多</string>
@@ -90,4 +91,5 @@
     <string name="font_is_invalid">Font is invalid! Please click to select a valid font</string>
     <string name="less">Less</string>
     <string name="sponsor_me">Sponsor Me \n(If you like my work, please consider supporting me with a donation!)</string>
+    <string name="capitalization_sentences">Request capitalized first letter from soft keyboard (IME)</string>
 </resources>

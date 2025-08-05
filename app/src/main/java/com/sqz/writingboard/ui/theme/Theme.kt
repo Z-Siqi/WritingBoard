@@ -53,6 +53,12 @@ class WritingBoardTheme private constructor(private val localMode: Int) {
             2 -> MaterialTheme.colorScheme.primary
             else -> MaterialTheme.colorScheme.onSurfaceVariant
         }
+    val navBars: Color
+        @ReadOnlyComposable @Composable get() = when (localMode) {
+            1 -> MaterialTheme.colorScheme.surfaceContainerHigh
+            2 -> MaterialTheme.colorScheme.inversePrimary
+            else -> MaterialTheme.colorScheme.surfaceContainer
+        }
     val settingsCardBackground: Color
         @ReadOnlyComposable @Composable get() = when (localMode) {
             1 -> MaterialTheme.colorScheme.surfaceContainer

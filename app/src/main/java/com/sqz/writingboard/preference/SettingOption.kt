@@ -80,6 +80,12 @@ class SettingOption(context: Context) : PreferenceHelper(context) {
         return super.readPreferencesState(name, false)
     }
 
+    fun capitalizationSentences(write: Boolean? = null): Boolean {
+        val name = "capitalization_sentences"
+        if (write != null) super.writePreferencesState(name, write)
+        return super.readPreferencesState(name, false)
+    }
+
     companion object {
         const val FONT_STYLE = "font_style"
         const val FONT_STYLE_EXTRA = "font_style_extra"
