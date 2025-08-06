@@ -132,7 +132,8 @@ open class GlanceWidgetManager : GlanceAppWidget() {
                     else -> null
                 }
             ),
-            modifier = modifier.fillMaxSize()
+            modifier = modifier.fillMaxSize(),
+            maxLines = 5000
         )
     }
 

@@ -2,6 +2,8 @@ package com.sqz.writingboard.ui.layout.main.item
 
 import android.util.Log
 import android.view.MotionEvent
+import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -12,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.delete
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,9 +47,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.sqz.writingboard.R
 import com.sqz.writingboard.common.feedback.Feedback
 import com.sqz.writingboard.common.io.deleteFont
 import com.sqz.writingboard.common.io.importedFontName
+import com.sqz.writingboard.data.maxLengthExpect
 import com.sqz.writingboard.preference.SettingOption
 import com.sqz.writingboard.ui.MainViewModel
 import com.sqz.writingboard.ui.component.BasicTextField2
@@ -61,6 +66,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import java.io.File
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BoardContent(
     viewModel: MainViewModel,
@@ -123,6 +129,14 @@ fun BoardContent(
                     },
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurfaceVariant),
                 textStyle = textStyle(settings, customFont, WritingBoardTheme.color.boardText),
+                inputTransformation = {
+                    if (length > maxLengthExpect) {
+                        delete(maxLengthExpect, length)
+                        Toast.makeText(
+                            context, context.getString(R.string.too_many_text), Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                },
                 onTextLayout = { textLayoutResult ->
                     if (viewModel.state.value.isFocus) { // get cursor position
                         val getCursorRect = textLayoutResult.invoke()?.getCursorRect(

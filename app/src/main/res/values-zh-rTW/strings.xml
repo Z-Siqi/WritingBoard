@@ -88,8 +88,11 @@
     <string name="font_is_imported">字體已匯入，按一下選擇新字體</string>
     <string name="may_only_english">可能僅支援英語</string>
     <string name="click_to_select_a_font">點選選擇字體</string>
-    <string name="font_is_invalid">Font is invalid! Please click to select a valid font</string>
-    <string name="less">Less</string>
-    <string name="sponsor_me">Sponsor Me \n(If you like my work, please consider supporting me with a donation!)</string>
-    <string name="capitalization_sentences">Request capitalized first letter from soft keyboard (IME)</string>
+    <string name="font_is_invalid">字體無效！請點選選擇有效字體</string>
+    <string name="less">較少的</string>
+    <string name="sponsor_me">贊助我 \n(如果您喜歡我的作品，請考慮透過捐款來支持我!)</string>
+    <string name="capitalization_sentences">請求軟鍵盤首字母大寫 (IME)</string>
+    <string name="unable_import_too_many_text">無法導入，因為會顯示太多文本</string>
+    <string name="file_size_limit"><![CDATA[檔案大小不允許 > 256 KB，因此無法選擇！]]></string>
+    <string name="too_many_text">文字太多, 不再允许增加更多文字!</string>
 </resources>

@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.sqz.writingboard.glance.GlanceWidgetManager
 import com.sqz.writingboard.ui.MainLayout
 import com.sqz.writingboard.ui.theme.WritingBoardTheme
 import com.sqz.writingboard.ui.theme.isAndroid15OrAbove
@@ -59,5 +60,10 @@ class MainActivity : ComponentActivity() {
             controller.isAppearanceLightStatusBars = true
             controller.isAppearanceLightNavigationBars = true
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        GlanceWidgetManager.updateWidget(applicationContext)
     }
 }

@@ -100,7 +100,9 @@ class GlanceWidgetTextHelper(private val context: Context) {
             var estimatedSize = estimateBitmapMemoryUsage(width, height)
             val limit = 12 * 1024 * 1024
             while (estimatedSize > limit && textIn.isNotEmpty()) {
-                textIn = if (textIn.length > 1100) when {
+                textIn = if (textIn.length > 12288) {
+                    textIn.dropLast(textIn.length - 8000)
+                } else if (textIn.length > 1100) when {
                     estimatedSize > limit * 1.3 -> textIn.dropLast(1024).plus("\n(...)")
                     estimatedSize > limit * 1.2 -> textIn.dropLast(512).plus("\n(...)")
                     estimatedSize > limit * 1.15 -> textIn.dropLast(256).plus("\n(...)")

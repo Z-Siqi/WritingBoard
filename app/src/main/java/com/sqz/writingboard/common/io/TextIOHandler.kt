@@ -40,7 +40,13 @@ class TextIOHandler(private val context: Context) {
     ) {
         try {
             context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                output(inputStream.bufferedReader().readText())
+                val maxSizeBytes = 256 * 1024
+                val size = inputStream.available()
+                if (size > maxSizeBytes) {
+                    throw IllegalArgumentException("Selected file is too large: ${size / 1024} KB. Limit is 256 KB.")
+                }
+                val text = inputStream.bufferedReader().readText()
+                output(text)
             }
         } catch (e: Exception) {
             Log.e("WritingBoardTag", "TextIOHandler Err: $e")

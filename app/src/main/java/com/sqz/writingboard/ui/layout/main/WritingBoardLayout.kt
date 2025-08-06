@@ -57,6 +57,7 @@ import com.sqz.writingboard.ui.theme.getSystemTopBarMaxHeightDp
 import com.sqz.writingboard.ui.theme.getTopDp
 import com.sqz.writingboard.ui.theme.isLandscape
 import com.sqz.writingboard.ui.theme.pxToDpInt
+import kotlinx.coroutines.delay
 
 @Composable
 fun WritingBoardLayout(
@@ -196,12 +197,13 @@ private fun ScrollToView(
     } else then()
     if (scrollToView) {
         val scrollValue = (padding.bottom.value + 88).toInt().dpToPxInt().let {
-            if (cursorPosition.height < buttonBottom) it - extraValue else it
+            if (cursorPosition.height < buttonBottom) it - (extraValue / 2) else it
         }
         val isEnoughScreenHeight: Boolean =
             (containerSize.height - imeHeight - barHeight) > (scrollValue * 2.2)
         if (isEnoughScreenHeight) LaunchedEffect(Unit) {
             scrollState.animateScrollBy(scrollValue.toFloat())
+            delay(50)
             then().also { scrollToView = false }
         }
     }

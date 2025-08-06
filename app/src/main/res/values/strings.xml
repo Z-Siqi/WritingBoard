@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- DO NOT TRANSLATE "used_language" -->
+    <!-- DO NOT TRANSLATE "language" -->
     <string name="language">EN</string> <!-- DO NOT TRANSLATE IT -->
-    <!-- DO NOT TRANSLATE "used_language" -->
+    <!-- DO NOT TRANSLATE "language" -->
     <string name="app_name">WritingBoard</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
@@ -93,4 +93,7 @@
     <string name="less">Less</string>
     <string name="sponsor_me">Sponsor Me \n(If you like my work, please consider supporting me with a donation!)</string>
     <string name="capitalization_sentences">Request capitalized first letter from soft keyboard (IME)</string>
+    <string name="unable_import_too_many_text">Unable to import because too many text would be displayed</string>
+    <string name="file_size_limit"><![CDATA[Unable to select due to file size not allowed > 256 KB!]]></string>
+    <string name="too_many_text">Too many text, more text won\'t be allowed to exist!</string>
 </resources>

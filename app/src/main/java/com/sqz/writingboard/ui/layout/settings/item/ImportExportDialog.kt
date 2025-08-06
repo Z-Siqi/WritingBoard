@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -34,7 +35,9 @@ import com.sqz.writingboard.common.feedback.Feedback
 import com.sqz.writingboard.common.io.TextIOHandler
 import com.sqz.writingboard.common.io.TextIOHandler.Companion.launchExport
 import com.sqz.writingboard.common.io.TextIOHandler.Companion.launchImport
+import com.sqz.writingboard.data.maxLengthExpect
 import com.sqz.writingboard.ui.component.drawVerticalScrollbar
+import java.lang.IllegalArgumentException
 
 class ImportExportDialog(private val feedback: Feedback) : ListItem(feedback) {
 
@@ -121,7 +124,11 @@ class ImportExportDialog(private val feedback: Feedback) : ListItem(feedback) {
         var text by rememberSaveable { mutableStateOf<String?>(null) }
         val rememberExport = TextIOHandler.rememberImport(
             context = context,
-            onException = { this.showToast(context) },
+            onException = {
+                if (it is IllegalArgumentException) {
+                    this.showToast(context.getString(R.string.file_size_limit), context)
+                } else this.showToast(context)
+            },
             importedText = { text = it },
         )
         this.Dialog(
@@ -151,17 +158,25 @@ class ImportExportDialog(private val feedback: Feedback) : ListItem(feedback) {
                         },
                     verticalArrangement = Arrangement.Top
                 ) {
+                    var err by remember { mutableStateOf(false) }
                     if (text == null || text != null && text!!.isEmpty()) {
                         Text(
-                            text = stringResource(R.string.select_a_text_file),
-                            modifier = Modifier.padding(5.dp),
+                            text = stringResource(R.string.select_a_text_file).let {
+                                if (!err) it else {
+                                    stringResource(R.string.unable_import_too_many_text) + "\n\n" + it
+                                }
+                            }, modifier = Modifier.padding(5.dp),
                             fontSize = 15.sp,
                             color = MaterialTheme.colorScheme.outline
                         )
-                    } else Text(
-                        text = text!!,
-                        modifier = Modifier.padding(5.dp)
-                    )
+                    } else {
+                        if (text!!.length > maxLengthExpect) {
+                            err = true
+                            text = null
+                        } else Text(
+                            text = text!!, modifier = Modifier.padding(5.dp)
+                        )
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(5.dp))
