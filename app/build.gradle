@@ -5,14 +5,14 @@ plugins {
 
 android {
     namespace 'com.sqz.writingboard'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId "com.sqz.writingboard"
         minSdk 29
         targetSdk 36
-        versionCode 58
-        versionName "0.7.0-beta2"
+        versionCode 70
+        versionName "0.7.0"
     }
 
     buildTypes {
@@ -42,17 +42,17 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.16.0'
+    implementation 'androidx.core:core-ktx:1.17.0'
     implementation platform('org.jetbrains.kotlin:kotlin-bom:1.8.22')
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.9.2'
     implementation 'androidx.activity:activity-compose:1.10.1'
-    implementation platform('androidx.compose:compose-bom:2025.07.00')
+    implementation platform('androidx.compose:compose-bom:2025.08.00')
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.ui:ui-graphics'
     implementation 'androidx.compose.ui:ui-tooling-preview'
     implementation 'androidx.compose.material3:material3-android:1.3.2'
-    implementation 'androidx.compose.foundation:foundation-android:1.8.3'
-    debugImplementation 'androidx.compose.ui:ui-tooling:1.8.3'
+    implementation 'androidx.compose.foundation:foundation-android:1.9.0'
+    debugImplementation 'androidx.compose.ui:ui-tooling:1.9.0'
     //leakcanary
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.14'
     //navigation

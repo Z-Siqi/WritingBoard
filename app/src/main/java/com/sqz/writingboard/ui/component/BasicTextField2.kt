@@ -78,7 +78,7 @@ import kotlinx.coroutines.launch
  *   and pass it to this param.
  * @param extraScrollValue A [BasicTextField2] param, for [verticalScrollWhenCursorUnderKeyboard];
  *   this value is a extra scroll value for solve may not able to scroll to right position caused by
- *   nav bars height or other system bars height.
+ *   nav bars height or other system bars height. Dp value as Int unit.
  * @param onFailure when [BasicTextField] throw exception, this function will be called.
  */
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalLayoutApi::class)
@@ -154,9 +154,7 @@ fun BasicTextField2(
                 scrollIt = false
             }
         }
-        if (!isEditing) rememberScroll = 0
     }
-
     runCatching {
         BasicTextField(
             state = state,

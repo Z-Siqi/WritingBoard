@@ -179,31 +179,36 @@ private fun ScrollToView(
     then: () -> Unit = {}
 ) {
     val imeHeight = WindowInsets.ime.getBottomPx()
-    val barHeight = getSystemTopBarMaxHeightDp()
+    val barHeight = getSystemTopBarMaxHeightDp().dpToPxInt()
     val displayCutout = WindowInsets.displayCutout.getLeftDp()
     val containerSize = LocalWindowInfo.current.containerSize
     val padding = writingBoardPadding.value
 
     val buttonEnd = containerSize.width - (padding.end + buttonWidth.dp + 32.dp + displayCutout.dp)
         .value.dpToPxInt()
-    val buttonHeightPx = (padding.bottom + padding.top + 96.dp).value.dpToPxInt()
+    val buttonHeightPx = (padding.bottom + padding.top + (96 + 8).dp).value.dpToPxInt()
     val buttonBottom = containerSize.height - buttonHeightPx - imeHeight - barHeight
     val cursorWidth = cursorPosition.width + (padding.start + 12.dp).value.dpToPxInt()
-    val extraValue = 25.dp.value.dpToPxInt()
 
     var scrollToView by remember { mutableStateOf(false) }
-    if (cursorPosition.height > (buttonBottom - extraValue) && cursorWidth > buttonEnd) {
+    if (cursorPosition.height > buttonBottom && cursorWidth > buttonEnd) {
         scrollToView = true
     } else then()
     if (scrollToView) {
-        val scrollValue = (padding.bottom.value + 88).toInt().dpToPxInt().let {
-            if (cursorPosition.height < buttonBottom) it - (extraValue / 2) else it
+        val scrollValue: Int  = (padding.bottom.value + 88 + 16).toInt().dpToPxInt().let {
+            when {
+                cursorPosition.height > buttonBottom / 2 -> it / 2
+                cursorPosition.height > buttonBottom / 1.8 -> (it / 1.8).toInt()
+                cursorPosition.height > buttonBottom / 1.5 -> (it / 1.5).toInt()
+                cursorPosition.height > buttonBottom / 1.2 -> (it / 1.2).toInt()
+                else -> it
+            }
         }
         val isEnoughScreenHeight: Boolean =
             (containerSize.height - imeHeight - barHeight) > (scrollValue * 2.2)
         if (isEnoughScreenHeight) LaunchedEffect(Unit) {
             scrollState.animateScrollBy(scrollValue.toFloat())
-            delay(50)
+            delay(52)
             then().also { scrollToView = false }
         }
     }

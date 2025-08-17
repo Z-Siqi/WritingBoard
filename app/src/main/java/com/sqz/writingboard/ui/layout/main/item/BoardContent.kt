@@ -45,6 +45,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sqz.writingboard.R
@@ -93,8 +94,12 @@ fun BoardContent(
         }
     }
     val getState = viewModel.state.collectAsState().value
-    var yInScreenFromClick = remember { mutableIntStateOf(0) }
-    val extraScrollValue = (writingBoardPadding.bottom.value).toInt()
+    val yInScreenFromClick = remember { mutableIntStateOf(0) }
+    val extraScrollValue = (writingBoardPadding.bottom.value).toInt().let {
+        if (settings.buttonStyle() != 2) it else {
+            it + navBarHeightDpIsEditing
+        }
+    }
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -118,8 +123,12 @@ fun BoardContent(
                 state = viewModel.textFieldState(context),
                 lazyListState = scrollState,
                 verticalScrollWhenCursorUnderKeyboard = true,
-                extraScrollValue = if (settings.buttonStyle() != 2) extraScrollValue else {
-                    extraScrollValue + navBarHeightDpIsEditing
+                extraScrollValue = extraScrollValue.let {
+                    if (!(enableSpacer && scrollState.lastScrolledBackward)) it else {
+                        if (scrollState.lastScrolledForward) it else {
+                            it + getSpacerHeight(writingBoardPadding).value.toInt()
+                        }
+                    }
                 },
                 modifier = Modifier
                     .fillMaxSize()
@@ -206,12 +215,18 @@ private fun Spacer(
     enable: Boolean, requestHandler: RequestHandler, writingBoardPadding: WritingBoardPadding
 ) {
     if (enable) {
-        val bottomHeight = WindowInsets.navigationBars.getBottom(LocalDensity.current).pxToDp()
-        val height = bottomHeight + writingBoardPadding.bottom + 20.dp
+        val height = getSpacerHeight(writingBoardPadding)
         Spacer(Modifier.height(height) then Modifier.pointerInput(Unit) {
             detectTapGestures { _ -> requestHandler.requestWriting() }
         })
     }
+}
+
+@Composable
+private fun getSpacerHeight(writingBoardPadding: WritingBoardPadding): Dp {
+    val bottomHeight = WindowInsets.navigationBars.getBottom(LocalDensity.current).pxToDp()
+    val height = bottomHeight + writingBoardPadding.bottom + 20.dp
+    return height
 }
 
 @Composable
