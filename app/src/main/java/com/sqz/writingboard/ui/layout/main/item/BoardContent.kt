@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.delete
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -93,7 +94,7 @@ fun BoardContent(
             customFont = FontFamily(font)
         }
     }
-    val getState = viewModel.state.collectAsState().value
+    val getState by viewModel.state.collectAsState()
     val yInScreenFromClick = remember { mutableIntStateOf(0) }
     val extraScrollValue = (writingBoardPadding.bottom.value).toInt().let {
         if (settings.buttonStyle() != 2) it else {
@@ -107,7 +108,11 @@ fun BoardContent(
             .pointerInput(Unit) {
                 detectTapGestures { _ ->
                     if (settings.vibrate() != 0) feedback.onClickSound()
-                    viewModel.requestHandler.requestWriting()
+                    if (getState.isEditable) {
+                        viewModel.requestHandler.requestWriting()
+                    } else {
+                        viewModel.requestHandler.freeFocus()
+                    }
                 }
             }
             .yInScreenFromClickGetter(
@@ -170,11 +175,13 @@ fun BoardContent(
             Spacer(enableSpacer, viewModel.requestHandler, writingBoardPadding)
         } else item {
             Spacer(Modifier.height(4.dp))
-            BasicText(
-                text = viewModel.textFieldState(context).text.toString(),
-                modifier = Modifier.fillMaxSize(),
-                style = textStyle(settings, customFont, WritingBoardTheme.color.boardText)
-            )
+            SelectionContainer {
+                BasicText(
+                    text = viewModel.textFieldState(context).text.toString(),
+                    modifier = Modifier.fillMaxSize(),
+                    style = textStyle(settings, customFont, WritingBoardTheme.color.boardText)
+                )
+            }
             Spacer(enableSpacer, viewModel.requestHandler, writingBoardPadding)
         }
     }

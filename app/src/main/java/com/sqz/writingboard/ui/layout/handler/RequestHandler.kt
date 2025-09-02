@@ -68,6 +68,12 @@ class RequestHandler {
         if (_viewModel.state.value.isEditable) _request.update { it.copy(getFocus = true) }
     }
 
+    fun freeFocus() {
+        _request.update { update ->
+            update.copy(freeFocus = true)
+        }
+    }
+
     fun saveTextWhenWindowNotFocused(windowInfo: WindowInfo, context: Context) {
         val textIsEdited =
             _viewModel.textFieldState().text.hashCode() != _viewModel.savedTextHashCode
@@ -112,8 +118,8 @@ class RequestHandler {
             softwareKeyboardController?.hide().also {
                 focusManager.clearFocus()
             }
-            if (_viewModel.state.value.isInReadOnlyMode) _viewModel.state.update {
-                it.copy(isEditable = false)
+            if (_viewModel.state.value.isInReadOnlyMode) _viewModel.state.update { update ->
+                update.copy(isEditable = false)
             }
             it.copy(freeFocus = false)
         }
